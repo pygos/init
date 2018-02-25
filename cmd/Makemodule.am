@@ -1,0 +1,13 @@
+shutdown_SOURCES = cmd/shutdown.c
+shutdown_CPPFLAGS = $(AM_CPPFLAGS) -DPROGNAME=shutdown
+shutdown_CFLAGS = $(AM_CFLAGS)
+shutdown_LDFLAGS = $(AM_LDFLAGS)
+shutdown_LDADD = libinit.a
+
+reboot_SOURCES = cmd/shutdown.c
+reboot_CPPFLAGS = $(AM_CPPFLAGS) -DPROGNAME=reboot
+reboot_CFLAGS = $(AM_CFLAGS)
+reboot_LDFLAGS = $(AM_LDFLAGS)
+reboot_LDADD = libinit.a
+
+sbin_PROGRAMS += reboot shutdown

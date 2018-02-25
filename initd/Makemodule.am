@@ -1,0 +1,8 @@
+init_SOURCES = initd/main.c initd/runlst.c initd/init.h initd/setup_tty.c
+init_SOURCES += initd/status.c initd/mksock.c initd/shutdown.c initd/svclist.c
+init_CPPFLAGS = $(AM_CPPFLAGS)
+init_CFLAGS = $(AM_CFLAGS)
+init_LDFLAGS = $(AM_LDFLAGS)
+init_LDADD = libinit.a
+
+sbin_PROGRAMS += init

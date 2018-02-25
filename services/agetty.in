@@ -1,0 +1,7 @@
+name = "agetty"
+description = "agetty on %0"
+exec = "@SBINPATH@/agetty %0 linux"
+type = respawn
+target = boot
+after = sysinit
+tty = "/dev/%0"

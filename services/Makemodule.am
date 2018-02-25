@@ -1,0 +1,5 @@
+initdir = @TEMPLATEDIR@
+init_DATA = services/agetty services/hostname services/loopback
+init_DATA += services/sysctl services/hwclock services/sysinit
+
+EXTRA_DIST += services/sysinit

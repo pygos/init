@@ -1,0 +1,4 @@
+name = "sysinit"
+description = "basic system initialization"
+type = once
+target = boot

@@ -1,0 +1,8 @@
+name = "sysctl"
+description = "configure kernel paramters"
+exec = "@SBINPATH@/sysctl --system"
+type = wait
+target = boot
+before = sysinit
+after = hwclock
+after = hostname

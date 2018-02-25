@@ -1,0 +1,13 @@
+HEADRS = lib/include/util.h lib/include/service.h lib/include/telinit.h
+
+libinit_a_SOURCES = lib/src/delsrv.c lib/src/rdline.c
+libinit_a_SOURCES += lib/src/splitkv.c lib/src/enum_by_name.c
+libinit_a_SOURCES += lib/src/strexpand.c lib/src/rdsrv.c lib/src/srvscan.c
+libinit_a_SOURCES += lib/src/del_srv_list.c lib/src/srv_tsort.c
+libinit_a_SOURCES += lib/src/opensock.c $(HEADRS)
+libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
+libinit_a_CFLAGS = $(AM_CFLAGS)
+
+EXTRA_DIST += $(HEADRS)
+
+noinst_LIBRARIES += libinit.a
