@@ -70,6 +70,13 @@ int splitkv(char *line, char **key, char **value);
 const enum_map_t *enum_by_name(const enum_map_t *map, const char *name);
 
 /*
+	Search through an array of enum_map_t entries to resolve a numeric
+	value to a string name. The end of the map is indicated by a sentinel
+	entry with the name set to NULL.
+*/
+const char *enum_to_name(const enum_map_t *map, int value);
+
+/*
 	Create a copy of the input string inp, but replace all occourances
 	of %<number> with argv[number] if the number is within the bounds
 	specified by argc.

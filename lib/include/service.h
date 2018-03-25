@@ -91,5 +91,13 @@ void del_srv_list(service_list_t *list);
 */
 service_t *srv_tsort(service_t *list);
 
+const char *svc_type_to_string(int type);
+
+int svc_type_from_string(const char *type);
+
+const char *svc_target_to_string(int target);
+
+int svc_target_from_string(const char *target);
+
 #endif /* SERVICE_H */
 

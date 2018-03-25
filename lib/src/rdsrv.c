@@ -27,21 +27,6 @@
 #include "service.h"
 #include "util.h"
 
-static const enum_map_t type_map[] = {
-	{ "once", SVC_ONCE },
-	{ "wait", SVC_WAIT },
-	{ "respawn", SVC_RESPAWN },
-	{ NULL, 0 },
-};
-
-static const enum_map_t target_map[] = {
-	{ "boot", TGT_BOOT },
-	{ "shutdown", TGT_SHUTDOWN },
-	{ "reboot", TGT_REBOOT },
-	{ "ctrlaltdel", TGT_CAD },
-	{ NULL, 0 },
-};
-
 static int srv_name(service_t *srv, char *arg,
 		    const char *filename, size_t lineno)
 {
@@ -118,15 +103,15 @@ static int srv_after(service_t *srv, char *arg,
 static int srv_type(service_t *srv, char *arg,
 		    const char *filename, size_t lineno)
 {
-	const enum_map_t *ent = enum_by_name(type_map, arg);
+	int type = svc_type_from_string(arg);
 
-	if (ent == NULL) {
+	if (type == -1) {
 		fprintf(stderr, "%s: %zu: unknown service type '%s'\n",
 			filename, lineno, arg);
 		return -1;
 	}
 
-	srv->type = ent->value;
+	srv->type = type;
 	free(arg);
 	return 0;
 }
@@ -134,15 +119,15 @@ static int srv_type(service_t *srv, char *arg,
 static int srv_target(service_t *srv, char *arg,
 		      const char *filename, size_t lineno)
 {
-	const enum_map_t *ent = enum_by_name(target_map, arg);
+	int target = svc_target_from_string(arg);
 
-	if (ent == NULL) {
+	if (target == -1) {
 		fprintf(stderr, "%s: %zu: unknown service target '%s'\n",
 			filename, lineno, arg);
 		return -1;
 	}
 
-	srv->target = ent->value;
+	srv->target = target;
 	free(arg);
 	return 0;
 }
