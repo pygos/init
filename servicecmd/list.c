@@ -60,11 +60,11 @@ static int cmd_list(int argc, char **argv)
 	}
 
 	if (argc == 2) {
-		i = svc_type_from_string(argv[1]);
+		i = svc_target_from_string(argv[1]);
 
 		if (i == -1) {
 			fprintf(stderr, "Unknown target `%s'\n", argv[1]);
-			tell_read_help(argv[1]);
+			tell_read_help(argv[0]);
 			ret = EXIT_FAILURE;
 			goto out;
 		}
