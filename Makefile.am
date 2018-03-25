@@ -5,7 +5,7 @@ AM_CFLAGS = -std=c99 -pedantic -Wall -Wextra
 
 sbin_PROGRAMS =
 noinst_LIBRARIES =
-EXTRA_DIST =
+EXTRA_DIST = README LICENSE
 
 include lib/Makemodule.am
 include cmd/Makemodule.am
