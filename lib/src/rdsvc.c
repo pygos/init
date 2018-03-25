@@ -28,14 +28,6 @@
 #include "service.h"
 #include "util.h"
 
-static int svc_name(service_t *svc, char *arg,
-		    const char *filename, size_t lineno)
-{
-	(void)filename; (void)lineno;
-	svc->name = arg;
-	return 0;
-}
-
 static int svc_desc(service_t *svc, char *arg,
 		    const char *filename, size_t lineno)
 {
@@ -166,7 +158,6 @@ static const struct {
 	int (*handle)(service_t *svc, char *arg,
 		      const char *filename, size_t lineno);
 } svc_params[] = {
-	{ "name", svc_name },
 	{ "description", svc_desc },
 	{ "exec", svc_exec },
 	{ "type", svc_type },
@@ -202,6 +193,19 @@ service_t *rdsvc(int dirfd, const char *filename)
 
 	svc = calloc(1, sizeof(*svc));
 	if (svc == NULL) {
+		fputs("out of memory\n", stderr);
+		close(fd);
+		return NULL;
+	}
+
+	if (arg != NULL) {
+		svc->name = strndup(filename, arg - filename);
+	} else {
+		svc->name = strdup(filename);
+	}
+
+	if (svc->name == NULL) {
+		free(svc);
 		fputs("out of memory\n", stderr);
 		close(fd);
 		return NULL;

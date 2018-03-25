@@ -1,4 +1,3 @@
-name = "agetty"
 description = "agetty on %0"
 exec = "@SBINPATH@/agetty %0 linux"
 type = respawn

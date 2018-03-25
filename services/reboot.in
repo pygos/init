@@ -1,4 +1,3 @@
-name = "reboot"
 description = "system reboot"
 exec = "@SBINPATH@/shutdown -nrf"
 type = wait

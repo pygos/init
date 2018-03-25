@@ -1,4 +1,3 @@
-name = "sigterm"
 description = "send SIGTERM to all processes"
 exec = "@SCRIPTDIR@/killall5 15"
 exec = "@BINPATH@/sleep 5"

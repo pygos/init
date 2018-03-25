@@ -1,4 +1,3 @@
-name = "hwclock"
 description = "restore time from RTC"
 exec = "@SBINPATH@/hwclock --hctosys --utc"
 type = wait

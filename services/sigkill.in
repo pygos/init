@@ -1,4 +1,3 @@
-name = "sigkill"
 description = "send SIGKILL to remaining processes"
 exec = "@SCRIPTDIR@/killall5 9"
 type = wait

@@ -1,4 +1,3 @@
-name = "sysctl"
 description = "configure kernel paramters"
 exec = "@SBINPATH@/sysctl --system"
 type = wait

@@ -1,4 +1,3 @@
-name = "loopback"
 description = "configure network loopback device"
 type = wait
 target = boot

@@ -1,4 +1,3 @@
-name = "sync"
 description = "sync"
 exec = "@BINPATH@/sync"
 type = wait
