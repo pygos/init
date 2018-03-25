@@ -19,13 +19,39 @@
 #include "service.h"
 #include "config.h"
 
+static void print_services(service_t *svc)
+{
+	size_t i;
+
+	for (; svc != NULL; svc = svc->next) {
+		printf("Name: %s\n", svc->name);
+		printf("\tDescrption: %s\n", svc->desc);
+		printf("\tType: %s\n", svc_type_to_string(svc->type));
+		printf("\tTarget: %s\n", svc_target_to_string(svc->target));
+
+		if (svc->num_before) {
+			fputs("\tMust be run before:\n", stdout);
+
+			for (i = 0; i < svc->num_before; ++i)
+				printf("\t\t%s\n", svc->before[i]);
+		}
+
+		if (svc->num_after) {
+			fputs("\tMust be run after:\n", stdout);
+
+			for (i = 0; i < svc->num_after; ++i)
+				printf("\t\t%s\n", svc->after[i]);
+		}
+	}
+}
+
 static int cmd_list(int argc, char **argv)
 {
 	int i, ret = EXIT_SUCCESS;
 	service_list_t list;
-	service_t *svc;
 
-	(void)argc; (void)argv;
+	if (check_arguments(argv[0], argc, 1, 2))
+		return EXIT_FAILURE;
 
 	if (srvscan(SVCDIR, &list)) {
 		fprintf(stderr, "Error while reading services from %s\n",
@@ -33,55 +59,33 @@ static int cmd_list(int argc, char **argv)
 		ret = EXIT_FAILURE;
 	}
 
-	for (i = 0; i < TGT_MAX; ++i) {
-		if (list.targets[i] == NULL)
-			continue;
+	if (argc == 2) {
+		i = svc_type_from_string(argv[1]);
 
-		fputs("******** target: ", stdout);
-
-		switch (i) {
-		case TGT_BOOT:
-			fputs("boot", stdout);
-			break;
-		case TGT_SHUTDOWN:
-			fputs("shutdown", stdout);
-			break;
-		case TGT_REBOOT:
-			fputs("reboot", stdout);
-			break;
-		case TGT_CAD:
-			fputs("ctrl-alt-delete", stdout);
-			break;
+		if (i == -1) {
+			fprintf(stderr, "Unknown target `%s'\n", argv[1]);
+			tell_read_help(argv[1]);
+			ret = EXIT_FAILURE;
+			goto out;
 		}
 
-		fputs(" ********\n", stdout);
-
-		for (svc = list.targets[i]; svc != NULL; svc = svc->next) {
-			fprintf(stdout, "Name: %s\n", svc->name);
-			fprintf(stdout, "Descrption: %s\n", svc->desc);
-
-			fputs("Type: ", stdout);
-			switch (svc->type) {
-			case SVC_ONCE: fputs("once\n", stdout); break;
-			case SVC_WAIT: fputs("wait\n", stdout); break;
-			case SVC_RESPAWN: fputs("respawn\n", stdout); break;
-			}
-
-			fputc('\n', stdout);
-		}
-
-		fputc('\n', stdout);
+		print_services(list.targets[i]);
+	} else {
+		for (i = 0; i < TGT_MAX; ++i)
+			print_services(list.targets[i]);
 	}
-
+out:
 	del_srv_list(&list);
 	return ret;
 }
 
 static command_t list = {
 	.cmd = "list",
-	.usage = "",
+	.usage = "[target]",
 	.s_desc = "print a list of currently enabled services",
-	.l_desc = "Print a list of currently enabled services.",
+	.l_desc = "Print a list of currently enabled services. If an "
+		  "optional target is specified, print services for this "
+		  "target.",
 	.run_cmd = cmd_list,
 };
 
