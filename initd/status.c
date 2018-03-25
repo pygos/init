@@ -30,6 +30,9 @@ void print_status(const char *msg, int type, bool update)
 	case STATUS_WAIT:
 		str = "\033[22;33m .. \033[0m";
 		break;
+	case STATUS_STARTED:
+		str = "\033[22;32m UP \033[0m";
+		break;
 	default:
 		str = "\033[22;32m OK \033[0m";
 		break;

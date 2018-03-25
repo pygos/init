@@ -123,6 +123,9 @@ static void start_runlevel(int level)
 				     true);
 			delsvc(svc);
 		} else {
+			if (svc->type == SVC_RESPAWN)
+				print_status(svc->desc, STATUS_STARTED, false);
+
 			svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
 			if (svc->pid == -1) {
 				print_status(svc->desc, STATUS_FAIL, false);

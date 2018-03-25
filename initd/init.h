@@ -29,6 +29,7 @@ enum {
 	STATUS_OK = 0,
 	STATUS_FAIL,
 	STATUS_WAIT,
+	STATUS_STARTED,
 };
 
 /********** runlst.c **********/
@@ -76,8 +77,8 @@ int setup_tty(void);
 /********** status.c **********/
 
 /*
-	Print a status message. Type is either STATUS_OK, STATUS_FAIL or
-	STATUS_WAIT.
+	Print a status message. Type is either STATUS_OK, STATUS_FAIL,
+	STATUS_WAIT or STATUS_STARTED.
 
 	A new-line is appended to the mssage, UNLESS type is STATUS_WAIT.
 
