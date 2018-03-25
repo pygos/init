@@ -226,18 +226,10 @@ int main(void)
 	pfd[0].events = pfd[1].events = POLLIN;
 
 	for (;;) {
-		if (!svclist_have_singleshot()) {
-			if (target != runlevel) {
-				start_runlevel(target);
-				runlevel = target;
-				continue;
-			}
-
-			if (runlevel == TGT_SHUTDOWN)
-				do_shutdown(RB_POWER_OFF);
-
-			if (runlevel == TGT_REBOOT)
-				do_shutdown(RB_AUTOBOOT);
+		if (!svclist_have_singleshot() && target != runlevel) {
+			start_runlevel(target);
+			runlevel = target;
+			continue;
 		}
 
 		ret = poll(pfd, sizeof(pfd) / sizeof(pfd[0]), -1);

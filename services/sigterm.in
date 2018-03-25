@@ -1,0 +1,10 @@
+name = "sigterm"
+description = "send SIGTERM to all processes"
+exec = "@SCRIPTDIR@/killall5 15"
+exec = "@BINPATH@/sleep 5"
+type = wait
+target = "%0"
+before = "sigkill"
+before = "sync"
+before = "reboot"
+before = "shutdown"

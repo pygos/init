@@ -98,16 +98,6 @@ void print_status(const char *msg, int type, bool update);
 */
 int mksock(void);
 
-/********** shutdown.c **********/
-
-/*
-	Kindly tell all processes to go kill themselves, then send
-	a SIGKILL if they don't and perform system shutdown.
-
-	The argument is passed directly to the reboot() syscall.
-*/
-NORETURN void do_shutdown(int type);
-
 /********** svclist.c **********/
 
 /*

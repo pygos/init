@@ -25,3 +25,8 @@ services/hostname
 services/loopback
 services/sysctl
 services/hwclock
+services/shutdown
+services/reboot
+services/sigkill
+services/sigterm
+services/sync
