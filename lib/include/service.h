@@ -53,6 +53,8 @@ typedef struct service_t {
 	size_t num_exec;	/* number of command lines */
 	char *ctty;		/* controlling tty or log file */
 
+	int rspwn_limit;	/* maximum respawn count */
+
 	char **before;		/* services that must be executed later */
 	size_t num_before;
 	char **after;		/* services that must be executed first */

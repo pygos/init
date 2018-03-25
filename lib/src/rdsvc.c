@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 #include "service.h"
 #include "util.h"
@@ -132,6 +133,32 @@ static int svc_target(service_t *svc, char *arg,
 	return 0;
 }
 
+static int svc_rspwn_limit(service_t *svc, char *arg,
+			   const char *filename, size_t lineno)
+{
+	const char *ptr;
+
+	svc->rspwn_limit = 0;
+
+	if (!isdigit(*arg))
+		goto fail;
+
+	for (ptr = arg; isdigit(*ptr); ++ptr)
+		svc->rspwn_limit = svc->rspwn_limit * 10 + (*ptr - '0');
+
+	if (*ptr != '\0')
+		goto fail;
+
+	free(arg);
+	return 0;
+fail:
+	fprintf(stderr,
+		"%s: %zu: expected numeric argument for respawn limit\n",
+		filename, lineno);
+	free(arg);
+	return -1;
+}
+
 
 static const struct {
 	const char *key;
@@ -147,6 +174,7 @@ static const struct {
 	{ "tty", svc_tty },
 	{ "before", svc_before },
 	{ "after", svc_after },
+	{ "respawn_limit", svc_rspwn_limit },
 };
 
 

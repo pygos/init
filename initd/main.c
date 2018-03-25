@@ -43,6 +43,16 @@ static void handle_exited(service_t *svc)
 			break;
 		}
 
+		if (svc->rspwn_limit > 0) {
+			svc->rspwn_limit -= 1;
+
+			if (svc->rspwn_limit == 0) {
+				print_status(svc->desc, STATUS_FAIL, false);
+				delsvc(svc);
+				break;
+			}
+		}
+
 		svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
 		if (svc->pid == -1) {
 			print_status(svc->desc, STATUS_FAIL, false);
