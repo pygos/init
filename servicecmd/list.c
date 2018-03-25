@@ -53,7 +53,7 @@ static int cmd_list(int argc, char **argv)
 	if (check_arguments(argv[0], argc, 1, 2))
 		return EXIT_FAILURE;
 
-	if (srvscan(SVCDIR, &list)) {
+	if (svcscan(SVCDIR, &list)) {
 		fprintf(stderr, "Error while reading services from %s\n",
 			SVCDIR);
 		ret = EXIT_FAILURE;
@@ -75,7 +75,7 @@ static int cmd_list(int argc, char **argv)
 			print_services(list.targets[i]);
 	}
 out:
-	del_srv_list(&list);
+	del_svc_list(&list);
 	return ret;
 }
 

@@ -71,9 +71,9 @@ typedef struct {
 /*
 	Read a service from a file.
 */
-service_t *rdsrv(int dirfd, const char *filename);
+service_t *rdsvc(int dirfd, const char *filename);
 
-void delsrv(service_t *srv);
+void delsvc(service_t *svc);
 
 /*
 	Rebuild a service list by scanning a directory and parsing all
@@ -82,14 +82,14 @@ void delsrv(service_t *srv);
 	Returns 0 on success, -1 on failure. The function takes care of
 	printing error messages on failure.
 */
-int srvscan(const char *directory, service_list_t *list);
+int svcscan(const char *directory, service_list_t *list);
 
-void del_srv_list(service_list_t *list);
+void del_svc_list(service_list_t *list);
 
 /*
 	Sort a list of services by dependencies.
 */
-service_t *srv_tsort(service_t *list);
+service_t *svc_tsort(service_t *list);
 
 const char *svc_type_to_string(int type);
 

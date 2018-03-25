@@ -39,14 +39,14 @@ static void handle_exited(service_t *svc)
 	switch (svc->type) {
 	case SVC_RESPAWN:
 		if (target == TGT_REBOOT || target == TGT_SHUTDOWN) {
-			delsrv(svc);
+			delsvc(svc);
 			break;
 		}
 
 		svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
 		if (svc->pid == -1) {
 			print_status(svc->desc, STATUS_FAIL, false);
-			delsrv(svc);
+			delsvc(svc);
 		}
 
 		svclist_add(svc);
@@ -57,7 +57,7 @@ static void handle_exited(service_t *svc)
 			     STATUS_OK : STATUS_FAIL, false);
 		/* fall-through */
 	default:
-		delsrv(svc);
+		delsvc(svc);
 		break;
 	}
 }
@@ -107,7 +107,7 @@ static void start_runlevel(int level)
 
 		if (!svc->num_exec) {
 			print_status(svc->desc, STATUS_OK, false);
-			delsrv(svc);
+			delsvc(svc);
 			continue;
 		}
 
@@ -121,12 +121,12 @@ static void start_runlevel(int level)
 				     status == EXIT_SUCCESS ?
 				     STATUS_OK : STATUS_FAIL,
 				     true);
-			delsrv(svc);
+			delsvc(svc);
 		} else {
 			svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
 			if (svc->pid == -1) {
 				print_status(svc->desc, STATUS_FAIL, false);
-				delsrv(svc);
+				delsvc(svc);
 				continue;
 			}
 
@@ -196,7 +196,7 @@ int main(void)
 	if (reboot(LINUX_REBOOT_CMD_CAD_OFF))
 		perror("cannot disable CTRL+ALT+DEL");
 
-	if (srvscan(SVCDIR, &cfg)) {
+	if (svcscan(SVCDIR, &cfg)) {
 		fputs("Error reading service list from " SVCDIR "\n"
 			"Trying to continue anyway\n", stderr);
 	}

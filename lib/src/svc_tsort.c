@@ -43,7 +43,7 @@ static bool has_dependencies(service_t *list, service_t *svc)
 	return false;
 }
 
-service_t *srv_tsort(service_t *list)
+service_t *svc_tsort(service_t *list)
 {
 	service_t *nl = NULL, *end = NULL;
 	service_t *svc, *prev;

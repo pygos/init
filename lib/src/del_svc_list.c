@@ -19,17 +19,17 @@
 
 #include "service.h"
 
-void del_srv_list(service_list_t *list)
+void del_svc_list(service_list_t *list)
 {
-	service_t *srv;
+	service_t *svc;
 	int i;
 
 	for (i = 0; i < TGT_MAX; ++i) {
 		while (list->targets[i] != NULL) {
-			srv = list->targets[i];
-			list->targets[i] = srv->next;
+			svc = list->targets[i];
+			list->targets[i] = svc->next;
 
-			delsrv(srv);
+			delsvc(svc);
 		}
 	}
 }

@@ -27,12 +27,12 @@
 
 #include "service.h"
 
-int srvscan(const char *directory, service_list_t *list)
+int svcscan(const char *directory, service_list_t *list)
 {
 	int i, dfd, type, ret = 0;
 	struct dirent *ent;
 	const char *ptr;
-	service_t *srv;
+	service_t *svc;
 	struct stat sb;
 	DIR *dir;
 
@@ -82,14 +82,14 @@ int srvscan(const char *directory, service_list_t *list)
 		if (type != S_IFREG && type != S_IFLNK)
 			continue;
 
-		srv = rdsrv(dfd, ent->d_name);
-		if (srv == NULL) {
+		svc = rdsvc(dfd, ent->d_name);
+		if (svc == NULL) {
 			ret = -1;
 			continue;
 		}
 
-		srv->next = list->targets[srv->target];
-		list->targets[srv->target] = srv;
+		svc->next = list->targets[svc->target];
+		list->targets[svc->target] = svc;
 	}
 
 	for (i = 0; i < TGT_MAX; ++i) {
@@ -97,7 +97,7 @@ int srvscan(const char *directory, service_list_t *list)
 			continue;
 
 		errno = 0;
-		list->targets[i] = srv_tsort(list->targets[i]);
+		list->targets[i] = svc_tsort(list->targets[i]);
 
 		if (errno != 0) {
 			fprintf(stderr, "sorting services read from %s: %s\n",

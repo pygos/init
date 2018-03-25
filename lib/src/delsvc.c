@@ -19,24 +19,24 @@
 
 #include "service.h"
 
-void delsrv(service_t *srv)
+void delsvc(service_t *svc)
 {
 	size_t i;
 
-	for (i = 0; i < srv->num_exec; ++i)
-		free(srv->exec[i]);
+	for (i = 0; i < svc->num_exec; ++i)
+		free(svc->exec[i]);
 
-	for (i = 0; i < srv->num_before; ++i)
-		free(srv->before[i]);
+	for (i = 0; i < svc->num_before; ++i)
+		free(svc->before[i]);
 
-	for (i = 0; i < srv->num_after; ++i)
-		free(srv->after[i]);
+	for (i = 0; i < svc->num_after; ++i)
+		free(svc->after[i]);
 
-	free(srv->before);
-	free(srv->after);
-	free(srv->name);
-	free(srv->desc);
-	free(srv->exec);
-	free(srv->ctty);
-	free(srv);
+	free(svc->before);
+	free(svc->after);
+	free(svc->name);
+	free(svc->desc);
+	free(svc->exec);
+	free(svc->ctty);
+	free(svc);
 }
