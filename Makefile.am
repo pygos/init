@@ -12,3 +12,7 @@ include cmd/Makemodule.am
 include initd/Makemodule.am
 include services/Makemodule.am
 include servicecmd/Makemodule.am
+
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(SVCDIR)
+

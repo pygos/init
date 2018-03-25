@@ -7,6 +7,7 @@ AM_SILENT_RULES([yes])
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
+AC_PROG_MKDIR_P
 
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])
