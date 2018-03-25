@@ -55,6 +55,23 @@ void usage(int status)
 	exit(status);
 }
 
+void tell_read_help(const char *cmd)
+{
+	fprintf(stderr, "Try `%s help %s' for more information.\n",
+		__progname, cmd);
+}
+
+int check_arguments(const char *cmd, int argc, int minc, int maxc)
+{
+	if (argc >= minc && argc <= maxc)
+		return 0;
+
+	fprintf(stderr, "Too %s arguments for `%s'\n",
+			argc > maxc ? "many" : "few", cmd);
+	tell_read_help(cmd);
+	return -1;
+}
+
 int main(int argc, char **argv)
 {
 	command_t *cmd;

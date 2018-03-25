@@ -31,18 +31,15 @@ static int cmd_disable(int argc, char **argv)
 	char *linkname, *ptr;
 	struct stat sb;
 
-	if (argc < 2 || argc > 3) {
-		fputs("Wrong number of arguments for `disable'.\n"
-			"Try `service help disable' for more information.\n",
-			stderr);
+	if (check_arguments(argv[0], argc, 2, 3))
 		return EXIT_FAILURE;
-	}
 
 	for (ptr = argv[1]; isalnum(*ptr) || *ptr == '_'; ++ptr)
 		;
 
 	if (*ptr != '\0') {
 		fprintf(stderr, "Invalid service name '%s'\n", argv[1]);
+		tell_read_help(argv[0]);
 		return EXIT_FAILURE;
 	}
 

@@ -61,6 +61,21 @@ extern command_t *commands;
 void usage(int status) NORETURN;
 
 /*
+	Write a message to stderr that advises the user how to consult the
+	help text for a specific command.
+*/
+void tell_read_help(const char *cmd);
+
+/*
+	Check if the argument count is within specified bounds (minc and maxc
+	inclusive). If it is, return 0.
+
+	If it isn't, complain about a wrong number of arguments for a
+	command (cmd), tell the user to consult the help text and return -1.
+*/
+int check_arguments(const char *cmd, int argc, int minc, int maxc);
+
+/*
 	To implement a new command, add a global, static instance of a
 	command_t (or derived) structure to a C file and pass it to this
 	macro to have it automatically registered on program startup.
