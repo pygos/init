@@ -7,6 +7,9 @@ sbin_PROGRAMS =
 noinst_LIBRARIES =
 EXTRA_DIST = README LICENSE
 
+helperdir = @SCRIPTDIR@
+helper_PROGRAMS =
+
 include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am

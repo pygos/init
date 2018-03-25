@@ -10,4 +10,10 @@ reboot_CFLAGS = $(AM_CFLAGS)
 reboot_LDFLAGS = $(AM_LDFLAGS)
 reboot_LDADD = libinit.a
 
+killall5_SOURCES = cmd/killall5.c
+killall5_CPPFLAGS = $(AM_CPPFLAGS)
+killall5_CFLAGS = $(AM_CFLAGS)
+killall5_LDFLAGS = $(AM_LDFLAGS)
+
 sbin_PROGRAMS += reboot shutdown
+helper_PROGRAMS += killall5

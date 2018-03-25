@@ -18,6 +18,7 @@ init
 service
 reboot
 shutdown
+killall5
 
 services/agetty
 services/hostname
