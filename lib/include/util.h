@@ -43,6 +43,18 @@ typedef struct {
 	cleared if end-of-file is reached.
 
 	The line must be deallocated with free().
+
+	The following transformations are applied:
+	 - Space characters are replaced with regular white space characters.
+	 - Sequences of space characters are truncated to a single space.
+	 - A '#' sign is interpreted as the start of a comment and removed,
+	   together with everything that follows.
+	 - Padding spaces are removed from the line.
+	 - If a '"' is encounterd, the above rules are disabled, until a
+	   after the matching '"' is read. A '"' can be escaped by preceeding
+	   it with a backslash.
+	 - If a second, coresponding '"' is not found, processing fails with
+	   errno set to EILSEQ.
 */
 char *rdline(int fd);
 

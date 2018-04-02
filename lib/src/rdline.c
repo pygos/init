@@ -22,11 +22,18 @@
 
 #include "util.h"
 
+enum {
+	STATE_INITIAL = 0,
+	STATE_STRING = 1,
+	STATE_STRING_ESC = 2,
+	STATE_COMMENT = 3,
+};
+
 char *rdline(int fd)
 {
 	size_t i = 0, bufsiz = 0, newsz;
+	int ret, state = STATE_INITIAL;
 	char c, *new, *buffer = NULL;
-	int ret;
 
 	for (;;) {
 		switch (read(fd, &c, 1)) {
@@ -47,6 +54,39 @@ char *rdline(int fd)
 			goto fail;
 		}
 
+		switch (state) {
+		case STATE_STRING:
+			if (c == '\\')
+				state = STATE_STRING_ESC;
+			if (c == '"')
+				state = STATE_INITIAL;
+			break;
+		case STATE_STRING_ESC:
+			state = STATE_STRING;
+			break;
+		case STATE_COMMENT:
+			if (c != '\0')
+				continue;
+			break;
+		default:
+			if (isspace(c))
+				c = ' ';
+			if (c == ' ' && (i == 0 || buffer[i - 1] == ' '))
+				continue;
+			if (c == '#') {
+				state = STATE_COMMENT;
+				continue;
+			}
+			if (c == '"')
+				state = STATE_STRING;
+			break;
+		}
+
+		if (c == '\0') {
+			while (i > 0 && buffer[i - 1] == ' ')
+				--i;
+		}
+
 		if (i == bufsiz) {
 			newsz = bufsiz ? bufsiz * 2 : 16;
 			new = realloc(buffer, newsz);
@@ -61,6 +101,11 @@ char *rdline(int fd)
 		buffer[i++] = c;
 		if (c == '\0')
 			break;
+	}
+
+	if (state == STATE_STRING || state == STATE_STRING_ESC) {
+		errno = EILSEQ;
+		goto fail;
 	}
 	return buffer;
 fail:
