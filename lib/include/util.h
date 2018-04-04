@@ -73,6 +73,17 @@ char *rdline(int fd, int argc, const char *const *argv);
 */
 int unescape(char *src);
 
+/*
+	Split a space seperated string into a sequence of null-terminated
+	strings. Return a NULL terminated array of strings pointing to the
+	start of each sub string.
+
+	If a double quote is encountered, the entire string up to to the next,
+	unescaped double quite is interpreted as a single sub string and
+	fed through the unescape function.
+
+	The returned array must be freed with free().
+*/
 char **split_argv(char *str);
 
 /*

@@ -45,8 +45,8 @@ enum {
 };
 
 typedef struct exec_t {
-	char **argv;
-	char *raw_argv;
+	char **argv;		/* NULL terminated argument vector */
+	char *raw_argv;		/* backing store for argv contents */
 
 	struct exec_t *next;
 } exec_t;
@@ -56,15 +56,20 @@ typedef struct service_t {
 	int target;		/* TGT_* service target */
 	char *name;		/* canonical service name */
 	char *desc;		/* description string */
-	exec_t *exec;		/* command lines to execute */
 	char *ctty;		/* controlling tty or log file */
-
 	int rspwn_limit;	/* maximum respawn count */
 
-	char **before;		/* services that must be executed later */
-	char **after;		/* services that must be executed first */
-	char *raw_after;
-	char *raw_before;
+	/* linked list of command lines to execute */
+	exec_t *exec;
+
+	/* NULL terminated array of services that must be executed later */
+	char **before;
+
+	/* NULL terminated array of services that must be executed first */
+	char **after;
+
+	char *raw_before;	/* backing store for 'before' contents */
+	char *raw_after;	/* backing store for 'after' contents */
 
 	pid_t pid;
 	int status;		/* process exit status */
