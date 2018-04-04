@@ -28,10 +28,21 @@
 #include "service.h"
 #include "util.h"
 
+static int try_unescape(char *arg, const char *filename, size_t lineno)
+{
+	if (unescape(arg)) {
+		fprintf(stderr, "%s: %zu: malformed string constant\n",
+			filename, lineno);
+		return -1;
+	}
+	return 0;
+}
+
 static int svc_desc(service_t *svc, char *arg,
 		    const char *filename, size_t lineno)
 {
-	(void)filename; (void)lineno;
+	if (try_unescape(arg, filename, lineno))
+		return -1;
 	svc->desc = arg;
 	return 0;
 }
@@ -39,7 +50,8 @@ static int svc_desc(service_t *svc, char *arg,
 static int svc_tty(service_t *svc, char *arg,
 		   const char *filename, size_t lineno)
 {
-	(void)filename; (void)lineno;
+	if (try_unescape(arg, filename, lineno))
+		return -1;
 	svc->ctty = arg;
 	return 0;
 }
@@ -63,8 +75,12 @@ static int svc_exec(service_t *svc, char *arg,
 static int svc_before(service_t *svc, char *arg,
 		      const char *filename, size_t lineno)
 {
-	char **new = realloc(svc->before,
-			     sizeof(char*) * (svc->num_before + 1));
+	char **new;
+
+	if (try_unescape(arg, filename, lineno))
+		return -1;
+
+	new = realloc(svc->before, sizeof(char*) * (svc->num_before + 1));
 
 	if (new == NULL) {
 		fprintf(stderr, "%s: %zu: out of memory\n", filename, lineno);
@@ -80,7 +96,12 @@ static int svc_before(service_t *svc, char *arg,
 static int svc_after(service_t *svc, char *arg,
 		     const char *filename, size_t lineno)
 {
-	char **new = realloc(svc->after, sizeof(char*) * (svc->num_after + 1));
+	char **new;
+
+	if (try_unescape(arg, filename, lineno))
+		return -1;
+
+	new = realloc(svc->after, sizeof(char*) * (svc->num_after + 1));
 
 	if (new == NULL) {
 		fprintf(stderr, "%s: %zu: out of memory\n", filename, lineno);
@@ -96,7 +117,22 @@ static int svc_after(service_t *svc, char *arg,
 static int svc_type(service_t *svc, char *arg,
 		    const char *filename, size_t lineno)
 {
-	int type = svc_type_from_string(arg);
+	char *extra;
+	int type;
+
+	if (try_unescape(arg, filename, lineno))
+		return -1;
+
+	for (extra = arg; *extra != ' ' && *extra != '\0'; ++extra)
+		;
+
+	if (*extra == ' ') {
+		*(extra++) = '\0';
+	} else {
+		extra = NULL;
+	}
+
+	type = svc_type_from_string(arg);
 
 	if (type == -1) {
 		fprintf(stderr, "%s: %zu: unknown service type '%s'\n",
@@ -104,15 +140,51 @@ static int svc_type(service_t *svc, char *arg,
 		return -1;
 	}
 
+	if (extra != NULL) {
+		switch (type) {
+		case SVC_RESPAWN:
+			if (strncmp(extra, "limit ", 6) != 0)
+				goto fail_limit;
+			extra += 6;
+
+			svc->rspwn_limit = 0;
+
+			if (!isdigit(*extra))
+				goto fail_limit;
+
+			while (isdigit(*extra)) {
+				svc->rspwn_limit *= 10;
+				svc->rspwn_limit += *(extra++) - '0';
+			}
+
+			if (*extra != '\0')
+				goto fail_limit;
+			break;
+		default:
+			fprintf(stderr, "%s: %zu: unexpected extra arguments "
+				"for type '%s'\n", filename, lineno, arg);
+			return -1;
+		}
+	}
+
 	svc->type = type;
 	free(arg);
 	return 0;
+fail_limit:
+	fprintf(stderr, "%s: %zu: expected 'limit <value>' after 'respawn'\n",
+		filename, lineno);
+	return -1;
 }
 
 static int svc_target(service_t *svc, char *arg,
 		      const char *filename, size_t lineno)
 {
-	int target = svc_target_from_string(arg);
+	int target;
+
+	if (try_unescape(arg, filename, lineno))
+		return -1;
+
+	target = svc_target_from_string(arg);
 
 	if (target == -1) {
 		fprintf(stderr, "%s: %zu: unknown service target '%s'\n",
@@ -124,33 +196,6 @@ static int svc_target(service_t *svc, char *arg,
 	free(arg);
 	return 0;
 }
-
-static int svc_rspwn_limit(service_t *svc, char *arg,
-			   const char *filename, size_t lineno)
-{
-	const char *ptr;
-
-	svc->rspwn_limit = 0;
-
-	if (!isdigit(*arg))
-		goto fail;
-
-	for (ptr = arg; isdigit(*ptr); ++ptr)
-		svc->rspwn_limit = svc->rspwn_limit * 10 + (*ptr - '0');
-
-	if (*ptr != '\0')
-		goto fail;
-
-	free(arg);
-	return 0;
-fail:
-	fprintf(stderr,
-		"%s: %zu: expected numeric argument for respawn limit\n",
-		filename, lineno);
-	free(arg);
-	return -1;
-}
-
 
 static const struct {
 	const char *key;
@@ -165,7 +210,6 @@ static const struct {
 	{ "tty", svc_tty },
 	{ "before", svc_before },
 	{ "after", svc_after },
-	{ "respawn_limit", svc_rspwn_limit },
 };
 
 
@@ -239,27 +283,26 @@ service_t *rdsvc(int dirfd, const char *filename)
 			goto fail;
 		}
 
-		if (splitkv(line, &key, &value)) {
-			if (key == NULL) {
-				fprintf(stderr,
-					"%s: %zu: expected <key> = <value>\n",
-					filename, lineno);
-			} else if (value == NULL) {
-				fprintf(stderr,
-					"%s: %zu: expected value after %s\n",
-					filename, lineno, key);
-			} else {
-				fprintf(stderr,
-					"%s: %zu: unexpected arguments "
-					"after key-value pair\n",
-					filename, lineno);
-			}
-			goto fail;
-		}
-
-		if (key == NULL) {
+		if (!strlen(line)) {
 			free(line);
 			continue;
+		}
+
+		key = value = line;
+
+		while (*value != ' ' && *value != '\0') {
+			if (!isalpha(*value)) {
+				fprintf(stderr, "%s: %zu: unexpected '%c' in "
+					"keyword\n", filename, lineno, *value);
+				goto fail_line;
+			}
+			++value;
+		}
+
+		if (*value == ' ') {
+			*(value++) = '\0';
+		} else {
+			value = NULL;
 		}
 
 		for (i = 0; i < ARRAY_SIZE(svc_params); ++i) {
@@ -268,7 +311,14 @@ service_t *rdsvc(int dirfd, const char *filename)
 		}
 
 		if (i >= ARRAY_SIZE(svc_params)) {
-			fprintf(stderr, "%s: %zu: unknown parameter '%s'\n",
+			fprintf(stderr, "%s: %zu: unknown keyword '%s'\n",
+				filename, lineno, key);
+			goto fail_line;
+		}
+
+		if (value == NULL) {
+			fprintf(stderr,
+				"%s: %zu: expected argument after '%s'\n",
 				filename, lineno, key);
 			goto fail_line;
 		}

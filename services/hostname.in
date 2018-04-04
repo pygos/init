@@ -1,6 +1,6 @@
-description = "reload hostname"
-exec = "@BINPATH@/hostname --file /etc/hostname"
-type = wait
-target = boot
-before = sysinit
-after = hwclock
+description reload hostname
+exec "@BINPATH@/hostname" --file /etc/hostname
+type wait
+target boot
+before sysinit
+after hwclock

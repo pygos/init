@@ -1,8 +1,8 @@
-description = "sync"
-exec = "@BINPATH@/sync"
-type = wait
-target = "%0"
-after = "sigkill"
-after = "sigterm"
-before = "reboot"
-before = "shutdown"
+description sync
+exec "@BINPATH@/sync"
+type wait
+target %0
+after sigkill
+after sigterm
+before reboot
+before shutdown

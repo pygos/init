@@ -37,15 +37,28 @@ static NORETURN void split_and_exec(char *cmd)
 	while (*cmd != '\0') {
 		argv[i++] = cmd;	/* FIXME: buffer overflow!! */
 
-		while (*cmd != '\0' && !isspace(*cmd))
-			++cmd;
+		if (*cmd == '"') {
+			while (*cmd != '\0' && *cmd != '"') {
+				if (cmd[0] == '\\' && cmd[1] != '\0')
+					++cmd;
 
-		if (isspace(*cmd)) {
-			*(cmd++) = '\0';
-
-			while (isspace(*cmd))
 				++cmd;
+			}
+
+			if (*cmd == '"')
+				*(cmd++) = '\0';
+
+			unescape(argv[i - 1]);
+		} else {
+			while (*cmd != '\0' && *cmd != ' ')
+				++cmd;
+
+			if (*cmd == ' ')
+				*(cmd++) = '\0';
 		}
+
+		while (*cmd == ' ')
+			++cmd;
 	}
 
 	argv[i] = NULL;

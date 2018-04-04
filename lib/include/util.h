@@ -68,20 +68,10 @@ typedef struct {
 char *rdline(int fd, int argc, const char *const *argv);
 
 /*
-	Split a line of the shape "key = value" into key and value part.
-
-	The key can contain alphanumeric characters and can be padded with
-	spaces or tabs.
-
-	The value can be either a sequence of alphanumeric characters, period
-	or underscore OR a string in quotation marks. For strings, the
-	quotation marks are removed and escape sequences are processed.
-
-	The value may also be padded with spaces or tabs but the line may not
-	contain anything else after the value, except for spaces, tabs or
-	the '#' symbol which is interpreted as start of a comment.
+	Remove double quotes ('"') from a string and substitute escape
+	sequences in between double quotes.
 */
-int splitkv(char *line, char **key, char **value);
+int unescape(char *src);
 
 /*
 	Search through an array of enum_map_t entries to resolve a string to
