@@ -3,6 +3,4 @@ exec "@SCRIPTDIR@/killall5" 9
 type wait
 target %0
 after sigterm
-before sync
-before shutdown
-before reboot
+before sync shutdown reboot

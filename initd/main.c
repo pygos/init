@@ -53,7 +53,7 @@ static void handle_exited(service_t *svc)
 			}
 		}
 
-		svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
+		svc->pid = runlst(svc->exec, svc->ctty);
 		if (svc->pid == -1) {
 			print_status(svc->desc, STATUS_FAIL, false);
 			delsvc(svc);
@@ -115,7 +115,7 @@ static void start_runlevel(int level)
 		svc = cfg.targets[level];
 		cfg.targets[level] = svc->next;
 
-		if (!svc->num_exec) {
+		if (svc->exec == NULL) {
 			print_status(svc->desc, STATUS_OK, false);
 			delsvc(svc);
 			continue;
@@ -124,8 +124,7 @@ static void start_runlevel(int level)
 		if (svc->type == SVC_WAIT) {
 			print_status(svc->desc, STATUS_WAIT, false);
 
-			status = runlst_wait(svc->exec, svc->num_exec,
-					     svc->ctty);
+			status = runlst_wait(svc->exec, svc->ctty);
 
 			print_status(svc->desc,
 				     status == EXIT_SUCCESS ?
@@ -136,7 +135,7 @@ static void start_runlevel(int level)
 			if (svc->type == SVC_RESPAWN)
 				print_status(svc->desc, STATUS_STARTED, false);
 
-			svc->pid = runlst(svc->exec, svc->num_exec, svc->ctty);
+			svc->pid = runlst(svc->exec, svc->ctty);
 			if (svc->pid == -1) {
 				print_status(svc->desc, STATUS_FAIL, false);
 				delsvc(svc);

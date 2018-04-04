@@ -3,7 +3,4 @@ exec "@SCRIPTDIR@/killall5" 15
 exec "@BINPATH@/sleep" 5
 type wait
 target %0
-before sigkill
-before sync
-before reboot
-before shutdown
+before sigkill sync reboot shutdown

@@ -73,6 +73,8 @@ char *rdline(int fd, int argc, const char *const *argv);
 */
 int unescape(char *src);
 
+char **split_argv(char *str);
+
 /*
 	Search through an array of enum_map_t entries to resolve a string to
 	a numeric value. The end of the map is indicated by a sentinel entry

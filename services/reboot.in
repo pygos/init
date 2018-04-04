@@ -2,6 +2,4 @@ description system reboot
 exec "@SBINPATH@/shutdown" -nrf
 type wait
 target reboot
-after sync
-after sigkill
-after sigterm
+after sync sigkill sigterm

@@ -2,6 +2,4 @@ description system shutdown
 exec "@SBINPATH@/shutdown" -npf
 type wait
 target shutdown
-after sync
-after sigkill
-after sigterm
+after sync sigkill sigterm

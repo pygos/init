@@ -44,21 +44,27 @@ enum {
 	TGT_MAX
 };
 
+typedef struct exec_t {
+	char **argv;
+	char *raw_argv;
+
+	struct exec_t *next;
+} exec_t;
+
 typedef struct service_t {
 	int type;		/* SVC_* service type */
 	int target;		/* TGT_* service target */
 	char *name;		/* canonical service name */
 	char *desc;		/* description string */
-	char **exec;		/* command lines to execute */
-	size_t num_exec;	/* number of command lines */
+	exec_t *exec;		/* command lines to execute */
 	char *ctty;		/* controlling tty or log file */
 
 	int rspwn_limit;	/* maximum respawn count */
 
 	char **before;		/* services that must be executed later */
-	size_t num_before;
 	char **after;		/* services that must be executed first */
-	size_t num_after;
+	char *raw_after;
+	char *raw_before;
 
 	pid_t pid;
 	int status;		/* process exit status */

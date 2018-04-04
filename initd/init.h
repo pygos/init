@@ -48,7 +48,7 @@ enum {
 	does not exit with EXIT_SUCCESS, processing of the list is aborted
 	and the function returns the exit status of the failed process.
 */
-int runlst_wait(char **exec, size_t num, const char *ctty);
+int runlst_wait(exec_t *list, const char *ctty);
 
 /*
 	Does basically the same as runlst_wait, but asynchronously.
@@ -60,7 +60,7 @@ int runlst_wait(char **exec, size_t num, const char *ctty);
 	Alternatively, if num is 1, the child process directly exec()s the
 	given command.
 */
-pid_t runlst(char **exec, size_t num, const char *ctty);
+pid_t runlst(exec_t *list, const char *ctty);
 
 /********** setup_tty.c **********/
 

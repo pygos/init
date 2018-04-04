@@ -32,17 +32,17 @@ static void print_services(service_t *svc)
 		if (svc->type == SVC_RESPAWN && svc->rspwn_limit > 0)
 			printf("\tRespawn limit: %d\n", svc->rspwn_limit);
 
-		if (svc->num_before) {
+		if (svc->before != NULL) {
 			fputs("\tMust be run before:\n", stdout);
 
-			for (i = 0; i < svc->num_before; ++i)
+			for (i = 0; svc->before[i] != NULL; ++i)
 				printf("\t\t%s\n", svc->before[i]);
 		}
 
-		if (svc->num_after) {
+		if (svc->after != NULL) {
 			fputs("\tMust be run after:\n", stdout);
 
-			for (i = 0; i < svc->num_after; ++i)
+			for (i = 0; svc->after[i] != NULL; ++i)
 				printf("\t\t%s\n", svc->after[i]);
 		}
 	}

@@ -29,42 +29,10 @@
 
 extern char **environ;
 
-static NORETURN void split_and_exec(char *cmd)
+static NORETURN void split_and_exec(exec_t *cmd)
 {
-	char *argv[128];
-	size_t i = 0;
-
-	while (*cmd != '\0') {
-		argv[i++] = cmd;	/* FIXME: buffer overflow!! */
-
-		if (*cmd == '"') {
-			while (*cmd != '\0' && *cmd != '"') {
-				if (cmd[0] == '\\' && cmd[1] != '\0')
-					++cmd;
-
-				++cmd;
-			}
-
-			if (*cmd == '"')
-				*(cmd++) = '\0';
-
-			unescape(argv[i - 1]);
-		} else {
-			while (*cmd != '\0' && *cmd != ' ')
-				++cmd;
-
-			if (*cmd == ' ')
-				*(cmd++) = '\0';
-		}
-
-		while (*cmd == ' ')
-			++cmd;
-	}
-
-	argv[i] = NULL;
-
-	execve(argv[0], argv, environ);
-	perror(argv[0]);
+	execve(cmd->argv[0], cmd->argv, environ);
+	perror(cmd->argv[0]);
 	exit(EXIT_FAILURE);
 }
 
@@ -98,19 +66,18 @@ static int child_setup(const char *ctty)
 	return 0;
 }
 
-int runlst_wait(char **exec, size_t num, const char *ctty)
+int runlst_wait(exec_t *list, const char *ctty)
 {
 	pid_t ret, pid;
 	int status;
-	size_t i;
 
-	for (i = 0; i < num; ++i) {
+	for (; list != NULL; list = list->next) {
 		pid = fork();
 
 		if (pid == 0) {
 			if (child_setup(ctty))
 				exit(EXIT_FAILURE);
-			split_and_exec(exec[i]);
+			split_and_exec(list);
 		}
 
 		if (pid == -1) {
@@ -132,7 +99,7 @@ int runlst_wait(char **exec, size_t num, const char *ctty)
 	return EXIT_SUCCESS;
 }
 
-pid_t runlst(char **exec, size_t num, const char *ctty)
+pid_t runlst(exec_t *list, const char *ctty)
 {
 	int status;
 	pid_t pid;
@@ -143,11 +110,11 @@ pid_t runlst(char **exec, size_t num, const char *ctty)
 		if (child_setup(ctty))
 			exit(EXIT_FAILURE);
 
-		if (num > 1) {
-			status = runlst_wait(exec, num, NULL);
+		if (list->next != NULL) {
+			status = runlst_wait(list, NULL);
 			exit(status);
 		} else {
-			split_and_exec(exec[0]);
+			split_and_exec(list);
 		}
 	}
 

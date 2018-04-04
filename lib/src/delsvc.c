@@ -21,16 +21,19 @@
 
 void delsvc(service_t *svc)
 {
-	size_t i;
+	exec_t *e;
 
-	for (i = 0; i < svc->num_exec; ++i)
-		free(svc->exec[i]);
+	while (svc->exec != NULL) {
+		e = svc->exec;
+		svc->exec = e->next;
 
-	for (i = 0; i < svc->num_before; ++i)
-		free(svc->before[i]);
+		free(e->argv);
+		free(e->raw_argv);
+		free(e);
+	}
 
-	for (i = 0; i < svc->num_after; ++i)
-		free(svc->after[i]);
+	free(svc->raw_before);
+	free(svc->raw_after);
 
 	free(svc->before);
 	free(svc->after);

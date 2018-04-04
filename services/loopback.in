@@ -2,8 +2,7 @@ description configure network loopback device
 type wait
 target boot
 before sysinit
-after hwclock
-after hostname
+after hwclock hostname
 
 exec "@SBINPATH@/ip" addr add 127.0.0.1/8 dev lo brd +
 exec "@SBINPATH@/ip" link set lo up
