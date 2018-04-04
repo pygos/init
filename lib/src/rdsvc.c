@@ -171,7 +171,7 @@ static const struct {
 
 service_t *rdsvc(int dirfd, const char *filename)
 {
-	const char *arg, *args[1];
+	const char *arg, *args[1], *error;
 	char *line, *key, *value;
 	size_t i, argc, lineno;
 	service_t *svc;
@@ -213,15 +213,30 @@ service_t *rdsvc(int dirfd, const char *filename)
 
 	for (lineno = 1; ; ++lineno) {
 		errno = 0;
-		line = rdline(fd);
+		line = rdline(fd, argc, args);
 
 		if (line == NULL) {
-			if (errno != 0) {
-				fprintf(stderr, "read: %s: %zu: %s\n",
-					filename, lineno, strerror(errno));
-				goto fail;
+			if (errno == 0)
+				break;
+
+			switch (errno) {
+			case EINVAL:
+				error = "error in argument expansion";
+				break;
+			case ELOOP:
+				error = "recursive argument expansion";
+				break;
+			case EILSEQ:
+				error = "missing \"";
+				break;
+			default:
+				error = strerror(errno);
+				break;
 			}
-			break;
+
+			fprintf(stderr, "%s: %zu: %s\n",
+				filename, lineno, error);
+			goto fail;
 		}
 
 		if (splitkv(line, &key, &value)) {
@@ -258,7 +273,7 @@ service_t *rdsvc(int dirfd, const char *filename)
 			goto fail_line;
 		}
 
-		value = strexpand(value, argc, args);
+		value = strdup(value);
 		if (value == NULL) {
 			fputs("out of memory", stderr);
 			goto fail_line;

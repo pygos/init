@@ -27,32 +27,44 @@ enum {
 	STATE_STRING = 1,
 	STATE_STRING_ESC = 2,
 	STATE_COMMENT = 3,
+	STATE_ARG = 4,
 };
 
-char *rdline(int fd)
+char *rdline(int fd, int argc, const char *const *argv)
 {
 	size_t i = 0, bufsiz = 0, newsz;
 	int ret, state = STATE_INITIAL;
 	char c, *new, *buffer = NULL;
+	const char *argstr = NULL;
 
 	for (;;) {
-		switch (read(fd, &c, 1)) {
-		case 0:
-			if (i == 0) {
-				errno = 0;
-				return NULL;
-			}
-			c = '\0';
-			break;
-		case 1:
-			if (c == '\n')
+		if (argstr == NULL) {
+			switch (read(fd, &c, 1)) {
+			case 0:
+				if (i == 0) {
+					errno = 0;
+					return NULL;
+				}
 				c = '\0';
-			break;
-		default:
-			if (errno == EINTR)
+				break;
+			case 1:
+				break;
+			default:
+				if (errno == EINTR)
+					continue;
+				goto fail;
+			}
+		} else {
+			c = *(argstr++);
+
+			if (c == '\0') {
+				argstr = NULL;
 				continue;
-			goto fail;
+			}
 		}
+
+		if (c == '\n')
+			c = '\0';
 
 		switch (state) {
 		case STATE_STRING:
@@ -68,6 +80,20 @@ char *rdline(int fd)
 			if (c != '\0')
 				continue;
 			break;
+		case STATE_ARG:
+			state = STATE_INITIAL;
+			if (c == '%')
+				break;
+			if (!isdigit(c) || (c - '0') >= argc) {
+				errno = EINVAL;
+				goto fail;
+			}
+			if (argstr != NULL) {
+				errno = ELOOP;
+				goto fail;
+			}
+			argstr = argv[c - '0'];
+			continue;
 		default:
 			if (isspace(c))
 				c = ' ';
@@ -75,6 +101,10 @@ char *rdline(int fd)
 				continue;
 			if (c == '#') {
 				state = STATE_COMMENT;
+				continue;
+			}
+			if (c == '%') {
+				state = STATE_ARG;
 				continue;
 			}
 			if (c == '"')

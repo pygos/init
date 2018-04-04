@@ -55,8 +55,17 @@ typedef struct {
 	   it with a backslash.
 	 - If a second, coresponding '"' is not found, processing fails with
 	   errno set to EILSEQ.
+	 - If a '%' character is encountered, the next character is expected
+	   to be a single digit index into argv. If it is not a digit or
+	   outside the bounds set by argc, processing fails and sets errno
+	   to EINVAL. On success, the argv value is inserted and processed
+	   as described above.
+	 - A '%' character can be escaped by writing '%%' or, if inside
+	   a double quite string, by writing \%.
+	 - An attempt to use such an indexed argument inside an argument
+	   expansion, results in failure with errno set to ELOOP.
 */
-char *rdline(int fd);
+char *rdline(int fd, int argc, const char *const *argv);
 
 /*
 	Split a line of the shape "key = value" into key and value part.
@@ -87,13 +96,6 @@ const enum_map_t *enum_by_name(const enum_map_t *map, const char *name);
 	entry with the name set to NULL.
 */
 const char *enum_to_name(const enum_map_t *map, int value);
-
-/*
-	Create a copy of the input string inp, but replace all occourances
-	of %<number> with argv[number] if the number is within the bounds
-	specified by argc.
-*/
-char *strexpand(const char *inp, size_t argc, const char *const *argv);
 
 #endif /* UTIL_H */
 
