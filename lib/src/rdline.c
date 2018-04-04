@@ -17,130 +17,153 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <errno.h>
 #include <ctype.h>
 
 #include "util.h"
 
-enum {
-	STATE_INITIAL = 0,
-	STATE_STRING = 1,
-	STATE_STRING_ESC = 2,
-	STATE_COMMENT = 3,
-	STATE_ARG = 4,
-};
+typedef struct {
+	int fd;			/* input file descriptor */
+	const char *argstr;	/* if not NULL, read from this instead */
+
+	size_t i;		/* buffer offset */
+	size_t bufsiz;		/* buffer size */
+	char *buffer;
+
+	bool string;		/* inside a string? */
+	bool escape;		/* reading an escape sequence? */
+	bool comment;		/* inside a comment */
+} rdline_t;
+
+static int rdline_getc(rdline_t *t)
+{
+	int ret;
+	char c;
+
+	if (t->argstr != NULL) {
+		c = *(t->argstr++);
+		if (c != '\0')
+			goto out;
+
+		t->argstr = NULL;
+	}
+
+	do {
+		ret = read(t->fd, &c, 1);
+	} while (ret < 0 && errno == EINTR);
+
+	if (ret < 0)
+		return -1;
+
+	if (ret == 0) {
+		if (t->i == 0) {
+			errno = 0;
+			return -1;
+		}
+		c = '\0';
+	}
+out:
+	return (c == '\n') ? '\0' : c;
+}
+
+static int rdline_append(rdline_t *t, int c)
+{
+	size_t newsz;
+	char *new;
+
+	if (t->comment) {
+		if (c != '\0')
+			return 0;
+	} else if (t->string) {
+		if (t->escape) {
+			t->escape = false;
+		} else {
+			if (c == '\\')
+				t->escape = true;
+			if (c == '"')
+				t->string = false;
+		}
+	} else {
+		if (isspace(c))
+			c = ' ';
+		if (c == ' ' && (t->i == 0 || t->buffer[t->i - 1] == ' '))
+			return 0;
+		if (c == '#') {
+			t->comment = true;
+			return 0;
+		}
+		if (c == '"')
+			t->string = true;
+	}
+
+	if (c == '\0') {
+		while (t->i > 0 && t->buffer[t->i - 1] == ' ')
+			t->i -= 1;
+	}
+
+	if (t->i == t->bufsiz) {
+		newsz = t->bufsiz ? t->bufsiz * 2 : 16;
+		new = realloc(t->buffer, newsz);
+
+		if (new == NULL)
+			return -1;
+
+		t->buffer = new;
+		t->bufsiz = newsz;
+	}
+
+	t->buffer[t->i++] = c;
+	return 0;
+}
 
 char *rdline(int fd, int argc, const char *const *argv)
 {
-	size_t i = 0, bufsiz = 0, newsz;
-	int ret, state = STATE_INITIAL;
-	char c, *new, *buffer = NULL;
-	const char *argstr = NULL;
+	rdline_t rd;
+	int ret;
+	char c;
 
-	for (;;) {
-		if (argstr == NULL) {
-			switch (read(fd, &c, 1)) {
-			case 0:
-				if (i == 0) {
-					errno = 0;
-					return NULL;
+	memset(&rd, 0, sizeof(rd));
+	rd.fd = fd;
+
+	do {
+		c = rdline_getc(&rd);
+		if (c < 0)
+			goto fail;
+		if (c == 0 && rd.string) {
+			errno = EILSEQ;
+			goto fail;
+		}
+
+		if (c == '%') {
+			c = rdline_getc(&rd);
+			if (c == 0)
+				errno = EILSEQ;
+			if (c <= 0)
+				goto fail;
+
+			if (c != '%') {
+				if (!isdigit(c) || (c - '0') >= argc) {
+					errno = EINVAL;
+					goto fail;
 				}
-				c = '\0';
-				break;
-			case 1:
-				break;
-			default:
-				if (errno == EINTR)
-					continue;
-				goto fail;
-			}
-		} else {
-			c = *(argstr++);
-
-			if (c == '\0') {
-				argstr = NULL;
+				if (rd.argstr != NULL) {
+					errno = ELOOP;
+					goto fail;
+				}
+				rd.argstr = argv[c - '0'];
 				continue;
 			}
 		}
 
-		if (c == '\n')
-			c = '\0';
+		if (rdline_append(&rd, c))
+			goto fail;
+	} while (c != '\0');
 
-		switch (state) {
-		case STATE_STRING:
-			if (c == '\\')
-				state = STATE_STRING_ESC;
-			if (c == '"')
-				state = STATE_INITIAL;
-			break;
-		case STATE_STRING_ESC:
-			state = STATE_STRING;
-			break;
-		case STATE_COMMENT:
-			if (c != '\0')
-				continue;
-			break;
-		case STATE_ARG:
-			state = STATE_INITIAL;
-			if (c == '%')
-				break;
-			if (!isdigit(c) || (c - '0') >= argc) {
-				errno = EINVAL;
-				goto fail;
-			}
-			if (argstr != NULL) {
-				errno = ELOOP;
-				goto fail;
-			}
-			argstr = argv[c - '0'];
-			continue;
-		default:
-			if (isspace(c))
-				c = ' ';
-			if (c == ' ' && (i == 0 || buffer[i - 1] == ' '))
-				continue;
-			if (c == '#') {
-				state = STATE_COMMENT;
-				continue;
-			}
-			if (c == '%') {
-				state = STATE_ARG;
-				continue;
-			}
-			if (c == '"')
-				state = STATE_STRING;
-			break;
-		}
-
-		if (c == '\0') {
-			while (i > 0 && buffer[i - 1] == ' ')
-				--i;
-		}
-
-		if (i == bufsiz) {
-			newsz = bufsiz ? bufsiz * 2 : 16;
-			new = realloc(buffer, newsz);
-
-			if (new == NULL)
-				goto fail;
-
-			buffer = new;
-			bufsiz = newsz;
-		}
-
-		buffer[i++] = c;
-		if (c == '\0')
-			break;
-	}
-
-	if (state == STATE_STRING || state == STATE_STRING_ESC) {
-		errno = EILSEQ;
-		goto fail;
-	}
-	return buffer;
+	return rd.buffer;
 fail:
 	ret = errno;
-	free(buffer);
+	free(rd.buffer);
 	errno = ret;
 	return NULL;
 }
