@@ -29,6 +29,9 @@ static void print_services(service_t *svc)
 		printf("\tType: %s\n", svc_type_to_string(svc->type));
 		printf("\tTarget: %s\n", svc_target_to_string(svc->target));
 
+		if (svc->type == SVC_RESPAWN && svc->rspwn_limit > 0)
+			printf("\tRespawn limit: %d\n", svc->rspwn_limit);
+
 		if (svc->num_before) {
 			fputs("\tMust be run before:\n", stdout);
 
