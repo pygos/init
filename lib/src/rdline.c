@@ -120,8 +120,7 @@ static int rdline_append(rdline_t *t, int c)
 char *rdline(int fd, int argc, const char *const *argv)
 {
 	rdline_t rd;
-	int ret;
-	char c;
+	int c, ret;
 
 	memset(&rd, 0, sizeof(rd));
 	rd.fd = fd;
