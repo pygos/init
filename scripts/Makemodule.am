@@ -1,2 +1,2 @@
 scriptdir = @SCRIPTDIR@
-script_SCRIPTS = scripts/devfs.sh scripts/trymount.sh
+script_SCRIPTS = scripts/devfs.sh scripts/trymount.sh scripts/overlay.sh

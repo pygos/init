@@ -1,0 +1,5 @@
+description "mount /root"
+type wait
+target boot
+before vfs
+exec "@SCRIPTDIR@/overlay.sh" root /root
