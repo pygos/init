@@ -62,18 +62,6 @@ int runlst_wait(exec_t *list, const char *ctty);
 */
 pid_t runlst(exec_t *list, const char *ctty);
 
-/********** setup_tty.c **********/
-
-/*
-	Initial tty setup for init. Makes /dev/console our controlling tty and
-	reroutes all output there. Closes stdin because we presumably won't
-	need it anymore.
-
-	Returns 0 on success, -1 on failure. The function takes care of
-	printing error messages on failure.
-*/
-int setup_tty(void);
-
 /********** status.c **********/
 
 /*

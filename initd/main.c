@@ -225,9 +225,6 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	if (setup_tty())
-		return EXIT_FAILURE;
-
 	memset(pfd, 0, sizeof(pfd));
 	pfd[0].fd = sfd;
 	pfd[0].events = POLLIN;
