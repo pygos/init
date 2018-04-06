@@ -13,6 +13,7 @@ helper_PROGRAMS =
 include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am
+include scripts/Makemodule.am
 include services/Makemodule.am
 include servicecmd/Makemodule.am
 
@@ -22,6 +23,12 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/hostname $(DESTDIR)$(SVCDIR)/hostname
 	$(LN_S) $(TEMPLATEDIR)/sysctl $(DESTDIR)$(SVCDIR)/sysctl
 	$(LN_S) $(TEMPLATEDIR)/sysinit $(DESTDIR)$(SVCDIR)/sysinit
+	$(LN_S) $(TEMPLATEDIR)/procfs $(DESTDIR)$(SVCDIR)/procfs
+	$(LN_S) $(TEMPLATEDIR)/sysfs $(DESTDIR)$(SVCDIR)/sysfs
+	$(LN_S) $(TEMPLATEDIR)/devfs $(DESTDIR)$(SVCDIR)/devfs
+	$(LN_S) $(TEMPLATEDIR)/tmpfs $(DESTDIR)$(SVCDIR)/tmpfs
+	$(LN_S) $(TEMPLATEDIR)/tmpfsrun $(DESTDIR)$(SVCDIR)/tmpfsrun
+	$(LN_S) $(TEMPLATEDIR)/vfs $(DESTDIR)$(SVCDIR)/vfs
 	$(LN_S) $(TEMPLATEDIR)/shutdown $(DESTDIR)$(SVCDIR)/shutdown
 	$(LN_S) $(TEMPLATEDIR)/reboot $(DESTDIR)$(SVCDIR)/reboot
 	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@shutdown

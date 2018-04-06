@@ -1,0 +1,11 @@
+description "mount /sys"
+type wait
+target boot
+after procfs
+before vfs
+
+exec "@SBINPATH@/mount" -t sysfs sysfs /sys
+exec "@SCRIPTDIR@/trymount.sh" "/sys/kernel/security" "securityfs" "nodev,noexec,nosuid"
+exec "@SCRIPTDIR@/trymount.sh" "/sys/kernel/config" "configfs" "nodev,noexec,nosuid"
+exec "@SCRIPTDIR@/trymount.sh" "/sys/fs/fuse/connections" "fusectl" "nodev,noexec,nosuid"
+exec "@SCRIPTDIR@/trymount.sh" "/sys/firmware/efi/efivars" "efivarfs" "ro"

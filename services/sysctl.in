@@ -3,4 +3,4 @@ exec "@SBINPATH@/sysctl" --system
 type wait
 target boot
 before sysinit
-after hwclock hostname
+after hwclock hostname vfs

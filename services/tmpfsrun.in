@@ -1,0 +1,8 @@
+description "mount /run"
+type wait
+target boot
+before vfs
+exec "@SBINPATH@/mount" -t tmpfs none /run
+exec "@BINPATH@/mkdir" /run/lock -m 0755
+exec "@BINPATH@/ln" -s /run /var/run
+exec "@BINPATH@/ln" -s /run/lock /var/lock

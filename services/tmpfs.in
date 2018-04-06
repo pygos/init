@@ -1,0 +1,5 @@
+description "mount /tmp"
+type wait
+target boot
+before vfs
+exec "@SBINPATH@/mount" -t tmpfs none /tmp

@@ -2,6 +2,8 @@ initdir = @TEMPLATEDIR@
 init_DATA = services/agetty services/hostname services/loopback
 init_DATA += services/sysctl services/hwclock services/sysinit
 init_DATA += services/reboot services/shutdown services/sigkill
-init_DATA += services/sigterm services/sync
+init_DATA += services/sigterm services/sync services/devfs
+init_DATA += services/sysfs services/procfs services/tmpfs
+init_DATA += services/tmpfsrun services/vfs
 
-EXTRA_DIST += services/sysinit
+EXTRA_DIST += services/sysinit services/vfs

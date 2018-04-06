@@ -3,4 +3,4 @@ exec "@BINPATH@/hostname" --file /etc/hostname
 type wait
 target boot
 before sysinit
-after hwclock
+after hwclock vfs

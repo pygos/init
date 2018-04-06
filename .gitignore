@@ -30,3 +30,11 @@ services/reboot
 services/sigkill
 services/sigterm
 services/sync
+services/devfs
+services/procfs
+services/sysfs
+services/tmpfs
+services/tmpfsrun
+
+scripts/devfs.sh
+scripts/trymount.sh
