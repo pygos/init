@@ -30,23 +30,12 @@
 int mksock(void)
 {
 	struct sockaddr_un un;
-	int fd, flags;
+	int fd;
 
-	fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
 	if (fd < 0) {
 		perror("socket");
 		return -1;
-	}
-
-	flags = fcntl(fd, F_GETFD);
-	if (flags == -1) {
-		perror("socket F_GETFD");
-		goto fail;
-	}
-
-	if (fcntl(fd, F_SETFD, flags | O_CLOEXEC)) {
-		perror("socket F_SETFD");
-		goto fail;
 	}
 
 	memset(&un, 0, sizeof(un));

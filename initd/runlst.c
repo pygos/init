@@ -16,25 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <sys/wait.h>
-#include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <errno.h>
-#include <ctype.h>
 #include <fcntl.h>
 
 #include "init.h"
 
 extern char **environ;
-
-static NORETURN void split_and_exec(exec_t *cmd)
-{
-	execve(cmd->argv[0], cmd->argv, environ);
-	perror(cmd->argv[0]);
-	exit(EXIT_FAILURE);
-}
 
 static int child_setup(const char *ctty)
 {
@@ -77,7 +66,9 @@ int runlst_wait(exec_t *list, const char *ctty)
 		if (pid == 0) {
 			if (child_setup(ctty))
 				exit(EXIT_FAILURE);
-			split_and_exec(list);
+			execve(list->argv[0], list->argv, environ);
+			perror(list->argv[0]);
+			exit(EXIT_FAILURE);
 		}
 
 		if (pid == -1) {
@@ -101,21 +92,18 @@ int runlst_wait(exec_t *list, const char *ctty)
 
 pid_t runlst(exec_t *list, const char *ctty)
 {
-	int status;
-	pid_t pid;
-
-	pid = fork();
+	pid_t pid = fork();
 
 	if (pid == 0) {
 		if (child_setup(ctty))
 			exit(EXIT_FAILURE);
 
-		if (list->next != NULL) {
-			status = runlst_wait(list, NULL);
-			exit(status);
-		} else {
-			split_and_exec(list);
-		}
+		if (list->next != NULL)
+			exit(runlst_wait(list, NULL));
+
+		execve(list->argv[0], list->argv, environ);
+		perror(list->argv[0]);
+		exit(EXIT_FAILURE);
 	}
 
 	if (pid == -1)

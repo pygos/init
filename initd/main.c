@@ -38,17 +38,14 @@ static void handle_exited(service_t *svc)
 {
 	switch (svc->type) {
 	case SVC_RESPAWN:
-		if (target == TGT_REBOOT || target == TGT_SHUTDOWN) {
-			delsvc(svc);
+		if (target == TGT_REBOOT || target == TGT_SHUTDOWN)
 			break;
-		}
 
 		if (svc->rspwn_limit > 0) {
 			svc->rspwn_limit -= 1;
 
 			if (svc->rspwn_limit == 0) {
 				print_status(svc->desc, STATUS_FAIL, false);
-				delsvc(svc);
 				break;
 			}
 		}
@@ -56,20 +53,18 @@ static void handle_exited(service_t *svc)
 		svc->pid = runlst(svc->exec, svc->ctty);
 		if (svc->pid == -1) {
 			print_status(svc->desc, STATUS_FAIL, false);
-			delsvc(svc);
+			break;
 		}
 
 		svclist_add(svc);
-		break;
+		return;
 	case SVC_ONCE:
 		print_status(svc->desc,
 			     svc->status == EXIT_SUCCESS ?
 			     STATUS_OK : STATUS_FAIL, false);
-		/* fall-through */
-	default:
-		delsvc(svc);
 		break;
 	}
+	delsvc(svc);
 }
 
 static void handle_signal(int sigfd)
@@ -86,11 +81,7 @@ static void handle_signal(int sigfd)
 
 	switch (info.ssi_signo) {
 	case SIGCHLD:
-		for (;;) {
-			pid = waitpid(-1, &status, WNOHANG);
-			if (pid <= 0)
-				break;
-
+		while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
 			status = WIFEXITED(status) ? WEXITSTATUS(status) :
 						     EXIT_FAILURE;
 
@@ -132,15 +123,15 @@ static void start_runlevel(int level)
 				     true);
 			delsvc(svc);
 		} else {
-			if (svc->type == SVC_RESPAWN)
-				print_status(svc->desc, STATUS_STARTED, false);
-
 			svc->pid = runlst(svc->exec, svc->ctty);
 			if (svc->pid == -1) {
 				print_status(svc->desc, STATUS_FAIL, false);
 				delsvc(svc);
 				continue;
 			}
+
+			if (svc->type == SVC_RESPAWN)
+				print_status(svc->desc, STATUS_STARTED, false);
 
 			svclist_add(svc);
 		}
