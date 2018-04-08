@@ -273,8 +273,6 @@ static int splitkv(const char *filename, size_t lineno,
 {
 	char *key = line, *value = line;
 
-	*k = *v = NULL;
-
 	while (*value != ' ' && *value != '\0') {
 		if (!isalpha(*value)) {
 			fprintf(stderr,
@@ -292,12 +290,6 @@ static int splitkv(const char *filename, size_t lineno,
 	}
 
 	*(value++) = '\0';
-
-	value = strdup(value);
-	if (value == NULL) {
-		fprintf(stderr, "%s: %zu: out of memory\n", filename, lineno);
-		return -1;
-	}
 
 	*k = key;
 	*v = value;
@@ -322,7 +314,7 @@ static const struct svc_param *find_param(const char *filename, size_t lineno,
 
 service_t *rdsvc(int dirfd, const char *filename)
 {
-	char *line = NULL, *key, *value = NULL;
+	char *line = NULL, *key, *value;
 	const struct svc_param *p;
 	const char *arg, *args[1];
 	service_t *svc = NULL;
@@ -368,10 +360,12 @@ service_t *rdsvc(int dirfd, const char *filename)
 			goto fail;
 
 		p = find_param(filename, lineno, key);
-		if (p == NULL || p->handle(svc, value, filename, lineno) != 0)
+		if (p == NULL)
 			goto fail;
 
-		free(line);
+		memmove(line, value, strlen(value) + 1);
+		if (p->handle(svc, line, filename, lineno))
+			goto fail;
 	}
 
 	close(fd);
@@ -379,7 +373,6 @@ service_t *rdsvc(int dirfd, const char *filename)
 fail_oom:
 	fputs("out of memory\n", stderr);
 fail:
-	free(value);
 	free(line);
 	delsvc(svc);
 	close(fd);
