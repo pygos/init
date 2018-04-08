@@ -1,8 +1,8 @@
 HEADRS = lib/include/util.h lib/include/service.h lib/include/telinit.h
 
 libinit_a_SOURCES = lib/src/delsvc.c lib/src/rdline.c lib/src/svcmap.c
-libinit_a_SOURCES += lib/src/splitkv.c lib/src/enum_by_name.c
-libinit_a_SOURCES += lib/src/rdsvc.c lib/src/svcscan.c
+libinit_a_SOURCES += lib/src/unescape.c lib/src/enum_by_name.c
+libinit_a_SOURCES += lib/src/rdsvc.c lib/src/svcscan.c lib/src/split_argv.c
 libinit_a_SOURCES += lib/src/del_svc_list.c lib/src/svc_tsort.c
 libinit_a_SOURCES += lib/src/opensock.c lib/src/enum_to_name.c $(HEADRS)
 libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
