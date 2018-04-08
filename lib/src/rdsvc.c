@@ -220,7 +220,7 @@ static int svc_target(service_t *svc, char *arg,
 	return 0;
 }
 
-static const struct {
+static const struct svc_param {
 	const char *key;
 
 	int (*handle)(service_t *svc, char *arg,
@@ -236,12 +236,97 @@ static const struct {
 };
 
 
+static char *get_line(int fd, const char *filename, size_t *lineno,
+		      int argc, const char *const *args)
+{
+	const char *error;
+	char *line;
+	int ret;
+retry:
+	errno = 0;
+	line = rdline(fd, argc, args);
+	ret = errno;
+
+	if (line == NULL && errno != 0) {
+		switch (errno) {
+		case EINVAL: error = "error in argument expansion";  break;
+		case ELOOP:  error = "recursive argument expansion"; break;
+		case EILSEQ: error = "missing \"";                   break;
+		default:     error = strerror(errno);                break;
+		}
+
+		fprintf(stderr, "%s: %zu: %s\n", filename, *lineno, error);
+	}
+
+	if (line != NULL && strlen(line) == 0) {
+		free(line);
+		(*lineno) += 1;
+		goto retry;
+	}
+
+	errno = ret;
+	return line;
+}
+
+static int splitkv(const char *filename, size_t lineno,
+		   char *line, char **k, char **v)
+{
+	char *key = line, *value = line;
+
+	*k = *v = NULL;
+
+	while (*value != ' ' && *value != '\0') {
+		if (!isalpha(*value)) {
+			fprintf(stderr,
+				"%s: %zu: unexpected '%c' in keyword\n",
+				filename, lineno, *value);
+			return -1;
+		}
+		++value;
+	}
+
+	if (*value != ' ') {
+		fprintf(stderr, "%s: %zu: expected argument after '%s'\n",
+			filename, lineno, key);
+		return -1;
+	}
+
+	*(value++) = '\0';
+
+	value = strdup(value);
+	if (value == NULL) {
+		fprintf(stderr, "%s: %zu: out of memory\n", filename, lineno);
+		return -1;
+	}
+
+	*k = key;
+	*v = value;
+	return 0;
+}
+
+static const struct svc_param *find_param(const char *filename, size_t lineno,
+					  const char *name)
+{
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(svc_params); ++i) {
+		if (!strcmp(svc_params[i].key, name))
+			return svc_params + i;
+	}
+
+	fprintf(stderr, "%s: %zu: unknown keyword '%s'\n",
+		filename, lineno, name);
+	return NULL;
+}
+
+
 service_t *rdsvc(int dirfd, const char *filename)
 {
-	const char *arg, *args[1], *error;
-	char *line, *key, *value;
-	size_t i, argc, lineno;
-	service_t *svc;
+	char *line = NULL, *key, *value = NULL;
+	const struct svc_param *p;
+	const char *arg, *args[1];
+	service_t *svc = NULL;
+	size_t argc, lineno;
 	int fd;
 
 	fd = openat(dirfd, filename, O_RDONLY);
@@ -259,11 +344,8 @@ service_t *rdsvc(int dirfd, const char *filename)
 	}
 
 	svc = calloc(1, sizeof(*svc));
-	if (svc == NULL) {
-		fputs("out of memory\n", stderr);
-		close(fd);
-		return NULL;
-	}
+	if (svc == NULL)
+		goto fail_oom;
 
 	if (arg != NULL) {
 		svc->name = strndup(filename, arg - filename);
@@ -271,101 +353,35 @@ service_t *rdsvc(int dirfd, const char *filename)
 		svc->name = strdup(filename);
 	}
 
-	if (svc->name == NULL) {
-		free(svc);
-		fputs("out of memory\n", stderr);
-		close(fd);
-		return NULL;
-	}
+	if (svc->name == NULL)
+		goto fail_oom;
 
 	for (lineno = 1; ; ++lineno) {
-		errno = 0;
-		line = rdline(fd, argc, args);
-
+		line = get_line(fd, filename, &lineno, argc, args);
 		if (line == NULL) {
 			if (errno == 0)
 				break;
-
-			switch (errno) {
-			case EINVAL:
-				error = "error in argument expansion";
-				break;
-			case ELOOP:
-				error = "recursive argument expansion";
-				break;
-			case EILSEQ:
-				error = "missing \"";
-				break;
-			default:
-				error = strerror(errno);
-				break;
-			}
-
-			fprintf(stderr, "%s: %zu: %s\n",
-				filename, lineno, error);
 			goto fail;
 		}
 
-		if (!strlen(line)) {
-			free(line);
-			continue;
-		}
+		if (splitkv(filename, lineno, line, &key, &value))
+			goto fail;
 
-		key = value = line;
-
-		while (*value != ' ' && *value != '\0') {
-			if (!isalpha(*value)) {
-				fprintf(stderr, "%s: %zu: unexpected '%c' in "
-					"keyword\n", filename, lineno, *value);
-				goto fail_line;
-			}
-			++value;
-		}
-
-		if (*value == ' ') {
-			*(value++) = '\0';
-		} else {
-			value = NULL;
-		}
-
-		for (i = 0; i < ARRAY_SIZE(svc_params); ++i) {
-			if (!strcmp(svc_params[i].key, key))
-				break;
-		}
-
-		if (i >= ARRAY_SIZE(svc_params)) {
-			fprintf(stderr, "%s: %zu: unknown keyword '%s'\n",
-				filename, lineno, key);
-			goto fail_line;
-		}
-
-		if (value == NULL) {
-			fprintf(stderr,
-				"%s: %zu: expected argument after '%s'\n",
-				filename, lineno, key);
-			goto fail_line;
-		}
-
-		value = strdup(value);
-		if (value == NULL) {
-			fputs("out of memory", stderr);
-			goto fail_line;
-		}
-
-		if (svc_params[i].handle(svc, value, filename, lineno)) {
-			free(value);
-			goto fail_line;
-		}
+		p = find_param(filename, lineno, key);
+		if (p == NULL || p->handle(svc, value, filename, lineno) != 0)
+			goto fail;
 
 		free(line);
 	}
 
 	close(fd);
 	return svc;
-fail_line:
-	free(line);
+fail_oom:
+	fputs("out of memory\n", stderr);
 fail:
-	close(fd);
+	free(value);
+	free(line);
 	delsvc(svc);
+	close(fd);
 	return NULL;
 }

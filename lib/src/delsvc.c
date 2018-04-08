@@ -23,6 +23,9 @@ void delsvc(service_t *svc)
 {
 	exec_t *e;
 
+	if (svc == NULL)
+		return;
+
 	while (svc->exec != NULL) {
 		e = svc->exec;
 		svc->exec = e->next;
