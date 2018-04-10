@@ -20,21 +20,9 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "util.h"
-
-typedef struct {
-	int fd;			/* input file descriptor */
-	const char *argstr;	/* if not NULL, read from this instead */
-
-	size_t i;		/* buffer offset */
-	size_t bufsiz;		/* buffer size */
-	char *buffer;
-
-	bool string;		/* inside a string? */
-	bool escape;		/* reading an escape sequence? */
-	bool comment;		/* inside a comment */
-} rdline_t;
 
 static int rdline_getc(rdline_t *t)
 {
@@ -69,9 +57,6 @@ out:
 
 static int rdline_append(rdline_t *t, int c)
 {
-	size_t newsz;
-	char *new;
-
 	if (t->comment) {
 		if (c != '\0')
 			return 0;
@@ -102,67 +87,88 @@ static int rdline_append(rdline_t *t, int c)
 			t->i -= 1;
 	}
 
-	if (t->i == t->bufsiz) {
-		newsz = t->bufsiz ? t->bufsiz * 2 : 16;
-		new = realloc(t->buffer, newsz);
-
-		if (new == NULL)
-			return -1;
-
-		t->buffer = new;
-		t->bufsiz = newsz;
-	}
+	if (t->i == sizeof(t->buffer))
+		return -1;
 
 	t->buffer[t->i++] = c;
 	return 0;
 }
 
-char *rdline(int fd, int argc, const char *const *argv)
+void rdline_init(rdline_t *t, int fd, const char *filename,
+		 int argc, const char *const *argv)
 {
-	rdline_t rd;
-	int c, ret;
+	memset(t, 0, sizeof(*t));
+	t->fd = fd;
+	t->filename = filename;
+	t->argc = argc;
+	t->argv = argv;
+}
 
-	memset(&rd, 0, sizeof(rd));
-	rd.fd = fd;
+int rdline(rdline_t *t)
+{
+	const char *errstr;
+	int c;
+retry:
+	t->i = 0;
+	t->argstr = NULL;
+	t->string = t->escape = t->comment = false;
+	t->lineno += 1;
 
 	do {
-		c = rdline_getc(&rd);
-		if (c < 0)
+		errno = 0;
+		c = rdline_getc(t);
+		if (c < 0) {
+			if (errno == 0)
+				return 1;
+			errstr = strerror(errno);
 			goto fail;
-		if (c == 0 && rd.string) {
-			errno = EILSEQ;
+		}
+		if (c == 0 && t->string) {
+			errstr = "missing \"";
 			goto fail;
 		}
 
 		if (c == '%') {
-			c = rdline_getc(&rd);
-			if (c == 0)
-				errno = EILSEQ;
-			if (c <= 0)
+			c = rdline_getc(t);
+			if (c == 0) {
+				errstr = "unexpected end of line after '%%'";
 				goto fail;
+			}
+			if (c < 0) {
+				errstr = strerror(errno);
+				goto fail;
+			}
 
 			if (c != '%') {
-				if (!isdigit(c) || (c - '0') >= argc) {
-					errno = EINVAL;
+				if (!isdigit(c)) {
+					errstr = "exptected digit after '%%'";
 					goto fail;
 				}
-				if (rd.argstr != NULL) {
-					errno = ELOOP;
+				if ((c - '0') >= t->argc) {
+					errstr = "argument out of range";
 					goto fail;
 				}
-				rd.argstr = argv[c - '0'];
+				if (t->argstr != NULL) {
+					errstr = "recursive argument "
+						 "expansion";
+					goto fail;
+				}
+				t->argstr = t->argv[c - '0'];
 				continue;
 			}
 		}
 
-		if (rdline_append(&rd, c))
+		if (rdline_append(t, c)) {
+			errstr = "line too long";
 			goto fail;
+		}
 	} while (c != '\0');
 
-	return rd.buffer;
+	if (t->buffer[0] == '\0')
+		goto retry;
+
+	return 0;
 fail:
-	ret = errno;
-	free(rd.buffer);
-	errno = ret;
-	return NULL;
+	fprintf(stderr, "%s: %zu: %s\n", t->filename, t->lineno, errstr);
+	return -1;
 }

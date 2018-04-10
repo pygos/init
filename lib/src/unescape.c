@@ -59,6 +59,7 @@ int unescape(char *src)
 				case 't': c = '\t'; break;
 				case '\\':
 				case '"':
+				case '%':
 					break;
 				case 'x':
 					c = 0;

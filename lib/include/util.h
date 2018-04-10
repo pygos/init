@@ -36,13 +36,40 @@ typedef struct {
 } enum_map_t;
 
 
+typedef struct {
+	int fd;			/* input file descriptor */
+	const char *argstr;	/* if not NULL, read from this instead */
+
+	const char *filename;	/* input file name */
+	size_t lineno;		/* current line number */
+
+	size_t i;		/* buffer offset */
+	char buffer[256];	/* current line, null-terminated */
+
+	int argc;
+	const char *const *argv;
+
+	bool string;		/* inside a string? */
+	bool escape;		/* reading an escape sequence? */
+	bool comment;		/* inside a comment */
+} rdline_t;
+
+
 /*
-	Read from fd until end-of-file or a line feed is encountered.
+	Initialize the config line scanner.
 
-	Returns NULL with errno set on failure. Returns NULL with errno
-	cleared if end-of-file is reached.
+	The scanner reads from the provided fd. The filename is used for
+	error reporting. An argument count and vector can be set for argument
+	substitution in rdline.
+*/
+void rdline_init(rdline_t *t, int fd, const char *filename,
+		 int argc, const char *const *argv);
 
-	The line must be deallocated with free().
+/*
+	Read from file until end-of-file or a line feed is encountered.
+
+	Returns -1 on failure, +1 if end of file was reached,
+	0 if data was read successfully.
 
 	The following transformations are applied:
 	 - Space characters are replaced with regular white space characters.
@@ -53,19 +80,18 @@ typedef struct {
 	 - If a '"' is encounterd, the above rules are disabled, until a
 	   after the matching '"' is read. A '"' can be escaped by preceeding
 	   it with a backslash.
-	 - If a second, coresponding '"' is not found, processing fails with
-	   errno set to EILSEQ.
+	 - If a second, coresponding '"' is not found, processing fails.
 	 - If a '%' character is encountered, the next character is expected
 	   to be a single digit index into argv. If it is not a digit or
-	   outside the bounds set by argc, processing fails and sets errno
-	   to EINVAL. On success, the argv value is inserted and processed
-	   as described above.
+	   outside the bounds set by argc, processing fails. On success,
+	   the argv value is inserted and processed as described above.
 	 - A '%' character can be escaped by writing '%%' or, if inside
 	   a double quite string, by writing \%.
 	 - An attempt to use such an indexed argument inside an argument
-	   expansion, results in failure with errno set to ELOOP.
+	   expansion, results in failure.
+	 - If the resulting line is empty, processing is restarted.
 */
-char *rdline(int fd, int argc, const char *const *argv);
+int rdline(rdline_t *t);
 
 /*
 	Remove double quotes ('"') from a string and substitute escape
