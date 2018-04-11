@@ -3,5 +3,7 @@ type wait
 target boot
 before vfs
 
-exec "@SBINPATH@/mount" -t proc proc /proc
-exec "@SCRIPTDIR@/trymount.sh" "/proc/sys/fs/binfmt_misc" "binfmt_misc" "nodev,noexec,nosuid"
+exec {
+	"@SBINPATH@/mount" -t proc proc /proc
+	"@SCRIPTDIR@/trymount.sh" /proc/sys/fs/binfmt_misc binfmt_misc nodev,noexec,nosuid
+}

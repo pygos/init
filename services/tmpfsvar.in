@@ -2,9 +2,11 @@ description "mount /var"
 type wait
 target boot
 before vfs
-exec "@SBINPATH@/mount" -t tmpfs none /var
-exec "@BINPATH@/mkdir" /var/log -m 0755
-exec "@BINPATH@/mkdir" /var/spool -m 0755
-exec "@BINPATH@/mkdir" /var/lib -m 0755
-exec "@BINPATH@/mkdir" /var/tmp -m 0755
-exec "@SCRIPTDIR@/overlay.sh" var_lib /var/lib
+exec {
+	"@SBINPATH@/mount" -t tmpfs none /var
+	"@BINPATH@/mkdir" /var/log -m 0755
+	"@BINPATH@/mkdir" /var/spool -m 0755
+	"@BINPATH@/mkdir" /var/lib -m 0755
+	"@BINPATH@/mkdir" /var/tmp -m 0755
+	"@SCRIPTDIR@/overlay.sh" var_lib /var/lib
+}

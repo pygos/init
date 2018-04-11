@@ -3,7 +3,9 @@ type wait
 target boot
 before vfs
 after tmpfsvar
-exec "@SBINPATH@/mount" -t tmpfs none /run
-exec "@BINPATH@/mkdir" /run/lock -m 0755
-exec "@BINPATH@/ln" -s /run /var/run
-exec "@BINPATH@/ln" -s /run/lock /var/lock
+exec {
+	"@SBINPATH@/mount" -t tmpfs none /run
+	"@BINPATH@/mkdir" /run/lock -m 0755
+	"@BINPATH@/ln" -s /run /var/run
+	"@BINPATH@/ln" -s /run/lock /var/lock
+}

@@ -202,15 +202,17 @@ static int svc_target(service_t *svc, char *arg, rdline_t *rd)
 static const struct svc_param {
 	const char *key;
 
+	unsigned int allow_block : 1;
+
 	int (*handle)(service_t *svc, char *arg, rdline_t *rd);
 } svc_params[] = {
-	{ "description", svc_desc },
-	{ "exec", svc_exec },
-	{ "type", svc_type },
-	{ "target", svc_target },
-	{ "tty", svc_tty },
-	{ "before", svc_before },
-	{ "after", svc_after },
+	{ "description", 0, svc_desc },
+	{ "exec", 1, svc_exec },
+	{ "type", 0, svc_type },
+	{ "target", 0, svc_target },
+	{ "tty", 0, svc_tty },
+	{ "before", 0, svc_before },
+	{ "after", 0, svc_after },
 };
 
 static int splitkv(rdline_t *rd, char **k, char **v)
@@ -297,8 +299,27 @@ service_t *rdsvc(int dirfd, const char *filename)
 		if (p == NULL)
 			goto fail;
 
-		if (p->handle(svc, value, &rd))
+		if (p->allow_block && *value == '{') {
+			for (++value; *value == ' '; ++value)
+				;
+			if (*value != '\0' && p->handle(svc, value, &rd))
+				goto fail;
+
+			while ((ret = rdline(&rd)) == 0) {
+				if (strcmp(rd.buffer, "}") == 0)
+					break;
+
+				if (p->handle(svc, rd.buffer, &rd))
+					goto fail;
+			}
+
+			if (ret < 0)
+				goto fail;
+			if (ret > 0)
+				goto fail_bra;
+		} else if (p->handle(svc, value, &rd)) {
 			goto fail;
+		}
 	}
 
 	if (ret < 0)
@@ -306,6 +327,9 @@ service_t *rdsvc(int dirfd, const char *filename)
 
 	close(fd);
 	return svc;
+fail_bra:
+	fprintf(stderr, "%s: missing '}' before end-of-file\n", filename);
+	goto fail;
 fail_oom:
 	fputs("out of memory\n", stderr);
 fail:
