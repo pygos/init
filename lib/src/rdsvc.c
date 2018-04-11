@@ -89,22 +89,17 @@ static int svc_exec(service_t *svc, char *arg, rdline_t *rd)
 {
 	exec_t *e, *end;
 
-	e = calloc(1, sizeof(*e));
+	e = calloc(1, sizeof(*e) + strlen(arg) + 1);
 	if (e == NULL) {
 		fprintf(stderr, "%s: %zu: out of memory\n",
 			rd->filename, rd->lineno);
 		return -1;
 	}
 
-	e->raw_argv = try_strdup(arg, rd);
-	if (e->raw_argv == NULL) {
-		free(e);
-		return -1;
-	}
+	strcpy(e->buffer, arg);
 
-	e->argv = try_split_argv(e->raw_argv, rd);
+	e->argv = try_split_argv(e->buffer, rd);
 	if (e->argv == NULL) {
-		free(e->raw_argv);
 		free(e);
 		return -1;
 	}
@@ -159,59 +154,59 @@ static int svc_after(service_t *svc, char *arg, rdline_t *rd)
 
 static int svc_type(service_t *svc, char *arg, rdline_t *rd)
 {
-	char **args;
-	int i, type;
+	char *ptr;
 
-	args = try_split_argv(arg, rd);
+	for (ptr = arg; *ptr != ' ' && *ptr != '\0'; ++ptr)
+		;
+	if (*ptr == ' ')
+		*(ptr++) = '\0';
 
-	if (args == NULL)
-		return -1;
+	svc->type = svc_type_from_string(arg);
 
-	type = svc_type_from_string(args[0]);
-
-	if (type == -1) {
+	if (svc->type == -1) {
 		fprintf(stderr, "%s: %zu: unknown service type '%s'\n",
-			rd->filename, rd->lineno, args[0]);
-		free(args);
+			rd->filename, rd->lineno, arg);
 		return -1;
 	}
 
-	if (args[1] != NULL) {
-		switch (type) {
+	if (*ptr != '\0') {
+		switch (svc->type) {
 		case SVC_RESPAWN:
-			if (strcmp(args[1], "limit") != 0)
+			for (arg = ptr; *ptr != ' ' && *ptr != '\0'; ++ptr)
+				;
+			if (*ptr == ' ')
+				*(ptr++) = '\0';
+
+			if (strcmp(arg, "limit") != 0)
 				goto fail_limit;
 
 			svc->rspwn_limit = 0;
 
-			if (!isdigit(args[2][0]))
+			if (!isdigit(*ptr))
 				goto fail_limit;
 
-			for (i = 0; isdigit(args[2][i]); ++i) {
+			while (isdigit(*ptr)) {
 				svc->rspwn_limit *= 10;
-				svc->rspwn_limit += args[2][i] - '0';
+				svc->rspwn_limit += *(ptr++) - '0';
 			}
 
-			if (args[2][i] != '\0')
-				goto fail_limit;
-			if (args[3] == NULL)
+			if (*ptr == '\0')
 				break;
+			if (*ptr != ' ')
+				goto fail_limit;
 			/* fall-through */
 		default:
-			fprintf(stderr, "%s: %zu: unexpected extra arguments "
-				"for type '%s'\n",
-				rd->filename, rd->lineno, arg);
+			fprintf(stderr,
+				"%s: %zu: unexpected extra arguments\n",
+				rd->filename, rd->lineno);
 			return -1;
 		}
 	}
 
-	svc->type = type;
-	free(args);
 	return 0;
 fail_limit:
 	fprintf(stderr, "%s: %zu: expected 'limit <value>' after 'respawn'\n",
 		rd->filename, rd->lineno);
-	free(args);
 	return -1;
 }
 
@@ -296,7 +291,7 @@ service_t *rdsvc(int dirfd, const char *filename)
 	const char *arg, *args[1];
 	service_t *svc = NULL;
 	char *key, *value;
-	size_t argc;
+	size_t argc, nlen;
 	rdline_t rd;
 	int fd, ret;
 
@@ -316,18 +311,13 @@ service_t *rdsvc(int dirfd, const char *filename)
 
 	rdline_init(&rd, fd, filename, argc, args);
 
-	svc = calloc(1, sizeof(*svc));
+	nlen = (arg != NULL) ? (size_t)(arg - filename) : strlen(filename);
+
+	svc = calloc(1, sizeof(*svc) + nlen + 1);
 	if (svc == NULL)
 		goto fail_oom;
 
-	if (arg != NULL) {
-		svc->name = strndup(filename, arg - filename);
-	} else {
-		svc->name = strdup(filename);
-	}
-
-	if (svc->name == NULL)
-		goto fail_oom;
+	memcpy(svc->name, filename, nlen);
 
 	while ((ret = rdline(&rd)) == 0) {
 		if (splitkv(&rd, &key, &value))

@@ -45,16 +45,16 @@ enum {
 };
 
 typedef struct exec_t {
-	char **argv;		/* NULL terminated argument vector */
-	char *raw_argv;		/* backing store for argv contents */
-
 	struct exec_t *next;
+	char **argv;		/* NULL terminated argument vector */
+	char buffer[];		/* backing store for argv */
 } exec_t;
 
 typedef struct service_t {
+	struct service_t *next;
+
 	int type;		/* SVC_* service type */
 	int target;		/* TGT_* service target */
-	char *name;		/* canonical service name */
 	char *desc;		/* description string */
 	char *ctty;		/* controlling tty or log file */
 	int rspwn_limit;	/* maximum respawn count */
@@ -74,7 +74,7 @@ typedef struct service_t {
 	pid_t pid;
 	int status;		/* process exit status */
 
-	struct service_t *next;
+	char name[];		/* canonical service name */
 } service_t;
 
 typedef struct {

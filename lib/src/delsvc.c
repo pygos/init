@@ -31,7 +31,6 @@ void delsvc(service_t *svc)
 		svc->exec = e->next;
 
 		free(e->argv);
-		free(e->raw_argv);
 		free(e);
 	}
 
@@ -40,7 +39,6 @@ void delsvc(service_t *svc)
 
 	free(svc->before);
 	free(svc->after);
-	free(svc->name);
 	free(svc->desc);
 	free(svc->exec);
 	free(svc->ctty);
