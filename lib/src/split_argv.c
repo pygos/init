@@ -80,25 +80,3 @@ fail_str:
 	errno = EINVAL;
 	return -1;
 }
-
-char **split_argv(char *str)
-{
-	char **argv = NULL;
-	int i, count;
-
-	count = pack_argv(str);
-	if (count <= 0)
-		return NULL;
-
-	argv = malloc(sizeof(argv[0]) * (count + 1));
-	if (argv == NULL)
-		return NULL;
-
-	for (i = 0; i < count; ++i) {
-		argv[i] = str;
-		str += strlen(str) + 1;
-	}
-
-	argv[i] = NULL;
-	return argv;
-}

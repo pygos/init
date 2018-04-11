@@ -113,18 +113,6 @@ int unescape(char *src);
 int pack_argv(char *str);
 
 /*
-	Split a space seperated string into a sequence of null-terminated
-	strings. Return a NULL terminated array of strings pointing to the
-	start of each sub string.
-
-	It basically runs pack_argv on 'str' and then constructs the argv
-	vector from that, with each entry pointing into 'str'.
-
-	The returned array must be freed with free().
-*/
-char **split_argv(char *str);
-
-/*
 	Search through an array of enum_map_t entries to resolve a string to
 	a numeric value. The end of the map is indicated by a sentinel entry
 	with the name set to NULL.

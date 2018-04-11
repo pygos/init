@@ -38,26 +38,6 @@ static int try_unescape(char *arg, rdline_t *rd)
 	return 0;
 }
 
-static char **try_split_argv(char *str, rdline_t *rd)
-{
-	char **argv = split_argv(str);
-
-	if (argv == NULL) {
-		switch (errno) {
-		case EINVAL:
-			fprintf(stderr, "%s: %zu: malformed string constant\n",
-				rd->filename, rd->lineno);
-			break;
-		default:
-			fprintf(stderr, "%s: %zu: %s\n",
-				rd->filename, rd->lineno, strerror(errno));
-			break;
-		}
-	}
-
-	return argv;
-}
-
 static char *try_strdup(const char *str, rdline_t *rd)
 {
 	char *out = strdup(str);
@@ -96,11 +76,12 @@ static int svc_exec(service_t *svc, char *arg, rdline_t *rd)
 		return -1;
 	}
 
-	strcpy(e->buffer, arg);
+	strcpy(e->args, arg);
 
-	e->argv = try_split_argv(e->buffer, rd);
-	if (e->argv == NULL) {
-		free(e);
+	e->argc = pack_argv(e->args);
+	if (e->argc < 0) {
+		fprintf(stderr, "%s: %zu: malformed string constant\n",
+				rd->filename, rd->lineno);
 		return -1;
 	}
 

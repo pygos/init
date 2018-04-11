@@ -46,8 +46,8 @@ enum {
 
 typedef struct exec_t {
 	struct exec_t *next;
-	char **argv;		/* NULL terminated argument vector */
-	char buffer[];		/* backing store for argv */
+	int argc;		/* number of elements in argument vector */
+	char args[];		/* argument vectot string blob */
 } exec_t;
 
 typedef struct service_t {

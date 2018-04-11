@@ -30,7 +30,6 @@ void delsvc(service_t *svc)
 		e = svc->exec;
 		svc->exec = e->next;
 
-		free(e->argv);
 		free(e);
 	}
 

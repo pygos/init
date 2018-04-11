@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 
@@ -55,6 +56,20 @@ static int child_setup(const char *ctty)
 	return 0;
 }
 
+static NORETURN void argv_exec(exec_t *e)
+{
+	char **argv = alloca(e->argc + 1), *ptr;
+	int i;
+
+	for (ptr = e->args, i = 0; i < e->argc; ++i, ptr += strlen(ptr) + 1)
+		argv[i] = ptr;
+
+	argv[i] = NULL;
+	execve(argv[0], argv, environ);
+	perror(argv[0]);
+	exit(EXIT_FAILURE);
+}
+
 int runlst_wait(exec_t *list, const char *ctty)
 {
 	pid_t ret, pid;
@@ -66,9 +81,7 @@ int runlst_wait(exec_t *list, const char *ctty)
 		if (pid == 0) {
 			if (child_setup(ctty))
 				exit(EXIT_FAILURE);
-			execve(list->argv[0], list->argv, environ);
-			perror(list->argv[0]);
-			exit(EXIT_FAILURE);
+			argv_exec(list);
 		}
 
 		if (pid == -1) {
@@ -101,9 +114,7 @@ pid_t runlst(exec_t *list, const char *ctty)
 		if (list->next != NULL)
 			exit(runlst_wait(list, NULL));
 
-		execve(list->argv[0], list->argv, environ);
-		perror(list->argv[0]);
-		exit(EXIT_FAILURE);
+		argv_exec(list);
 	}
 
 	if (pid == -1)
