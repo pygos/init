@@ -100,13 +100,25 @@ int rdline(rdline_t *t);
 int unescape(char *src);
 
 /*
+	Replace spaces in 'str' with null bytes. Tread strings (started and
+	terminated with double-quotes which can be escaped) as a single block.
+	Such strings are run through unescap(). All elements are tightly
+	packed together and the function returns the number of consecutive
+	argument strings that are now inside 'str'.
+
+	Returns a negative value if unescape() fails, a string is not
+	termianted or two such strings touch each other without a white
+	space in between.
+*/
+int pack_argv(char *str);
+
+/*
 	Split a space seperated string into a sequence of null-terminated
 	strings. Return a NULL terminated array of strings pointing to the
 	start of each sub string.
 
-	If a double quote is encountered, the entire string up to to the next,
-	unescaped double quite is interpreted as a single sub string and
-	fed through the unescape function.
+	It basically runs pack_argv on 'str' and then constructs the argv
+	vector from that, with each entry pointing into 'str'.
 
 	The returned array must be freed with free().
 */

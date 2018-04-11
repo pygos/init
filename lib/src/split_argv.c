@@ -16,78 +16,89 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "util.h"
 
-char **split_argv(char *str)
+int pack_argv(char *str)
 {
-	size_t i = 0, cap = 0, new_cap;
-	char **argv = NULL, **new;
-	char *ptr;
+	char *dst, *start;
+	int count = 0;
 
-	ptr = str;
+	dst = str;
 
 	for (;;) {
-		if (*ptr == ' ') {
-			++ptr;
-			continue;
-		}
+		while (*str == ' ')
+			++str;
 
-		if (i == cap) {
-			new_cap = cap ? cap * 2 : 16;
-			new = realloc(argv, sizeof(argv[0]) * new_cap);
-
-			if (new == NULL) {
-				free(argv);
-				errno = ENOMEM;
-				return NULL;
-			}
-
-			cap = new_cap;
-			argv = new;
-		}
-
-		if (*ptr == '\0') {
-			argv[i++] = NULL;
+		if (*str == '\0')
 			break;
-		}
 
-		argv[i++] = ptr;
+		if (*str == '"') {
+			start = dst;
+			*(dst++) = *(str++);
 
-		if (*ptr == '"') {
-			++ptr;
-			while (*ptr != '\0' && *ptr != '"') {
-				if (ptr[0] == '\\' && ptr[1] != '\0')
-					++ptr;
-
-				++ptr;
+			while (*str != '"') {
+				if (*str == '\0')
+					goto fail_str;
+				if (str[0] == '\\' && str[1] != '\0')
+					*(dst++) = *(str++);
+				*(dst++) = *(str++);
 			}
 
-			if (*ptr == '"')
-				++ptr;
+			*(dst++) = *(str++);
 
-			if (*ptr == ' ') {
-				*(ptr++) = '\0';
-			} else if (*ptr != '\0') {
+			if (*str != ' ' && *str != '\0')
 				goto fail_str;
-			}
+			if (*str == ' ')
+				++str;
 
-			if (unescape(argv[i - 1]))
+			*(dst++) = '\0';
+
+			if (unescape(start))
 				goto fail_str;
+
+			dst = start + strlen(start) + 1;
 		} else {
-			while (*ptr != '\0' && *ptr != ' ')
-				++ptr;
-
-			if (*ptr == ' ')
-				*(ptr++) = '\0';
+			while (*str != '\0' && *str != ' ')
+				*(dst++) = *(str++);
+			if (*str == ' ') {
+				++str;
+				*(dst++) = '\0';
+			}
 		}
+
+		++count;
 	}
 
-	return argv;
+	*dst = '\0';
+	return count;
 fail_str:
-	free(argv);
 	errno = EINVAL;
-	return NULL;
+	return -1;
+}
+
+char **split_argv(char *str)
+{
+	char **argv = NULL;
+	int i, count;
+
+	count = pack_argv(str);
+	if (count <= 0)
+		return NULL;
+
+	argv = malloc(sizeof(argv[0]) * (count + 1));
+	if (argv == NULL)
+		return NULL;
+
+	for (i = 0; i < count; ++i) {
+		argv[i] = str;
+		str += strlen(str) + 1;
+	}
+
+	argv[i] = NULL;
+	return argv;
 }
