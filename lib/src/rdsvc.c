@@ -49,6 +49,16 @@ static char *try_strdup(const char *str, rdline_t *rd)
 	return out;
 }
 
+static int try_pack_argv(char *str, rdline_t *rd)
+{
+	int count = pack_argv(str);
+	if (count < 0) {
+		fprintf(stderr, "%s: %zu: malformed string constant\n",
+			rd->filename, rd->lineno);
+	}
+	return count;
+}
+
 static int svc_desc(service_t *svc, char *arg, rdline_t *rd)
 {
 	if (try_unescape(arg, rd))
@@ -78,12 +88,9 @@ static int svc_exec(service_t *svc, char *arg, rdline_t *rd)
 
 	strcpy(e->args, arg);
 
-	e->argc = pack_argv(e->args);
-	if (e->argc < 0) {
-		fprintf(stderr, "%s: %zu: malformed string constant\n",
-				rd->filename, rd->lineno);
+	e->argc = try_pack_argv(e->args, rd);
+	if (e->argc < 0)
 		return -1;
-	}
 
 	if (svc->exec == NULL) {
 		svc->exec = e;
@@ -107,14 +114,8 @@ static int svc_before(service_t *svc, char *arg, rdline_t *rd)
 	if (svc->before == NULL)
 		return -1;
 
-	svc->num_before = pack_argv(svc->before);
-	if (svc->num_before < 0) {
-		fprintf(stderr, "%s: %zu: malformed string constant\n",
-				rd->filename, rd->lineno);
-		return -1;
-	}
-
-	return 0;
+	svc->num_before = try_pack_argv(svc->before, rd);
+	return (svc->num_before < 0) ? -1 : 0;
 }
 
 static int svc_after(service_t *svc, char *arg, rdline_t *rd)
@@ -129,24 +130,16 @@ static int svc_after(service_t *svc, char *arg, rdline_t *rd)
 	if (svc->after == NULL)
 		return -1;
 
-	svc->num_after = pack_argv(svc->after);
-	if (svc->num_after < 0) {
-		fprintf(stderr, "%s: %zu: malformed string constant\n",
-				rd->filename, rd->lineno);
-		return -1;
-	}
-
-	return 0;
+	svc->num_after = try_pack_argv(svc->after, rd);
+	return (svc->num_after < 0) ? -1 : 0;
 }
 
 static int svc_type(service_t *svc, char *arg, rdline_t *rd)
 {
-	char *ptr;
+	int count = try_pack_argv(arg, rd);
 
-	for (ptr = arg; *ptr != ' ' && *ptr != '\0'; ++ptr)
-		;
-	if (*ptr == ' ')
-		*(ptr++) = '\0';
+	if (count < 1)
+		return -1;
 
 	svc->type = svc_type_from_string(arg);
 
@@ -156,41 +149,31 @@ static int svc_type(service_t *svc, char *arg, rdline_t *rd)
 		return -1;
 	}
 
-	if (*ptr != '\0') {
+	if (count > 1) {
+		arg += strlen(arg) + 1;
+
 		switch (svc->type) {
 		case SVC_RESPAWN:
-			for (arg = ptr; *ptr != ' ' && *ptr != '\0'; ++ptr)
-				;
-			if (*ptr == ' ')
-				*(ptr++) = '\0';
-
 			if (strcmp(arg, "limit") != 0)
 				goto fail_limit;
+			arg += strlen(arg) + 1;
 
-			svc->rspwn_limit = 0;
-
-			if (!isdigit(*ptr))
+			if (count > 3)
+				goto fail_args;
+			if (!isdigit(*arg))
 				goto fail_limit;
-
-			while (isdigit(*ptr)) {
-				svc->rspwn_limit *= 10;
-				svc->rspwn_limit += *(ptr++) - '0';
-			}
-
-			if (*ptr == '\0')
-				break;
-			if (*ptr != ' ')
-				goto fail_limit;
-			/* fall-through */
+			svc->rspwn_limit = atoi(arg);
+			break;
 		default:
-			fprintf(stderr,
-				"%s: %zu: unexpected extra arguments\n",
-				rd->filename, rd->lineno);
-			return -1;
+			goto fail_args;
 		}
 	}
 
 	return 0;
+fail_args:
+	fprintf(stderr, "%s: %zu: unexpected extra arguments\n",
+		rd->filename, rd->lineno);
+	return -1;
 fail_limit:
 	fprintf(stderr, "%s: %zu: expected 'limit <value>' after 'respawn'\n",
 		rd->filename, rd->lineno);
