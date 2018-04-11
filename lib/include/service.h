@@ -62,14 +62,11 @@ typedef struct service_t {
 	/* linked list of command lines to execute */
 	exec_t *exec;
 
-	/* NULL terminated array of services that must be executed later */
-	char **before;
+	char *before;	/* services that must be executed later */
+	char *after;	/* services that must be executed first */
 
-	/* NULL terminated array of services that must be executed first */
-	char **after;
-
-	char *raw_before;	/* backing store for 'before' contents */
-	char *raw_after;	/* backing store for 'after' contents */
+	int num_before;
+	int num_after;
 
 	pid_t pid;
 	int status;		/* process exit status */

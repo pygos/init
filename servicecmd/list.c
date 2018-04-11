@@ -21,7 +21,8 @@
 
 static void print_services(service_t *svc)
 {
-	size_t i;
+	const char *ptr;
+	int i;
 
 	for (; svc != NULL; svc = svc->next) {
 		printf("Name: %s\n", svc->name);
@@ -32,18 +33,24 @@ static void print_services(service_t *svc)
 		if (svc->type == SVC_RESPAWN && svc->rspwn_limit > 0)
 			printf("\tRespawn limit: %d\n", svc->rspwn_limit);
 
-		if (svc->before != NULL) {
+		ptr = svc->before;
+		if (ptr != NULL && svc->num_before > 0) {
 			fputs("\tMust be run before:\n", stdout);
 
-			for (i = 0; svc->before[i] != NULL; ++i)
-				printf("\t\t%s\n", svc->before[i]);
+			for (i = 0; i < svc->num_before; ++i) {
+				printf("\t\t%s\n", ptr);
+				ptr += strlen(ptr) + 1;
+			}
 		}
 
-		if (svc->after != NULL) {
+		ptr = svc->after;
+		if (ptr != NULL && svc->num_after > 0) {
 			fputs("\tMust be run after:\n", stdout);
 
-			for (i = 0; svc->after[i] != NULL; ++i)
-				printf("\t\t%s\n", svc->after[i]);
+			for (i = 0; i < svc->num_after; ++i) {
+				printf("\t\t%s\n", ptr);
+				ptr += strlen(ptr) + 1;
+			}
 		}
 	}
 }

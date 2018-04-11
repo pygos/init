@@ -24,21 +24,20 @@
 
 static bool has_dependencies(service_t *list, service_t *svc)
 {
-	size_t i;
+	const char *ptr;
+	int i;
 
 	while (list != NULL) {
-		if (svc->after != NULL) {
-			for (i = 0; svc->after[i] != NULL; ++i) {
-				if (!strcmp(svc->after[i], list->name))
-					return true;
-			}
+		for (ptr = svc->after, i = 0; i < svc->num_after; ++i) {
+			if (!strcmp(ptr, list->name))
+				return true;
+			ptr += strlen(ptr) + 1;
 		}
 
-		if (list->before != NULL) {
-			for (i = 0; list->before[i] != NULL; ++i) {
-				if (!strcmp(list->before[i], svc->name))
-					return true;
-			}
+		for (ptr = list->before, i = 0; i < list->num_before; ++i) {
+			if (!strcmp(ptr, svc->name))
+				return true;
+			ptr += strlen(ptr) + 1;
 		}
 
 		list = list->next;

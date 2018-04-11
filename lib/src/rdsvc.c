@@ -122,13 +122,16 @@ static int svc_before(service_t *svc, char *arg, rdline_t *rd)
 		return -1;
 	}
 
-	svc->raw_before = try_strdup(arg, rd);
-	if (svc->raw_before == NULL)
-		return -1;
-
-	svc->before = try_split_argv(svc->raw_before, rd);
+	svc->before = try_strdup(arg, rd);
 	if (svc->before == NULL)
 		return -1;
+
+	svc->num_before = pack_argv(svc->before);
+	if (svc->num_before < 0) {
+		fprintf(stderr, "%s: %zu: malformed string constant\n",
+				rd->filename, rd->lineno);
+		return -1;
+	}
 
 	return 0;
 }
@@ -141,13 +144,16 @@ static int svc_after(service_t *svc, char *arg, rdline_t *rd)
 		return -1;
 	}
 
-	svc->raw_after = try_strdup(arg, rd);
-	if (svc->raw_after == NULL)
-		return -1;
-
-	svc->after = try_split_argv(svc->raw_after, rd);
+	svc->after = try_strdup(arg, rd);
 	if (svc->after == NULL)
 		return -1;
+
+	svc->num_after = pack_argv(svc->after);
+	if (svc->num_after < 0) {
+		fprintf(stderr, "%s: %zu: malformed string constant\n",
+				rd->filename, rd->lineno);
+		return -1;
+	}
 
 	return 0;
 }

@@ -34,9 +34,6 @@ void delsvc(service_t *svc)
 		free(e);
 	}
 
-	free(svc->raw_before);
-	free(svc->raw_after);
-
 	free(svc->before);
 	free(svc->after);
 	free(svc->desc);
