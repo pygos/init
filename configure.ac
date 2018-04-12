@@ -21,6 +21,30 @@ AC_ARG_WITH([pygos],
 	[AM_CONDITIONAL([PYGOSCFG], [true])])
 
 
+UL_WARN_ADD([-Wall])
+UL_WARN_ADD([-Wextra])
+UL_WARN_ADD([-Wunused])
+UL_WARN_ADD([-Wmissing-prototypes])
+UL_WARN_ADD([-Wmissing-declarations])
+UL_WARN_ADD([-Wwrite-strings])
+UL_WARN_ADD([-Wjump-misses-init])
+UL_WARN_ADD([-Wuninitialized])
+UL_WARN_ADD([-Winit-self])
+UL_WARN_ADD([-Wlogical-op])
+UL_WARN_ADD([-Wunused-but-set-parameter])
+UL_WARN_ADD([-Wunused-but-set-variable])
+UL_WARN_ADD([-Wunused-parameter])
+UL_WARN_ADD([-Wunused-result])
+UL_WARN_ADD([-Wunused-variable])
+UL_WARN_ADD([-Wduplicated-cond])
+UL_WARN_ADD([-Wduplicated-branches])
+UL_WARN_ADD([-Wrestrict])
+UL_WARN_ADD([-Wnull-dereference])
+UL_WARN_ADD([-pedantic])
+
+AC_SUBST([WARN_CFLAGS])
+
+
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])
 AC_DEFINE_DIR(TEMPLATEDIR, datadir/init, [Service template directory])
