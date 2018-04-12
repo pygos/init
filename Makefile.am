@@ -9,13 +9,13 @@ EXTRA_DIST = README LICENSE
 
 helperdir = @SCRIPTDIR@
 helper_PROGRAMS =
+helper_SCRIPTS =
 
 include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am
 include scripts/Makemodule.am
 include services/Makemodule.am
-include servicecmd/Makemodule.am
 
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(SVCDIR)

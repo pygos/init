@@ -15,5 +15,18 @@ killall5_CPPFLAGS = $(AM_CPPFLAGS)
 killall5_CFLAGS = $(AM_CFLAGS)
 killall5_LDFLAGS = $(AM_LDFLAGS)
 
-sbin_PROGRAMS += reboot shutdown
+SRVHEADERS = cmd/service/servicecmd.h
+
+service_SOURCES = cmd/service/servicecmd.c cmd/service/help.c
+service_SOURCES += cmd/service/enable.c cmd/service/disable.c
+service_SOURCES += cmd/service/dumpscript.c cmd/service/list.c
+service_SOURCES += $(SRVHEADERS)
+service_CPPFLAGS = $(AM_CPPFLAGS)
+service_CFLAGS = $(AM_CFLAGS)
+service_LDFLAGS = $(AM_LDFLAGS)
+service_LDADD = libinit.a
+
+EXTRA_DIST += $(SRVHEADERS)
+
+sbin_PROGRAMS += service reboot shutdown
 helper_PROGRAMS += killall5
