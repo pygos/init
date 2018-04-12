@@ -1,5 +1,5 @@
 description configure kernel paramters
-exec "@SBINPATH@/sysctl" --system
+exec sysctl --system
 type wait
 target boot
 before sysinit

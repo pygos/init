@@ -5,6 +5,6 @@ before sysinit
 after hwclock hostname vfs
 
 exec {
-	"@SBINPATH@/ip" addr add 127.0.0.1/8 dev lo brd +
-	"@SBINPATH@/ip" link set lo up
+	ip addr add 127.0.0.1/8 dev lo brd +
+	ip link set lo up
 }

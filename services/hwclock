@@ -1,5 +1,5 @@
 description restore time from RTC
-exec "@SBINPATH@/hwclock" --hctosys --utc
+exec hwclock --hctosys --utc
 type wait
 target boot
 before sysinit

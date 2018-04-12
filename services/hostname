@@ -1,5 +1,5 @@
 description reload hostname
-exec "@BINPATH@/hostname" --file /etc/hostname
+exec hostname --file /etc/hostname
 type wait
 target boot
 before sysinit

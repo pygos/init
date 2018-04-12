@@ -24,8 +24,6 @@
 
 #include "init.h"
 
-extern char **environ;
-
 static int child_setup(const char *ctty)
 {
 	sigset_t mask;
@@ -65,7 +63,7 @@ static NORETURN void argv_exec(exec_t *e)
 		argv[i] = ptr;
 
 	argv[i] = NULL;
-	execve(argv[0], argv, environ);
+	execvp(argv[0], argv);
 	perror(argv[0]);
 	exit(EXIT_FAILURE);
 }

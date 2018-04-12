@@ -3,10 +3,10 @@ type wait
 target boot
 before vfs
 exec {
-	"@SBINPATH@/mount" -t tmpfs none /var
-	"@BINPATH@/mkdir" /var/log -m 0755
-	"@BINPATH@/mkdir" /var/spool -m 0755
-	"@BINPATH@/mkdir" /var/lib -m 0755
-	"@BINPATH@/mkdir" /var/tmp -m 0755
+	mount -t tmpfs none /var
+	mkdir /var/log -m 0755
+	mkdir /var/spool -m 0755
+	mkdir /var/lib -m 0755
+	mkdir /var/tmp -m 0755
 	"@SCRIPTDIR@/overlay.sh" var_lib /var/lib
 }

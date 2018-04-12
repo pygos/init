@@ -5,5 +5,5 @@ before sigkill sync reboot shutdown
 
 exec {
 	"@SCRIPTDIR@/killall5" 15
-	"@BINPATH@/sleep" 5
+	sleep 5
 }

@@ -11,11 +11,11 @@ fi
 
 if [ -d "$lower" ]; then
 	if [ -d "$upper" ]; then
-		@BINPATH@/mkdir -p "$work"
-		@SBINPATH@/mount -t overlay overlay \
+		mkdir -p "$work"
+		mount -t overlay overlay \
 			-olowerdir=${lower},upperdir=${upper},workdir=${work} \
 			${target}
 	else
-		@SBINPATH@/mount --bind "$lower" "$target"
+		mount --bind "$lower" "$target"
 	fi
 fi

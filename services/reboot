@@ -1,5 +1,5 @@
 description system reboot
-exec "@SBINPATH@/shutdown" -nrf
+exec shutdown -nrf
 type wait
 target reboot
 after sync sigkill sigterm

@@ -20,26 +20,14 @@ reboot
 shutdown
 killall5
 
-services/agetty
-services/hostname
-services/loopback
-services/sysctl
-services/hwclock
-services/shutdown
-services/reboot
 services/sigkill
 services/sigterm
-services/sync
 services/devfs
 services/procfs
 services/sysfs
-services/tmpfs
-services/tmpfsrun
 services/tmpfsvar
 services/rootusr
 
 scripts/devfs.sh
-scripts/overlay.sh
-scripts/trymount.sh
 
 etc/initd.env

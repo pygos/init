@@ -1,5 +1,5 @@
 description sync
-exec "@BINPATH@/sync"
+exec sync
 type wait
 target %0
 after sigkill sigterm

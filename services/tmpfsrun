@@ -1,0 +1,11 @@
+description "mount /run"
+type wait
+target boot
+before vfs
+after tmpfsvar
+exec {
+	mount -t tmpfs none /run
+	mkdir /run/lock -m 0755
+	ln -s /run /var/run
+	ln -s /run/lock /var/lock
+}

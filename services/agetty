@@ -1,5 +1,5 @@
 description agetty on %0
-exec "@SBINPATH@/agetty" %0 linux
+exec agetty %0 linux
 type respawn
 target boot
 after sysinit
