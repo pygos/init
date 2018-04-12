@@ -5,6 +5,7 @@ AM_CFLAGS = -std=c99 $(WARN_CFLAGS)
 
 sbin_PROGRAMS =
 noinst_LIBRARIES =
+sysconf_DATA = etc/initd.env
 EXTRA_DIST = README LICENSE
 
 helperdir = @SCRIPTDIR@

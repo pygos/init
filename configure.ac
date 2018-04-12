@@ -53,6 +53,7 @@ AC_DEFINE_DIR(SOCKDIR, localstatedir/run, [Directory for initd socket])
 
 AC_DEFINE_DIR(BINPATH, bindir, [Fully evaluated bin directory])
 AC_DEFINE_DIR(SBINPATH, sbindir, [Fully evaluated sbin directory])
+AC_DEFINE_DIR(ETCPATH, sysconfdir, [Fulle evaluated etc directory])
 
 AC_CONFIG_FILES([services/agetty])
 AC_CONFIG_FILES([services/hostname])
@@ -74,5 +75,6 @@ AC_CONFIG_FILES([services/rootusr])
 AC_CONFIG_FILES([scripts/devfs.sh])
 AC_CONFIG_FILES([scripts/overlay.sh])
 AC_CONFIG_FILES([scripts/trymount.sh])
+AC_CONFIG_FILES([etc/initd.env])
 
 AC_OUTPUT([Makefile])

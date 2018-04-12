@@ -25,6 +25,8 @@
 #include "telinit.h"
 #include "util.h"
 
+#define ENVFILE ETCPATH "/initd.env"
+
 enum {
 	STATUS_OK = 0,
 	STATUS_FAIL,
@@ -106,6 +108,14 @@ void svclist_add(service_t *svc);
 	is no such service.
 */
 service_t *svclist_remove(pid_t pid);
+
+/********** env.c **********/
+
+/*
+	Read /etc/initd.env (actually ENVFILE defined above)
+	and setup environment variables for init.
+*/
+int initenv(void);
 
 #endif /* INIT_H */
 

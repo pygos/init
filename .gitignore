@@ -41,3 +41,5 @@ services/rootusr
 scripts/devfs.sh
 scripts/overlay.sh
 scripts/trymount.sh
+
+etc/initd.env
