@@ -27,9 +27,11 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/sysfs $(DESTDIR)$(SVCDIR)/sysfs
 	$(LN_S) $(TEMPLATEDIR)/devfs $(DESTDIR)$(SVCDIR)/devfs
 	$(LN_S) $(TEMPLATEDIR)/tmpfs $(DESTDIR)$(SVCDIR)/tmpfs
+if PYGOSCFG
 	$(LN_S) $(TEMPLATEDIR)/tmpfsrun $(DESTDIR)$(SVCDIR)/tmpfsrun
 	$(LN_S) $(TEMPLATEDIR)/tmpfsvar $(DESTDIR)$(SVCDIR)/tmpfsvar
 	$(LN_S) $(TEMPLATEDIR)/rootusr $(DESTDIR)$(SVCDIR)/rootusr
+endif
 	$(LN_S) $(TEMPLATEDIR)/vfs $(DESTDIR)$(SVCDIR)/vfs
 	$(LN_S) $(TEMPLATEDIR)/shutdown $(DESTDIR)$(SVCDIR)/shutdown
 	$(LN_S) $(TEMPLATEDIR)/reboot $(DESTDIR)$(SVCDIR)/reboot

@@ -10,6 +10,17 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
 
+AC_ARG_WITH([pygos],
+	[AS_HELP_STRING([--without-pygos],
+			[Disable Pygos specific default configuration])],
+	[case "${withval}" in
+	yes) AM_CONDITIONAL([PYGOSCFG], [true]) ;;
+	no)  AM_CONDITIONAL([PYGOSCFG], [false]) ;;
+	*) AC_MSG_ERROR([bad value ${withval} for --without-pygos]) ;;
+	esac],
+	[AM_CONDITIONAL([PYGOSCFG], [true])])
+
+
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])
 AC_DEFINE_DIR(TEMPLATEDIR, datadir/init, [Service template directory])

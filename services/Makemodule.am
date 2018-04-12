@@ -4,7 +4,10 @@ init_DATA += services/sysctl services/hwclock services/sysinit
 init_DATA += services/reboot services/shutdown services/sigkill
 init_DATA += services/sigterm services/sync services/devfs
 init_DATA += services/sysfs services/procfs services/tmpfs
-init_DATA += services/tmpfsrun services/tmpfsvar services/vfs
-init_DATA += services/rootusr
+init_DATA += services/vfs
+
+if PYGOSCFG
+init_DATA += services/rootusr services/tmpfsrun services/tmpfsvar
+endif
 
 EXTRA_DIST += services/sysinit services/vfs

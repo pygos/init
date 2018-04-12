@@ -1,2 +1,6 @@
 scriptdir = @SCRIPTDIR@
-script_SCRIPTS = scripts/devfs.sh scripts/trymount.sh scripts/overlay.sh
+script_SCRIPTS = scripts/devfs.sh scripts/trymount.sh
+
+if PYGOSCFG
+script_SCRIPTS += scripts/overlay.sh
+endif
