@@ -6,7 +6,7 @@ AM_CFLAGS = $(WARN_CFLAGS)
 sbin_PROGRAMS =
 noinst_LIBRARIES =
 sysconf_DATA = etc/initd.env
-EXTRA_DIST = README LICENSE
+EXTRA_DIST = README.md LICENSE docs
 
 helperdir = @SCRIPTDIR@
 helper_PROGRAMS =
