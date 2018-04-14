@@ -69,3 +69,6 @@ If a single command line returns something other than `EXIT_SUCCESS`,
 processing of multiple command lines is immediately stopped and the offending
 exit status is returned to init.
 
+
+The init process reads environment variables from `/etc/initd.env`.
+
