@@ -19,7 +19,9 @@
 #define INIT_H
 
 #include <linux/reboot.h>
+#include <sys/signalfd.h>
 #include <sys/reboot.h>
+#include <signal.h>
 
 #include "service.h"
 #include "telinit.h"
@@ -116,6 +118,29 @@ service_t *svclist_remove(pid_t pid);
 	and setup environment variables for init.
 */
 int initenv(void);
+
+/********** signal_<platform>.c **********/
+
+/*
+	Setup signal handling. Returns -1 on error, a file descriptor on
+	success.
+
+	The returned file descriptor can be polled and becomes readable
+	when a signal arrives. Reading from it returns a signalfd_siginfo
+	structure.
+
+	The returned file descriptor has the close on exec flag set.
+
+	The kernel is also told to send us SIGINT signals if a user presses
+	the local equivalent of CTRL+ALT+DEL.
+*/
+int sigsetup(void);
+
+/*
+	Undo everything that sigsetup() changed about signal handling and
+	restore the default.
+*/
+void sigreset(void);
 
 #endif /* INIT_H */
 

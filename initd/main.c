@@ -25,8 +25,6 @@
 #include <errno.h>
 #include <poll.h>
 
-#include <sys/signalfd.h>
-
 #include "init.h"
 
 static service_list_t cfg;
@@ -189,32 +187,20 @@ int main(void)
 {
 	int ti_sock = -1, sfd, ret, count;
 	struct pollfd pfd[2];
-	sigset_t mask;
 
 	if (getpid() != 1) {
 		fputs("init does not have pid 1, terminating!\n", stderr);
 		return EXIT_FAILURE;
 	}
 
-	if (reboot(LINUX_REBOOT_CMD_CAD_OFF))
-		perror("cannot disable CTRL+ALT+DEL");
-
 	if (svcscan(SVCDIR, &cfg)) {
 		fputs("Error reading service list from " SVCDIR "\n"
 			"Trying to continue anyway\n", stderr);
 	}
 
-	sigfillset(&mask);
-	if (sigprocmask(SIG_SETMASK, &mask, NULL) == -1) {
-		perror("sigprocmask");
-		return EXIT_FAILURE;
-	}
-
-	sfd = signalfd(-1, &mask, SFD_CLOEXEC);
-	if (sfd == -1) {
-		perror("signalfd");
-		return EXIT_FAILURE;
-	}
+	sfd = sigsetup();
+	if (sfd < 0)
+		return -1;
 
 	memset(pfd, 0, sizeof(pfd));
 	pfd[0].fd = sfd;

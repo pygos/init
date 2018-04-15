@@ -26,11 +26,9 @@
 
 static int child_setup(const char *ctty)
 {
-	sigset_t mask;
 	int fd;
 
-	sigemptyset(&mask);
-	sigprocmask(SIG_SETMASK, &mask, NULL);
+	sigreset();
 
 	if (ctty != NULL) {
 		fd = open(ctty, O_RDWR);
