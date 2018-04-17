@@ -1,6 +1,8 @@
 AC_PREREQ([2.60])
 
-AC_INIT([init], 0.2, [david.oberhollenzer@tele2.at], init)
+m4_define([RELEASE], 0.2)
+
+AC_INIT([init], [RELEASE], [david.oberhollenzer@tele2.at], init)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz])
 AM_SILENT_RULES([yes])
