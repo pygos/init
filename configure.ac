@@ -13,17 +13,6 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
 
-AC_ARG_WITH([pygos],
-	[AS_HELP_STRING([--without-pygos],
-			[Disable Pygos specific default configuration])],
-	[case "${withval}" in
-	yes) AM_CONDITIONAL([PYGOSCFG], [true]) ;;
-	no)  AM_CONDITIONAL([PYGOSCFG], [false]) ;;
-	*) AC_MSG_ERROR([bad value ${withval} for --without-pygos]) ;;
-	esac],
-	[AM_CONDITIONAL([PYGOSCFG], [true])])
-
-
 UL_WARN_ADD([-Wall])
 UL_WARN_ADD([-Wextra])
 UL_WARN_ADD([-Wunused])
@@ -63,8 +52,6 @@ AC_CONFIG_FILES([services/sigterm])
 AC_CONFIG_FILES([services/sysfs])
 AC_CONFIG_FILES([services/devfs])
 AC_CONFIG_FILES([services/procfs])
-AC_CONFIG_FILES([services/tmpfsvar])
-AC_CONFIG_FILES([services/rootusr])
 AC_CONFIG_FILES([scripts/devfs.sh])
 AC_CONFIG_FILES([etc/initd.env])
 

@@ -6,11 +6,6 @@ init_DATA += services/sigterm services/sync services/devfs
 init_DATA += services/sysfs services/procfs services/tmpfs
 init_DATA += services/vfs
 
-if PYGOSCFG
-init_DATA += services/rootusr services/tmpfsrun services/tmpfsvar
-endif
-
 EXTRA_DIST += services/sysinit services/vfs services/agetty services/hostname
 EXTRA_DIST += services/hwclock services/loopback services/reboot
 EXTRA_DIST += services/shutdown services/sync services/sysctl services/tmpfs
-EXTRA_DIST += services/tmpfsrun

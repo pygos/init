@@ -1,7 +1,3 @@
 helper_SCRIPTS += scripts/devfs.sh scripts/trymount.sh
 
-if PYGOSCFG
-helper_SCRIPTS += scripts/overlay.sh
-endif
-
-EXTRA_DIST += scripts/trymount.sh scripts/overlay.sh
+EXTRA_DIST += scripts/trymount.sh
