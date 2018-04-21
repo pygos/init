@@ -193,7 +193,7 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	if (svcscan(SVCDIR, &cfg)) {
+	if (svcscan(SVCDIR, &cfg, 0)) {
 		fputs("Error reading service list from " SVCDIR "\n"
 			"Trying to continue anyway\n", stderr);
 	}

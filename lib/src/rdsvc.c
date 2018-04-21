@@ -204,15 +204,17 @@ static const struct svc_param {
 
 	unsigned int allow_block : 1;
 
+	int flags;
+
 	int (*handle)(service_t *svc, char *arg, rdline_t *rd);
 } svc_params[] = {
-	{ "description", 0, svc_desc },
-	{ "exec", 1, svc_exec },
-	{ "type", 0, svc_type },
-	{ "target", 0, svc_target },
-	{ "tty", 0, svc_tty },
-	{ "before", 0, svc_before },
-	{ "after", 0, svc_after },
+	{ "description", 0, 0, svc_desc },
+	{ "exec", 1, RDSVC_NO_EXEC, svc_exec },
+	{ "type", 0, 0, svc_type },
+	{ "target", 0, 0, svc_target },
+	{ "tty", 0, RDSVC_NO_CTTY, svc_tty },
+	{ "before", 0, RDSVC_NO_DEPS, svc_before },
+	{ "after", 0, RDSVC_NO_DEPS, svc_after },
 };
 
 static int splitkv(rdline_t *rd, char **k, char **v)
@@ -257,7 +259,7 @@ static const struct svc_param *find_param(rdline_t *rd, const char *name)
 }
 
 
-service_t *rdsvc(int dirfd, const char *filename)
+service_t *rdsvc(int dirfd, const char *filename, int flags)
 {
 	const struct svc_param *p;
 	const char *arg, *args[1];
@@ -289,9 +291,11 @@ service_t *rdsvc(int dirfd, const char *filename)
 	if (svc == NULL)
 		goto fail_oom;
 
-	svc->fname = strdup(filename);
-	if (svc->fname == NULL)
-		goto fail_oom;
+	if (!(flags & RDSVC_NO_FNAME)) {
+		svc->fname = strdup(filename);
+		if (svc->fname == NULL)
+			goto fail_oom;
+	}
 
 	memcpy(svc->name, filename, nlen);
 
@@ -306,13 +310,19 @@ service_t *rdsvc(int dirfd, const char *filename)
 		if (p->allow_block && *value == '{') {
 			for (++value; *value == ' '; ++value)
 				;
-			if (*value != '\0' && p->handle(svc, value, &rd))
-				goto fail;
+
+			if (!(flags & p->flags)) {
+				if (*value != '\0' &&
+				    p->handle(svc, value, &rd)) {
+					goto fail;
+				}
+			}
 
 			while ((ret = rdline(&rd)) == 0) {
 				if (strcmp(rd.buffer, "}") == 0)
 					break;
-
+				if (flags & p->flags)
+					continue;
 				if (p->handle(svc, rd.buffer, &rd))
 					goto fail;
 			}
@@ -321,8 +331,11 @@ service_t *rdsvc(int dirfd, const char *filename)
 				goto fail;
 			if (ret > 0)
 				goto fail_bra;
-		} else if (p->handle(svc, value, &rd)) {
-			goto fail;
+		} else {
+			if (flags & p->flags)
+				continue;
+			if (p->handle(svc, value, &rd))
+				goto fail;
 		}
 	}
 

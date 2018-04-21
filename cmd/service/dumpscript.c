@@ -49,7 +49,7 @@ static service_t *try_load(const char *directory, const char *filename)
 	if (type != S_IFREG && type != S_IFLNK)
 		return NULL;
 
-	svc = rdsvc(dirfd, filename);
+	svc = rdsvc(dirfd, filename, 0);
 	close(dirfd);
 	return svc;
 }
