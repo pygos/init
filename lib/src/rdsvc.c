@@ -289,6 +289,10 @@ service_t *rdsvc(int dirfd, const char *filename)
 	if (svc == NULL)
 		goto fail_oom;
 
+	svc->fname = strdup(filename);
+	if (svc->fname == NULL)
+		goto fail_oom;
+
 	memcpy(svc->name, filename, nlen);
 
 	while ((ret = rdline(&rd)) == 0) {

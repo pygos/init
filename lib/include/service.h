@@ -53,6 +53,8 @@ typedef struct exec_t {
 typedef struct service_t {
 	struct service_t *next;
 
+	char *fname;		/* source file name */
+
 	int type;		/* SVC_* service type */
 	int target;		/* TGT_* service target */
 	char *desc;		/* description string */
