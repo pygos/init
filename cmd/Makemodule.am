@@ -10,6 +10,12 @@ reboot_CFLAGS = $(AM_CFLAGS)
 reboot_LDFLAGS = $(AM_LDFLAGS)
 reboot_LDADD = libinit.a
 
+runsvc_SOURCES = cmd/runsvc/runsvc.c cmd/runsvc/env.c cmd/runsvc/runsvc.h
+runsvc_CPPFLAGS = $(AM_CPPFLAGS)
+runsvc_CFLAGS = $(AM_CFLAGS)
+runsvc_LDFLAGS = $(AM_LDFLAGS)
+runsvc_LDADD = libinit.a
+
 killall5_SOURCES = cmd/killall5.c
 killall5_CPPFLAGS = $(AM_CPPFLAGS)
 killall5_CFLAGS = $(AM_CFLAGS)
@@ -29,4 +35,4 @@ service_LDADD = libinit.a
 EXTRA_DIST += $(SRVHEADERS)
 
 sbin_PROGRAMS += service reboot shutdown
-helper_PROGRAMS += killall5
+helper_PROGRAMS += killall5 runsvc

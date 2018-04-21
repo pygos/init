@@ -19,6 +19,7 @@ service
 reboot
 shutdown
 killall5
+runsvc
 
 services/sigkill
 services/sigterm

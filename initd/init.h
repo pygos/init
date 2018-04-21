@@ -27,7 +27,7 @@
 #include "telinit.h"
 #include "util.h"
 
-#define ENVFILE ETCPATH "/initd.env"
+#define RUNSVCBIN SCRIPTDIR "/runsvc"
 
 enum {
 	STATUS_OK = 0,
@@ -36,35 +36,20 @@ enum {
 	STATUS_STARTED,
 };
 
-/********** runlst.c **********/
+/********** runsvc.c **********/
 
 /*
-	Plow through an array of strings and execute each one, i.e. do
-	a fork() and exec().
+	Invoke the runsvc command to execute the comands of a service.
 
-	In the parent process, wait() until the child is done before
-	continuing through the list.
-
-	If ctty is not NULL, open it and redirect all I/O of the child
-	process to that file.
-
-	If everyhing works, the function returns EXIT_SUCCESS. If one child
-	does not exit with EXIT_SUCCESS, processing of the list is aborted
-	and the function returns the exit status of the failed process.
+	Returns the pid of the child process containing the runsvc instance.
 */
-int runlst_wait(exec_t *list, const char *ctty);
+pid_t runsvc(service_t *svc);
 
 /*
-	Does basically the same as runlst_wait, but asynchronously.
-
-	A child process is created that calls runlst_wait exits with the
-	result of runlst_wait. In the parent process, the function returns
-	immediately with the PID of the child process.
-
-	Alternatively, if num is 1, the child process directly exec()s the
-	given command.
+	Start a service using runsvc, but wait until the child process
+	terminats and return its exit status.
 */
-pid_t runlst(exec_t *list, const char *ctty);
+int runsvc_wait(service_t *svc);
 
 /********** status.c **********/
 
@@ -110,14 +95,6 @@ void svclist_add(service_t *svc);
 	is no such service.
 */
 service_t *svclist_remove(pid_t pid);
-
-/********** env.c **********/
-
-/*
-	Read /etc/initd.env (actually ENVFILE defined above)
-	and setup environment variables for init.
-*/
-int initenv(void);
 
 /********** signal_<platform>.c **********/
 

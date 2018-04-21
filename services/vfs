@@ -1,3 +1,3 @@
 description VFS setup done
-type once
+type wait
 target boot

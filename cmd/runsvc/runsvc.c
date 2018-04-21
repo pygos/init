@@ -15,20 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <sys/wait.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <fcntl.h>
+#include "runsvc.h"
 
-#include "init.h"
-
-static int child_setup(const char *ctty)
+static int setup_tty(const char *ctty)
 {
 	int fd;
-
-	sigreset();
 
 	if (ctty != NULL) {
 		fd = open(ctty, O_RDWR);
@@ -52,6 +43,8 @@ static int child_setup(const char *ctty)
 	return 0;
 }
 
+/*****************************************************************************/
+
 static NORETURN void argv_exec(exec_t *e)
 {
 	char **argv = alloca(e->argc + 1), *ptr;
@@ -66,7 +59,7 @@ static NORETURN void argv_exec(exec_t *e)
 	exit(EXIT_FAILURE);
 }
 
-int runlst_wait(exec_t *list, const char *ctty)
+static int runlst_wait(exec_t *list)
 {
 	pid_t ret, pid;
 	int status;
@@ -74,11 +67,8 @@ int runlst_wait(exec_t *list, const char *ctty)
 	for (; list != NULL; list = list->next) {
 		pid = fork();
 
-		if (pid == 0) {
-			if (child_setup(ctty))
-				exit(EXIT_FAILURE);
+		if (pid == 0)
 			argv_exec(list);
-		}
 
 		if (pid == -1) {
 			perror("fork");
@@ -99,22 +89,50 @@ int runlst_wait(exec_t *list, const char *ctty)
 	return EXIT_SUCCESS;
 }
 
-pid_t runlst(exec_t *list, const char *ctty)
+/*****************************************************************************/
+
+int main(int argc, char **argv)
 {
-	pid_t pid = fork();
+	int dirfd, ret = EXIT_FAILURE;
+	service_t *svc = NULL;
 
-	if (pid == 0) {
-		if (child_setup(ctty))
-			exit(EXIT_FAILURE);
-
-		if (list->next != NULL)
-			exit(runlst_wait(list, NULL));
-
-		argv_exec(list);
+	if (argc != 3) {
+		fputs("usage: runsvc <directory> <filename>\n", stderr);
+		goto out;
 	}
 
-	if (pid == -1)
-		perror("fork");
+	if (getppid() != 1) {
+		fputs("must be run by init!\n", stderr);
+		goto out;
+	}
 
-	return pid;
+	dirfd = open(argv[1], O_RDONLY | O_DIRECTORY);
+	if (dirfd < 0) {
+		perror(argv[1]);
+		goto out;
+	}
+
+	svc = rdsvc(dirfd, argv[2], RDSVC_NO_FNAME | RDSVC_NO_DEPS);
+	close(dirfd);
+	if (svc == NULL)
+		goto out;
+
+	if (svc->exec == NULL) {
+		ret = EXIT_SUCCESS;
+		goto out;
+	}
+
+	if (initenv())
+		goto out;
+
+	if (setup_tty(svc->ctty))
+		goto out;
+
+	if (svc->exec->next == NULL)
+		argv_exec(svc->exec);
+
+	ret = runlst_wait(svc->exec);
+out:
+	delsvc(svc);
+	return ret;
 }

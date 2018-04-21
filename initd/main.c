@@ -48,7 +48,7 @@ static void handle_exited(service_t *svc)
 			}
 		}
 
-		svc->pid = runlst(svc->exec, svc->ctty);
+		svc->pid = runsvc(svc);
 		if (svc->pid == -1) {
 			print_status(svc->desc, STATUS_FAIL, false);
 			break;
@@ -104,16 +104,10 @@ static void start_runlevel(int level)
 		svc = cfg.targets[level];
 		cfg.targets[level] = svc->next;
 
-		if (svc->exec == NULL) {
-			print_status(svc->desc, STATUS_OK, false);
-			delsvc(svc);
-			continue;
-		}
-
 		if (svc->type == SVC_WAIT) {
 			print_status(svc->desc, STATUS_WAIT, false);
 
-			status = runlst_wait(svc->exec, svc->ctty);
+			status = runsvc_wait(svc);
 
 			print_status(svc->desc,
 				     status == EXIT_SUCCESS ?
@@ -121,7 +115,7 @@ static void start_runlevel(int level)
 				     true);
 			delsvc(svc);
 		} else {
-			svc->pid = runlst(svc->exec, svc->ctty);
+			svc->pid = runsvc(svc);
 			if (svc->pid == -1) {
 				print_status(svc->desc, STATUS_FAIL, false);
 				delsvc(svc);
@@ -193,7 +187,7 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	if (svcscan(SVCDIR, &cfg, 0)) {
+	if (svcscan(SVCDIR, &cfg, RDSVC_NO_EXEC | RDSVC_NO_CTTY)) {
 		fputs("Error reading service list from " SVCDIR "\n"
 			"Trying to continue anyway\n", stderr);
 	}

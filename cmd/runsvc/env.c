@@ -15,14 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-
-#include "init.h"
-#include "util.h"
+#include "runsvc.h"
 
 struct entry {
 	struct entry *next;
