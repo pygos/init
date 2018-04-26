@@ -1,0 +1,13 @@
+#
+# Interface renaming rules
+#
+# Format: NAME,MAC,NEWNAME
+#
+# NAME and MAC are shell glob patterns. Both must match for a rule to apply.
+# The first matching rule is chosen (top to bottom).
+#
+# Interfaces with the same NEWNAME are sorted by MAC and have a running
+# index appended to their new name.
+#
+# Example: rename all ethernet interfaces to "port<X>"
+# eth*,*,port

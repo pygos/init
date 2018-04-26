@@ -1,0 +1,6 @@
+description "rename network interfaces"
+type wait
+target boot
+after sysinit
+
+exec "@SCRIPTDIR@/ifrename.sh"

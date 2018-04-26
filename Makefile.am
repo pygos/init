@@ -5,8 +5,9 @@ AM_CFLAGS = $(WARN_CFLAGS)
 
 sbin_PROGRAMS =
 noinst_LIBRARIES =
+nobase_sysconf_DATA = netcfg/ifrename
 sysconf_DATA = etc/initd.env
-EXTRA_DIST = README.md LICENSE docs
+EXTRA_DIST = README.md LICENSE docs netcfg
 
 helperdir = @SCRIPTDIR@
 helper_PROGRAMS =

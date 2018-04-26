@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 - David Oberhollenzer
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+NAMERULES="@ETCPATH@/netcfg/ifrename"
+TMPPATH="/tmp/ifrename"
+
+[ -f "$NAMERULES" ] || exit 0
+
+mkdir -p "$TMPPATH"
+
+for IFPATH in /sys/class/net/*; do
+	[ "$IFPATH" == "/sys/class/net/lo" ] && continue
+
+	IF=`basename $IFPATH`
+	MAC=`cat $IFPATH/address`
+
+	grep "^[^,]\+,[^,]\+,[a-zA-Z0-9]\+$" $NAMERULES | while read LINE;
+	do
+		NAMECMP=$(echo $LINE | cut -d',' -f1)
+		ADDRCMP=$(echo $LINE | cut -d',' -f2)
+		RULE=$(echo $LINE | cut -d',' -f3)
+
+		case $IF in ($NAMECMP) ;; *) continue;; esac
+		case $MAC in ($ADDRCMP) ;; *) continue;; esac
+
+		echo "$MAC,$IF" >> "$TMPPATH/$RULE"
+		break
+	done
+done
+
+for FNAME in $TMPPATH/*; do
+	[ ! -f "$FNAME" ] && break
+
+	IDX=0
+	PREFIX=$(basename $FNAME)
+
+	sort -t',' -k1 -u $FNAME | while read LINE;
+	do
+		OLDNAME=$(echo $LINE | cut -d',' -f2)
+		NEWNAME="$PREFIX$IDX"
+		IDX=`expr $IDX + 1`
+
+		ip link set "$OLDNAME" name "$NEWNAME"
+	done
+
+	rm "$FNAME"
+done
+
+rmdir "$TMPPATH"
