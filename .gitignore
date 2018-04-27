@@ -27,8 +27,10 @@ services/devfs
 services/procfs
 services/sysfs
 services/ifrename
+services/ifcfg
 
 scripts/devfs.sh
 scripts/ifrename.sh
+scripts/ifcfg.sh
 
 etc/initd.env

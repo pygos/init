@@ -1,0 +1,6 @@
+description "static network configuration"
+type wait
+target boot
+after sysinit ifrename
+
+exec "@SCRIPTDIR@/ifcfg.sh"

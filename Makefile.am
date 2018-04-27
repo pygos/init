@@ -38,3 +38,4 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@reboot
 	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@reboot
 	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@reboot
+	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg

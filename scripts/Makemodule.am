@@ -1,3 +1,4 @@
 helper_SCRIPTS += scripts/devfs.sh scripts/trymount.sh scripts/ifrename.sh
+helper_SCRIPTS += scripts/ifcfg.sh
 
 EXTRA_DIST += scripts/trymount.sh
