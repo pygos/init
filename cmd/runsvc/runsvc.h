@@ -27,6 +27,7 @@
 #include <fcntl.h>
 
 #include "service.h"
+#include "libcfg.h"
 #include "util.h"
 
 #define ENVFILE ETCPATH "/initd.env"

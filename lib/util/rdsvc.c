@@ -26,6 +26,7 @@
 #include <ctype.h>
 
 #include "service.h"
+#include "libcfg.h"
 #include "util.h"
 
 static int try_unescape(char *arg, rdline_t *rd)

@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "util.h"
+#include "libcfg.h"
 
 int pack_argv(char *str)
 {

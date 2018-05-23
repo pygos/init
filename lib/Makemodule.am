@@ -1,13 +1,17 @@
 HEADRS = lib/include/util.h lib/include/service.h lib/include/telinit.h
 
-libinit_a_SOURCES = lib/src/delsvc.c lib/src/rdline.c lib/src/svcmap.c
-libinit_a_SOURCES += lib/src/unescape.c lib/src/enum_by_name.c
-libinit_a_SOURCES += lib/src/rdsvc.c lib/src/svcscan.c lib/src/split_argv.c
-libinit_a_SOURCES += lib/src/del_svc_list.c lib/src/svc_tsort.c
-libinit_a_SOURCES += lib/src/opensock.c lib/src/enum_to_name.c $(HEADRS)
+libinit_a_SOURCES = lib/util/delsvc.c lib/util/svcmap.c lib/util/enum_by_name.c
+libinit_a_SOURCES += lib/util/rdsvc.c lib/util/svcscan.c
+libinit_a_SOURCES += lib/util/del_svc_list.c lib/util/svc_tsort.c
+libinit_a_SOURCES += lib/util/opensock.c lib/util/enum_to_name.c $(HEADRS)
 libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
-EXTRA_DIST += $(HEADRS)
+libcfg_a_SOURCES = lib/libcfg/rdline.c lib/libcfg/unescape.c
+libcfg_a_SOURCES += lib/libcfg/pack_argv.c lib/include/libcfg.h
+libcfg_a_CPPFLAGS = $(AM_CPPFLAGS)
+libcfg_a_CFLAGS = $(AM_CFLAGS)
 
-noinst_LIBRARIES += libinit.a
+EXTRA_DIST += $(HEADRS) lib/include/libcfg.h
+
+noinst_LIBRARIES += libinit.a libcfg.a

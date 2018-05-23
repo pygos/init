@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include "util.h"
+#include "libcfg.h"
 
 static int rdline_getc(rdline_t *t)
 {

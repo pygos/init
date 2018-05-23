@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "util.h"
+#include "libcfg.h"
 
 static int xdigit(int x)
 {
