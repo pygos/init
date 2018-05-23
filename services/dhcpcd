@@ -1,0 +1,6 @@
+description "DHCP client on %0"
+type once
+target boot
+after dhcpcdmaster
+
+exec dhcpcd -n %0

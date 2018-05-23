@@ -1,0 +1,9 @@
+description "DHCP client - master service"
+type wait
+target boot
+after sysinit ifrename ifcfg
+
+exec {
+	mkdir -p /var/db/dhcpcd
+	dhcpcd --inactive
+}
