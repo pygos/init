@@ -35,6 +35,17 @@ typedef struct {
 	int value;
 } enum_map_t;
 
+enum {
+	/* only allow root to connect */
+	SOCK_FLAG_ROOT_ONLY = 0x01,
+
+	/* allow everyone to connect */
+	SOCK_FLAG_EVERYONE = 0x02,
+
+	/* create a datagram socket, otherwise use a stream socket */
+	SOCK_FLAG_DGRAM = 0x04,
+};
+
 /*
 	Search through an array of enum_map_t entries to resolve a string to
 	a numeric value. The end of the map is indicated by a sentinel entry
@@ -48,6 +59,16 @@ const enum_map_t *enum_by_name(const enum_map_t *map, const char *name);
 	entry with the name set to NULL.
 */
 const char *enum_to_name(const enum_map_t *map, int value);
+
+/*
+	Create a UNIX stream socket at the given path.
+
+	Returns the socket fd, -1 on failure. The function takes care of
+	printing error messages on failure.
+
+	The socket has the CLOEXEC flag set.
+*/
+int mksock(const char *path, int flags);
 
 #endif /* UTIL_H */
 

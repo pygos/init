@@ -207,7 +207,7 @@ int main(void)
 			runlevel = target;
 
 			if (target == TGT_BOOT && ti_sock == -1) {
-				ti_sock = mksock();
+				ti_sock = mksock(INITSOCK, SOCK_FLAG_ROOT_ONLY);
 				if (ti_sock != -1) {
 					pfd[1].fd = ti_sock;
 					pfd[1].events = POLLIN;

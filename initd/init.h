@@ -64,18 +64,6 @@ int runsvc_wait(service_t *svc);
 */
 void print_status(const char *msg, int type, bool update);
 
-/********** mksock.c **********/
-
-/*
-	Create a UNIX socket that programs can use to pass messages to init.
-
-	Returns the socked fd or -1 on failure. The function takes care of
-	printing error messages on failure.
-
-	The socket has the CLOEXEC flag set.
-*/
-int mksock(void);
-
 /********** svclist.c **********/
 
 /*

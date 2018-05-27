@@ -23,16 +23,19 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <errno.h>
 
-#include "telinit.h"
-#include "init.h"
+#include "util.h"
 
-int mksock(void)
+int mksock(const char *path, int flags)
 {
 	struct sockaddr_un un;
-	int fd;
+	const char *errmsg;
+	int fd, type;
 
-	fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+	type = (flags & SOCK_FLAG_DGRAM) ? SOCK_DGRAM : SOCK_STREAM;
+
+	fd = socket(AF_UNIX, type | SOCK_CLOEXEC, 0);
 	if (fd < 0) {
 		perror("socket");
 		return -1;
@@ -41,31 +44,41 @@ int mksock(void)
 	memset(&un, 0, sizeof(un));
 	un.sun_family = AF_UNIX;
 
-	strcpy(un.sun_path, INITSOCK);
+	strcpy(un.sun_path, path);
 
 	if (bind(fd, (struct sockaddr *)&un, sizeof(un))) {
-		perror("bind: " INITSOCK);
-		goto fail;
+		errmsg ="bind";
+		goto fail_errno;
 	}
 
-	if (chown(INITSOCK, 0, 0)) {
-		perror("chown: " INITSOCK);
-		goto fail;
+	if (flags & SOCK_FLAG_ROOT_ONLY) {
+		if (chown(path, 0, 0)) {
+			errmsg = "chown";
+			goto fail_errno;
+		}
+
+		if (chmod(path, 0770)) {
+			errmsg = "chmod";
+			goto fail_errno;
+		}
+	} else if (flags & SOCK_FLAG_EVERYONE) {
+		if (chmod(path, 0777)) {
+			errmsg = "chmod";
+			goto fail_errno;
+		}
 	}
 
-	if (chmod(INITSOCK, 0770)) {
-		perror("chmod: " INITSOCK);
-		goto fail;
-	}
-
-	if (listen(fd, 10)) {
-		perror("listen");
-		goto fail;
+	if (!(flags & SOCK_FLAG_DGRAM)) {
+		if (listen(fd, 10)) {
+			errmsg = "listen";
+			goto fail_errno;
+		}
 	}
 
 	return fd;
-fail:
+fail_errno:
+	fprintf(stderr, "%s: %s: %s\n", path, errmsg, strerror(errno));
 	close(fd);
-	unlink(INITSOCK);
+	unlink(path);
 	return -1;
 }
