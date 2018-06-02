@@ -1,0 +1,6 @@
+description "starting usyslogd"
+exec usyslogd
+type respawn limit 5
+target boot
+after hostname vfs
+before sysinit

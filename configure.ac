@@ -37,6 +37,16 @@ UL_WARN_ADD([-pedantic])
 AC_SUBST([WARN_CFLAGS])
 
 
+AC_ARG_WITH([usyslogd],
+	[AS_HELP_STRING([--without-usyslogd], [Build without syslog daemon])],
+	[case "${withval}" in
+	yes) AM_CONDITIONAL([USYSLOGD], [true]) ;;
+	no) AM_CONDITIONAL([USYSLOGD], [false]) ;;
+	*) AC_MSG_ERROR([bad value ${withval} for --without-usyslogd]) ;;
+	esac],
+	[AM_CONDITIONAL([USYSLOGD], [true])])
+
+
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])
 AC_DEFINE_DIR(TEMPLATEDIR, datadir/init, [Service template directory])

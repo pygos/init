@@ -20,6 +20,7 @@ reboot
 shutdown
 killall5
 runsvc
+usyslogd
 
 services/sigkill
 services/sigterm

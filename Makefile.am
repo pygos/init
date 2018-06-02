@@ -19,6 +19,10 @@ include initd/Makemodule.am
 include scripts/Makemodule.am
 include services/Makemodule.am
 
+if USYSLOGD
+include syslogd/Makemodule.am
+endif
+
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(SVCDIR)
 	$(LN_S) $(TEMPLATEDIR)/loopback $(DESTDIR)$(SVCDIR)/loopback
@@ -39,3 +43,6 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@reboot
 	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@reboot
 	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg
+if USYSLOGD
+	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
+endif
