@@ -1,0 +1,6 @@
+description "Unbound resolver"
+type respawn limit 5
+target boot
+after sysinit ifcfg
+
+exec unbound -d
