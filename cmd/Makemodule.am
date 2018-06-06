@@ -32,6 +32,16 @@ service_CFLAGS = $(AM_CFLAGS)
 service_LDFLAGS = $(AM_LDFLAGS)
 service_LDADD = libinit.a libcfg.a
 
+if USYSLOGD
+syslog_SOURCES = cmd/syslog.c
+syslog_CPPFLAGS = $(AM_CPPFLAGS)
+syslog_CFLAGS = $(AM_CFLAGS)
+syslog_LDFLAGS = $(AM_LDFLAGS)
+syslog_LDADD = libinit.a
+
+bin_PROGRAMS += syslog
+endif
+
 EXTRA_DIST += $(SRVHEADERS)
 
 sbin_PROGRAMS += service reboot shutdown

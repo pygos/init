@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(top_srcdir)/lib/include
 AM_CFLAGS = $(WARN_CFLAGS)
 
+bin_PROGRAMS =
 sbin_PROGRAMS =
 noinst_LIBRARIES =
 nobase_sysconf_DATA = netcfg/ifrename
