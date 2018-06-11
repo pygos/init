@@ -24,9 +24,9 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-#include <ctype.h>
 
 #include "logfile.h"
+#include "proto.h"
 #include "util.h"
 
 
@@ -118,16 +118,18 @@ static void signal_setup(void)
 	sigaction(SIGTERM, &act, NULL);
 }
 
-static int print_to_log(int facility, int level, const char *data)
+static int print_to_log(const syslog_msg_t *msg)
 {
 	const char *fac_name, *lvl_str;
+	char timebuf[32];
 	logfile_t *log;
+	struct tm tm;
 
-	fac_name = enum_to_name(facilities, facility);
+	fac_name = enum_to_name(facilities, msg->facility);
 	if (fac_name == NULL)
 		return -1;
 
-	lvl_str = enum_to_name(levels, level);
+	lvl_str = enum_to_name(levels, msg->level);
 	if (lvl_str == NULL)
 		return -1;
 
@@ -144,14 +146,19 @@ static int print_to_log(int facility, int level, const char *data)
 		logfiles = log;
 	}
 
-	logfile_write(log, "[%s] %s", lvl_str, data);
+	gmtime_r(&msg->timestamp, &tm);
+	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
+
+	logfile_write(log, "[%s][%s][%s][%u] %s", timebuf, lvl_str,
+		      msg->ident ? msg->ident : "", msg->pid,
+		      msg->message);
 	return 0;
 }
 
 static int handle_data(int fd)
 {
-	char buffer[2048], *ptr;
-	int i = 0, priority;
+	char buffer[2048];
+	syslog_msg_t msg;
 	ssize_t ret;
 
 	memset(buffer, 0, sizeof(buffer));
@@ -160,20 +167,10 @@ static int handle_data(int fd)
 	if (ret <= 0)
 		return -1;
 
-	for (ptr = buffer; isspace(*ptr); ++ptr)
-		;
-	if (*(ptr++) != '<')
+	if (syslog_msg_parse(&msg, buffer))
 		return -1;
-	if (!isdigit(*ptr))
-		return -1;
-	for (priority = 0; isdigit(*ptr); ++ptr)
-		priority = priority * 10 + (*ptr) - '0';
-	if (*(ptr++) != '>')
-		return -1;
-	while (isspace(*ptr))
-		++ptr;
 
-	return print_to_log(priority >> 3, priority & 0x07, ptr);
+	return print_to_log(&msg);
 }
 
 int main(void)
