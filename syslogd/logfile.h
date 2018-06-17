@@ -20,12 +20,13 @@
 
 typedef struct logfile_t {
 	struct logfile_t *next;
+	int facility;
 	int fd;
 
 	char name[];
 } logfile_t;
 
-logfile_t *logfile_create(const char *name);
+logfile_t *logfile_create(const char *name, int facility);
 
 void logfile_destroy(logfile_t *file);
 

@@ -25,7 +25,7 @@
 #include "logfile.h"
 
 
-logfile_t *logfile_create(const char *name)
+logfile_t *logfile_create(const char *name, int facility)
 {
 	logfile_t *file;
 
@@ -36,6 +36,7 @@ logfile_t *logfile_create(const char *name)
 	}
 
 	strcpy(file->name, name);
+	file->facility = facility;
 
 	file->fd = open(file->name, O_WRONLY | O_CREAT, 0640);
 	if (file->fd < 0)

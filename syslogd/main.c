@@ -134,12 +134,12 @@ static int print_to_log(const syslog_msg_t *msg)
 		return -1;
 
 	for (log = logfiles; log != NULL; log = log->next) {
-		if (!strcmp(log->name, fac_name))
+		if (log->facility == msg->facility)
 			break;
 	}
 
 	if (log == NULL) {
-		log = logfile_create(fac_name);
+		log = logfile_create(fac_name, msg->facility);
 		if (log == NULL)
 			return -1;
 		log->next = logfiles;
