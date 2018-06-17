@@ -23,10 +23,10 @@ typedef struct logfile_t {
 	int facility;
 	int fd;
 
-	char name[];
+	char ident[];
 } logfile_t;
 
-logfile_t *logfile_create(const char *name, int facility);
+logfile_t *logfile_create(const char *ident, const char *name, int facility);
 
 void logfile_destroy(logfile_t *file);
 

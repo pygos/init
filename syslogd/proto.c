@@ -169,9 +169,20 @@ int syslog_msg_parse(syslog_msg_t *msg, char *str)
 		ident = NULL;
 	}
 
+	if (ident != NULL && ident[0] == '\0')
+		ident = NULL;
+
 	msg->timestamp = mktime(&tstamp);
 	msg->pid = pid;
 	msg->ident = ident;
 	msg->message = str;
+
+	if (ident != NULL) {
+		for (ptr = ident; *ptr != '\0'; ++ptr) {
+			if (!isalnum(*ptr))
+				*ptr = '_';
+		}
+	}
+
 	return 0;
 }

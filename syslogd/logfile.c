@@ -15,39 +15,66 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "logfile.h"
 
 
-logfile_t *logfile_create(const char *name, int facility)
+logfile_t *logfile_create(const char *ident, const char *name, int facility)
 {
+	int dfd = AT_FDCWD;
 	logfile_t *file;
+	size_t size;
 
-	file = calloc(1, sizeof(*file) + strlen(name) + 1);
+	size = sizeof(*file) + 1;
+	if (ident != NULL)
+		size += strlen(ident);
+
+	file = calloc(1, size);
 	if (file == NULL) {
 		perror("calloc");
 		return NULL;
 	}
 
-	strcpy(file->name, name);
+	if (ident != NULL) {
+		strcpy(file->ident, ident);
+		if (mkdir(file->ident, 0750) != 0 && errno != EEXIST) {
+			perror(file->ident);
+			goto fail;
+		}
+
+		dfd = open(file->ident, O_DIRECTORY | O_RDONLY);
+		if (dfd < 0) {
+			perror(file->ident);
+			goto fail;
+		}
+	}
+
 	file->facility = facility;
 
-	file->fd = open(file->name, O_WRONLY | O_CREAT, 0640);
-	if (file->fd < 0)
+	file->fd = openat(dfd, name, O_WRONLY | O_CREAT, 0640);
+	if (file->fd < 0) {
+		perror(name);
 		goto fail;
+	}
 
 	if (lseek(file->fd, 0, SEEK_END))
 		goto fail;
 
+	if (dfd != AT_FDCWD)
+		close(dfd);
 	return file;
 fail:
-	perror(file->name);
+	if (dfd != AT_FDCWD)
+		close(dfd);
 	free(file);
 	return NULL;
 }
