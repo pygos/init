@@ -46,6 +46,7 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@reboot
 	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@reboot
 	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg
+	$(LN_S) $(TEMPLATEDIR)/modules $(DESTDIR)$(SVCDIR)/modules
 if USYSLOGD
 	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
 endif

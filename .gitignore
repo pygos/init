@@ -31,9 +31,11 @@ services/sysfs
 services/ifrename
 services/ifcfg
 services/ifdown
+services/modules
 
 scripts/devfs.sh
 scripts/ifrename.sh
 scripts/ifcfg.sh
+scripts/modules_load.sh
 
 etc/initd.env
