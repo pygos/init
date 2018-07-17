@@ -30,6 +30,7 @@ services/procfs
 services/sysfs
 services/ifrename
 services/ifcfg
+services/ifdown
 
 scripts/devfs.sh
 scripts/ifrename.sh

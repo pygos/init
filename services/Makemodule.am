@@ -6,7 +6,7 @@ init_DATA += services/sigterm services/sync services/devfs
 init_DATA += services/sysfs services/procfs services/tmpfs
 init_DATA += services/vfs services/ifrename services/ifcfg
 init_DATA += services/dhcpcd services/dhcpcdmaster services/unbound
-init_DATA += services/dnsmasq
+init_DATA += services/dnsmasq services/ifdown
 
 if USYSLOGD
 init_DATA += services/usyslogd

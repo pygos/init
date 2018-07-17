@@ -37,12 +37,14 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/vfs $(DESTDIR)$(SVCDIR)/vfs
 	$(LN_S) $(TEMPLATEDIR)/shutdown $(DESTDIR)$(SVCDIR)/shutdown
 	$(LN_S) $(TEMPLATEDIR)/reboot $(DESTDIR)$(SVCDIR)/reboot
+	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@reboot
 	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@reboot
 	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@reboot
+	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@reboot
 	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg
 if USYSLOGD
 	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
