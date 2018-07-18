@@ -1,3 +1,4 @@
 description VFS setup done
 type wait
 target boot
+before sysinit

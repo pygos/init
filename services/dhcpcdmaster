@@ -1,7 +1,7 @@
 description "DHCP client - master service"
 type wait
 target boot
-after sysinit ifrename ifcfg
+after network
 
 exec {
 	mkdir -p /var/db/dhcpcd

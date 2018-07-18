@@ -2,5 +2,5 @@ description agetty on %0
 exec agetty %0 linux
 type respawn
 target boot
-after sysinit
+after network
 tty "/dev/%0"

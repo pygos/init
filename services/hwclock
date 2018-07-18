@@ -3,4 +3,4 @@ exec hwclock --hctosys --utc
 type wait
 target boot
 before sysinit
-after vfs
+after vfs modules

@@ -1,6 +1,6 @@
 description "dnsmasq DNS & DHCP server"
 type respawn limit 5
 target boot
-after sysinit ifcfg unbound
+after network unbound
 
 exec dnsmasq -k
