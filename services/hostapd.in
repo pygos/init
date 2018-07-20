@@ -1,0 +1,7 @@
+description "WIFI access point daemon"
+type respawn limit 10
+target boot
+after sysinit ifrename
+before network ifcfg
+
+exec hostapd "@ETCPATH@/hostapd.conf"

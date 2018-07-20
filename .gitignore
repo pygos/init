@@ -32,6 +32,7 @@ services/ifrename
 services/ifcfg
 services/ifdown
 services/modules
+services/hostapd
 
 scripts/devfs.sh
 scripts/ifrename.sh

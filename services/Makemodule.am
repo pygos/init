@@ -7,7 +7,7 @@ init_DATA += services/sysfs services/procfs services/tmpfs
 init_DATA += services/vfs services/ifrename services/ifcfg
 init_DATA += services/dhcpcd services/dhcpcdmaster services/unbound
 init_DATA += services/dnsmasq services/ifdown services/modules
-init_DATA += services/network
+init_DATA += services/network services/hostapd
 
 if USYSLOGD
 init_DATA += services/usyslogd
