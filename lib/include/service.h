@@ -51,6 +51,11 @@ enum {
 	RDSVC_NO_DEPS = 0x08,	/* do not store dependencies */
 };
 
+enum {
+	/* truncate stdout */
+	SVC_FLAG_TRUNCATE_OUT = 0x01,
+};
+
 typedef struct exec_t {
 	struct exec_t *next;
 	int argc;		/* number of elements in argument vector */
@@ -67,6 +72,7 @@ typedef struct service_t {
 	char *desc;		/* description string */
 	char *ctty;		/* controlling tty or log file */
 	int rspwn_limit;	/* maximum respawn count */
+	unsigned int flags;	/* SVC_FLAG_* bit field */
 
 	/* linked list of command lines to execute */
 	exec_t *exec;

@@ -17,16 +17,19 @@
  */
 #include "runsvc.h"
 
-static int setup_tty(const char *ctty)
+static int setup_tty(service_t *svc)
 {
 	int fd;
 
-	if (ctty != NULL) {
-		fd = open(ctty, O_RDWR);
+	if (svc->ctty != NULL) {
+		fd = open(svc->ctty, O_RDWR);
 		if (fd < 0) {
-			perror(ctty);
+			perror(svc->ctty);
 			return -1;
 		}
+
+		if (svc->flags & SVC_FLAG_TRUNCATE_OUT)
+			ftruncate(fd, 0);
 
 		close(STDIN_FILENO);
 		close(STDOUT_FILENO);
@@ -125,7 +128,7 @@ int main(int argc, char **argv)
 	if (initenv())
 		goto out;
 
-	if (setup_tty(svc->ctty))
+	if (setup_tty(svc))
 		goto out;
 
 	if (svc->exec->next == NULL)

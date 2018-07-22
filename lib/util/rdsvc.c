@@ -70,8 +70,16 @@ static int svc_desc(service_t *svc, char *arg, rdline_t *rd)
 
 static int svc_tty(service_t *svc, char *arg, rdline_t *rd)
 {
+	if (strncmp(arg, "truncate", 8) == 0 && isspace(arg[8])) {
+		svc->flags |= SVC_FLAG_TRUNCATE_OUT;
+		arg += 8;
+		while (isspace(*arg))
+			++arg;
+	}
+
 	if (try_unescape(arg, rd))
 		return -1;
+
 	svc->ctty = try_strdup(arg, rd);
 	return svc->ctty == NULL ? -1 : 0;
 }
