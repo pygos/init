@@ -1,0 +1,6 @@
+description restore saved time from last shutdown
+type wait
+target boot
+before sysinit
+after vfs modules
+exec xargs -a @STATEFILESPATH@/swclock date --utc

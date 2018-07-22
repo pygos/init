@@ -1,0 +1,7 @@
+description write current time to backup file
+type wait
+target %0
+after sigkill
+before sync
+tty truncate @STATEFILESPATH@/swclock
+exec date --utc +%%m%%d%%H%%M%%Y.%%S

@@ -33,6 +33,8 @@ services/ifcfg
 services/ifdown
 services/modules
 services/hostapd
+services/swclock
+services/swclocksave
 
 scripts/devfs.sh
 scripts/ifrename.sh
