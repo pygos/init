@@ -8,7 +8,7 @@ init_DATA += services/vfs services/ifrename services/ifcfg
 init_DATA += services/dhcpcd services/dhcpcdmaster services/unbound
 init_DATA += services/dnsmasq services/ifdown services/modules
 init_DATA += services/network services/hostapd services/swclock
-init_DATA += services/swclocksave
+init_DATA += services/swclocksave services/nft
 
 if USYSLOGD
 init_DATA += services/usyslogd

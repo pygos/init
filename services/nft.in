@@ -1,0 +1,7 @@
+description "restore netfilter rule set"
+type wait
+target boot
+after sysinit ifrename
+before network ifcfg
+
+exec nft -f "@ETCPATH@/nftables.rules"

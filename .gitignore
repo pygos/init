@@ -35,6 +35,7 @@ services/modules
 services/hostapd
 services/swclock
 services/swclocksave
+services/nft
 
 scripts/devfs.sh
 scripts/ifrename.sh
