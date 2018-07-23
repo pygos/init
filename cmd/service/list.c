@@ -19,39 +19,16 @@
 #include "service.h"
 #include "config.h"
 
-static void print_services(service_t *svc)
+static void print_services(service_t *svc, const char *target)
 {
-	const char *ptr;
-	int i;
+	printf("Services for target '%s' in dependency order:\n\n", target);
 
 	for (; svc != NULL; svc = svc->next) {
-		printf("Name: %s\n", svc->name);
-		printf("\tDescrption: %s\n", svc->desc);
+		printf("%s - %s\n", svc->name, svc->desc);
 		printf("\tType: %s\n", svc_type_to_string(svc->type));
-		printf("\tTarget: %s\n", svc_target_to_string(svc->target));
 
 		if (svc->type == SVC_RESPAWN && svc->rspwn_limit > 0)
 			printf("\tRespawn limit: %d\n", svc->rspwn_limit);
-
-		ptr = svc->before;
-		if (ptr != NULL && svc->num_before > 0) {
-			fputs("\tMust be run before:\n", stdout);
-
-			for (i = 0; i < svc->num_before; ++i) {
-				printf("\t\t%s\n", ptr);
-				ptr += strlen(ptr) + 1;
-			}
-		}
-
-		ptr = svc->after;
-		if (ptr != NULL && svc->num_after > 0) {
-			fputs("\tMust be run after:\n", stdout);
-
-			for (i = 0; i < svc->num_after; ++i) {
-				printf("\t\t%s\n", ptr);
-				ptr += strlen(ptr) + 1;
-			}
-		}
 	}
 }
 
@@ -79,10 +56,14 @@ static int cmd_list(int argc, char **argv)
 			goto out;
 		}
 
-		print_services(list.targets[i]);
+		print_services(list.targets[i], argv[1]);
 	} else {
-		for (i = 0; i < TGT_MAX; ++i)
-			print_services(list.targets[i]);
+		for (i = 0; i < TGT_MAX; ++i) {
+			if (i != 0)
+				printf("\n\n");
+			print_services(list.targets[i],
+				       svc_target_to_string(i));
+		}
 	}
 out:
 	del_svc_list(&list);
