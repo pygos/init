@@ -121,9 +121,10 @@ static void signal_setup(void)
 static int print_to_log(const syslog_msg_t *msg)
 {
 	const char *fac_name, *lvl_str;
-	char timebuf[32];
+	char timebuf[32], *filename;
 	logfile_t *log;
 	struct tm tm;
+	size_t len;
 
 	fac_name = enum_to_name(facilities, msg->facility);
 	if (fac_name == NULL)
@@ -133,17 +134,29 @@ static int print_to_log(const syslog_msg_t *msg)
 	if (lvl_str == NULL)
 		return -1;
 
+	if (msg->ident) {
+		len = strlen(msg->ident) + 1 + strlen(fac_name) + 1;
+		filename = alloca(len);
+		sprintf(filename, "%s/%s", msg->ident, fac_name);
+	} else {
+		filename = (char *)fac_name;
+	}
+
 	for (log = logfiles; log != NULL; log = log->next) {
 		if (log->facility != msg->facility)
 			continue;
-		if (msg->ident == NULL && log->ident[0] == '\0')
-			break;
-		if (msg->ident != NULL && strcmp(msg->ident, log->ident) == 0)
+		if (strcmp(filename, log->filename) == 0)
 			break;
 	}
 
 	if (log == NULL) {
-		log = logfile_create(msg->ident, fac_name, msg->facility);
+		if (msg->ident != NULL && mkdir(msg->ident, 0750) != 0 &&
+		    errno != EEXIST) {
+			perror(msg->ident);
+			return -1;
+		}
+
+		log = logfile_create(filename, msg->facility);
 		if (log == NULL)
 			return -1;
 		log->next = logfiles;

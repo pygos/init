@@ -28,53 +28,32 @@
 #include "logfile.h"
 
 
-logfile_t *logfile_create(const char *ident, const char *name, int facility)
+logfile_t *logfile_create(const char *filename, int facility)
 {
-	int dfd = AT_FDCWD;
-	logfile_t *file;
-	size_t size;
+	logfile_t *file = calloc(1, sizeof(*file) + strlen(filename) + 1);
 
-	size = sizeof(*file) + 1;
-	if (ident != NULL)
-		size += strlen(ident);
-
-	file = calloc(1, size);
 	if (file == NULL) {
 		perror("calloc");
 		return NULL;
 	}
 
-	if (ident != NULL) {
-		strcpy(file->ident, ident);
-		if (mkdir(file->ident, 0750) != 0 && errno != EEXIST) {
-			perror(file->ident);
-			goto fail;
-		}
-
-		dfd = open(file->ident, O_DIRECTORY | O_RDONLY);
-		if (dfd < 0) {
-			perror(file->ident);
-			goto fail;
-		}
-	}
+	strcpy(file->filename, filename);
 
 	file->facility = facility;
 
-	file->fd = openat(dfd, name, O_WRONLY | O_CREAT, 0640);
+	file->fd = open(file->filename, O_WRONLY | O_CREAT, 0640);
 	if (file->fd < 0) {
-		perror(name);
+		perror(file->filename);
 		goto fail;
 	}
 
 	if (lseek(file->fd, 0, SEEK_END))
-		goto fail;
+		goto fail_fd;
 
-	if (dfd != AT_FDCWD)
-		close(dfd);
 	return file;
+fail_fd:
+	close(file->fd);
 fail:
-	if (dfd != AT_FDCWD)
-		close(dfd);
 	free(file);
 	return NULL;
 }
