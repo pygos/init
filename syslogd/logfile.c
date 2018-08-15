@@ -20,15 +20,72 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
 
-#include "logfile.h"
+#include "backend.h"
+#include "util.h"
 
 
-logfile_t *logfile_create(const char *filename, int facility)
+#define SYSLOG_PATH "/var/log"
+
+
+static const enum_map_t levels[] = {
+	{ "emergency", 0 },
+	{ "alert", 1 },
+	{ "critical", 2 },
+	{ "error", 3 },
+	{ "warning", 4 },
+	{ "notice", 5 },
+	{ "info", 6 },
+	{ "debug", 7 },
+	{ NULL, 0 },
+};
+
+static const enum_map_t facilities[] = {
+	{ "kernel.log", 0 },
+	{ "user.log", 1 },
+	{ "mail.log", 2 },
+	{ "daemon.log", 3 },
+	{ "auth.log", 4 },
+	{ "syslog.log", 5 },
+	{ "lpr.log", 6 },
+	{ "news.log", 7 },
+	{ "uucp.log", 8 },
+	{ "clock.log", 9 },
+	{ "authpriv.log", 10 },
+	{ "ftp.log", 11 },
+	{ "ntp.log", 12 },
+	{ "audit.log", 13 },
+	{ "alert.log", 14 },
+	{ "cron.log", 15 },
+	{ "local0.log", 16 },
+	{ "local1.log", 17 },
+	{ "local2.log", 18 },
+	{ "local3.log", 19 },
+	{ "local4.log", 20 },
+	{ "local5.log", 21 },
+	{ "local6.log", 22 },
+	{ "local7.log", 23 },
+	{ NULL, 0 },
+};
+
+
+typedef struct logfile_t {
+	struct logfile_t *next;
+	int fd;
+	char filename[];
+} logfile_t;
+
+
+typedef struct {
+	log_backend_t base;
+	logfile_t *list;
+} log_backend_file_t;
+
+
+static logfile_t *logfile_create(const char *filename)
 {
 	logfile_t *file = calloc(1, sizeof(*file) + strlen(filename) + 1);
 
@@ -38,8 +95,6 @@ logfile_t *logfile_create(const char *filename, int facility)
 	}
 
 	strcpy(file->filename, filename);
-
-	file->facility = facility;
 
 	file->fd = open(file->filename, O_WRONLY | O_CREAT, 0640);
 	if (file->fd < 0) {
@@ -58,19 +113,110 @@ fail:
 	return NULL;
 }
 
-void logfile_destroy(logfile_t *file)
+static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 {
-	close(file->fd);
-	free(file);
-}
+	const char *lvl_str;
+	char timebuf[32];
+	struct tm tm;
 
-void logfile_write(logfile_t *file, const char *format, ...)
-{
-	va_list ap;
+	lvl_str = enum_to_name(levels, msg->level);
+	if (lvl_str == NULL)
+		return -1;
 
-	va_start(ap, format);
-	vdprintf(file->fd, format, ap);
-	va_end(ap);
+	gmtime_r(&msg->timestamp, &tm);
+	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
+
+	dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str, msg->pid,
+		msg->message);
 
 	fsync(file->fd);
+	return 0;
 }
+
+/*****************************************************************************/
+
+static int file_backend_init(log_backend_t *log)
+{
+	(void)log;
+
+	if (mkdir(SYSLOG_PATH, 0755)) {
+		if (errno != EEXIST) {
+			perror("mkdir " SYSLOG_PATH);
+			return -1;
+		}
+	}
+
+	if (chdir(SYSLOG_PATH)) {
+		perror("cd " SYSLOG_PATH);
+		return -1;
+	}
+
+	return 0;
+}
+
+static void file_backend_cleanup(log_backend_t *backend)
+{
+	log_backend_file_t *log = (log_backend_file_t *)backend;
+	logfile_t *f;
+
+	while (log->list != NULL) {
+		f = log->list;
+		log->list = f->next;
+
+		close(f->fd);
+		free(f);
+	}
+}
+
+static int file_backend_write(log_backend_t *backend, const syslog_msg_t *msg)
+{
+	log_backend_file_t *log = (log_backend_file_t *)backend;
+	const char *fac_name;
+	char *filename;
+	logfile_t *f;
+	size_t len;
+
+	fac_name = enum_to_name(facilities, msg->facility);
+	if (fac_name == NULL)
+		return -1;
+
+	if (msg->ident) {
+		len = strlen(msg->ident) + 1 + strlen(fac_name) + 1;
+		filename = alloca(len);
+		sprintf(filename, "%s/%s", msg->ident, fac_name);
+	} else {
+		filename = (char *)fac_name;
+	}
+
+	for (f = log->list; f != NULL; f = f->next) {
+		if (strcmp(filename, f->filename) == 0)
+			break;
+	}
+
+	if (f == NULL) {
+		if (msg->ident != NULL && mkdir(msg->ident, 0750) != 0 &&
+		    errno != EEXIST) {
+			perror(msg->ident);
+			return -1;
+		}
+
+		f = logfile_create(filename);
+		if (f == NULL)
+			return -1;
+		f->next = log->list;
+		log->list = f;
+	}
+
+	return logfile_write(f, msg);
+}
+
+log_backend_file_t filebackend = {
+	.base = {
+		.init = file_backend_init,
+		.cleanup = file_backend_cleanup,
+		.write = file_backend_write,
+	},
+	.list = NULL,
+};
+
+log_backend_t *logmgr = (log_backend_t *)&filebackend;

@@ -18,18 +18,18 @@
 #ifndef LOGFILE_H
 #define LOGFILE_H
 
-typedef struct logfile_t {
-	struct logfile_t *next;
-	int facility;
-	int fd;
+#include "proto.h"
 
-	char filename[];
-} logfile_t;
+typedef struct log_backend_t {
+	int (*init)(struct log_backend_t *log);
 
-logfile_t *logfile_create(const char *filename, int facility);
+	void (*cleanup)(struct log_backend_t *log);
 
-void logfile_destroy(logfile_t *file);
+	int (*write)(struct log_backend_t *log, const syslog_msg_t *msg);
+} log_backend_t;
 
-void logfile_write(logfile_t *file, const char *format, ...);
+
+extern log_backend_t *logmgr;
+
 
 #endif /* LOGFILE_H */
