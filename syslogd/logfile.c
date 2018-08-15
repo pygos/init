@@ -85,6 +85,22 @@ typedef struct {
 } log_backend_file_t;
 
 
+static int logfile_open(logfile_t *file)
+{
+	file->fd = open(file->filename, O_WRONLY | O_CREAT, 0640);
+	if (file->fd < 0) {
+		perror(file->filename);
+		return -1;
+	}
+
+	if (lseek(file->fd, 0, SEEK_END)) {
+		close(file->fd);
+		return -1;
+	}
+
+	return 0;
+}
+
 static logfile_t *logfile_create(const char *filename)
 {
 	logfile_t *file = calloc(1, sizeof(*file) + strlen(filename) + 1);
@@ -96,21 +112,12 @@ static logfile_t *logfile_create(const char *filename)
 
 	strcpy(file->filename, filename);
 
-	file->fd = open(file->filename, O_WRONLY | O_CREAT, 0640);
-	if (file->fd < 0) {
-		perror(file->filename);
-		goto fail;
+	if (logfile_open(file)) {
+		free(file);
+		return NULL;
 	}
 
-	if (lseek(file->fd, 0, SEEK_END))
-		goto fail_fd;
-
 	return file;
-fail_fd:
-	close(file->fd);
-fail:
-	free(file);
-	return NULL;
 }
 
 static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
@@ -118,6 +125,9 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 	const char *lvl_str;
 	char timebuf[32];
 	struct tm tm;
+
+	if (file->fd < 0 && logfile_open(file) != 0)
+		return -1;
 
 	lvl_str = enum_to_name(levels, msg->level);
 	if (lvl_str == NULL)
@@ -130,6 +140,30 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 		msg->message);
 
 	fsync(file->fd);
+	return 0;
+}
+
+static int logfile_rotate(logfile_t *f)
+{
+	char timebuf[32];
+	char *filename;
+	struct tm tm;
+	time_t now;
+
+	now = time(NULL);
+	gmtime_r(&now, &tm);
+	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
+
+	filename = alloca(strlen(f->filename) + strlen(timebuf) + 2);
+	sprintf(filename, "%s.%s", f->filename, timebuf);
+
+	if (rename(f->filename, filename)) {
+		perror(filename);
+		return -1;
+	}
+
+	close(f->fd);
+	logfile_open(f);
 	return 0;
 }
 
@@ -210,11 +244,21 @@ static int file_backend_write(log_backend_t *backend, const syslog_msg_t *msg)
 	return logfile_write(f, msg);
 }
 
+static void file_backend_rotate(log_backend_t *backend)
+{
+	log_backend_file_t *log = (log_backend_file_t *)backend;
+	logfile_t *f;
+
+	for (f = log->list; f != NULL; f = f->next)
+		logfile_rotate(f);
+}
+
 log_backend_file_t filebackend = {
 	.base = {
 		.init = file_backend_init,
 		.cleanup = file_backend_cleanup,
 		.write = file_backend_write,
+		.rotate = file_backend_rotate,
 	},
 	.list = NULL,
 };

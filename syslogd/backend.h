@@ -26,6 +26,8 @@ typedef struct log_backend_t {
 	void (*cleanup)(struct log_backend_t *log);
 
 	int (*write)(struct log_backend_t *log, const syslog_msg_t *msg);
+
+	void (*rotate)(struct log_backend_t *log);
 } log_backend_t;
 
 

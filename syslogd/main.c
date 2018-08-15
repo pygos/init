@@ -34,6 +34,7 @@
 
 
 static volatile sig_atomic_t syslog_run = 1;
+static volatile sig_atomic_t syslog_rotate = 0;
 
 
 static void sighandler(int signo)
@@ -42,6 +43,9 @@ static void sighandler(int signo)
 	case SIGINT:
 	case SIGTERM:
 		syslog_run = 0;
+		break;
+	case SIGHUP:
+		syslog_rotate = 1;
 		break;
 	default:
 		break;
@@ -57,6 +61,7 @@ static void signal_setup(void)
 
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGTERM, &act, NULL);
+	sigaction(SIGHUP, &act, NULL);
 }
 
 static int handle_data(int fd)
@@ -91,6 +96,11 @@ int main(void)
 		goto out;
 
 	while (syslog_run) {
+		if (syslog_rotate) {
+			logmgr->rotate(logmgr);
+			syslog_rotate = 0;
+		}
+
 		handle_data(sfd);
 	}
 
