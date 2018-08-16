@@ -74,6 +74,7 @@ static const enum_map_t facilities[] = {
 
 typedef struct logfile_t {
 	struct logfile_t *next;
+	size_t size;
 	int fd;
 	char filename[];
 } logfile_t;
@@ -87,18 +88,26 @@ typedef struct {
 
 static int logfile_open(logfile_t *file)
 {
+	struct stat sb;
+
 	file->fd = open(file->filename, O_WRONLY | O_CREAT, 0640);
 	if (file->fd < 0) {
 		perror(file->filename);
 		return -1;
 	}
 
-	if (lseek(file->fd, 0, SEEK_END)) {
-		close(file->fd);
-		return -1;
-	}
+	if (lseek(file->fd, 0, SEEK_END))
+		goto fail;
 
+	if (fstat(file->fd, &sb))
+		goto fail;
+
+	file->size = sb.st_size;
 	return 0;
+fail:
+	close(file->fd);
+	file->fd = -1;
+	return -1;
 }
 
 static logfile_t *logfile_create(const char *filename)
@@ -125,6 +134,7 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 	const char *lvl_str;
 	char timebuf[32];
 	struct tm tm;
+	int ret;
 
 	if (file->fd < 0 && logfile_open(file) != 0)
 		return -1;
@@ -136,10 +146,13 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 	gmtime_r(&msg->timestamp, &tm);
 	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
 
-	dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str, msg->pid,
-		msg->message);
+	ret = dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str, msg->pid,
+		      msg->message);
 
 	fsync(file->fd);
+
+	if (ret > 0)
+		file->size += ret;
 	return 0;
 }
 
