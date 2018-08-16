@@ -58,6 +58,8 @@ AC_DEFINE_DIR(SBINPATH, sbindir, [Fully evaluated sbin directory])
 AC_DEFINE_DIR(ETCPATH, sysconfdir, [Fulle evaluated etc directory])
 AC_DEFINE_DIR(STATEFILESPATH, prefix/var/lib, [Path for persistent state files])
 
+AC_DEFINE_DIR(PREFIXPATH, prefix, [Fully expaneded installation prefix])
+
 AC_CONFIG_FILES([services/sigkill])
 AC_CONFIG_FILES([services/sigterm])
 AC_CONFIG_FILES([services/sysfs])

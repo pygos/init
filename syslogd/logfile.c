@@ -25,10 +25,11 @@
 #include <errno.h>
 
 #include "backend.h"
+#include "config.h"
 #include "util.h"
 
 
-#define SYSLOG_PATH "/var/log"
+#define SYSLOG_PATH PREFIXPATH "/var/log"
 
 
 static const enum_map_t levels[] = {

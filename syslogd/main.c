@@ -31,7 +31,7 @@
 #include "util.h"
 
 
-#define SYSLOG_SOCKET "/dev/log"
+#define SYSLOG_SOCKET PREFIXPATH "/dev/log"
 
 #define GPL_URL "https://gnu.org/licenses/gpl.html"
 
