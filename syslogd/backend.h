@@ -20,8 +20,30 @@
 
 #include "proto.h"
 
+enum {
+	/*
+	  Rotate log data in a way that we still generate a continuous stream
+	  of log data. E.g. in the case of log files, move the current log file
+	  to one suffixed with a timestamp. We don't lose any log data.
+	 */
+	LOG_ROTATE_CONTINUOUS = 0x00,
+
+	/*
+	  Rotate log data by overwriting old data with more recent data.
+	  E.g. in the case of log files, move the current log file to one
+	  with a constant prefix, overwriting any existing data.
+	 */
+	LOG_ROTATE_OVERWRITE = 0x01,
+
+	/*
+	  Automatically do a log rotatation if a log stream reaches a preset
+	  size limit.
+	 */
+	LOG_ROTATE_SIZE_LIMIT = 0x10,
+};
+
 typedef struct log_backend_t {
-	int (*init)(struct log_backend_t *log);
+	int (*init)(struct log_backend_t *log, int flags, size_t sizelimit);
 
 	void (*cleanup)(struct log_backend_t *log);
 

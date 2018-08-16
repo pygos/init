@@ -83,6 +83,8 @@ typedef struct logfile_t {
 typedef struct {
 	log_backend_t base;
 	logfile_t *list;
+	size_t maxsize;
+	int flags;
 } log_backend_file_t;
 
 
@@ -156,16 +158,20 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 	return 0;
 }
 
-static int logfile_rotate(logfile_t *f)
+static int logfile_rotate(logfile_t *f, int flags)
 {
 	char timebuf[32];
 	char *filename;
 	struct tm tm;
 	time_t now;
 
-	now = time(NULL);
-	gmtime_r(&now, &tm);
-	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
+	if (flags & LOG_ROTATE_OVERWRITE) {
+		strcpy(timebuf, "1");
+	} else {
+		now = time(NULL);
+		gmtime_r(&now, &tm);
+		strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
+	}
 
 	filename = alloca(strlen(f->filename) + strlen(timebuf) + 2);
 	sprintf(filename, "%s.%s", f->filename, timebuf);
@@ -182,9 +188,10 @@ static int logfile_rotate(logfile_t *f)
 
 /*****************************************************************************/
 
-static int file_backend_init(log_backend_t *log)
+static int file_backend_init(log_backend_t *backend, int flags,
+			     size_t sizelimit)
 {
-	(void)log;
+	log_backend_file_t *log = (log_backend_file_t *)backend;
 
 	if (mkdir(SYSLOG_PATH, 0755)) {
 		if (errno != EEXIST) {
@@ -198,6 +205,8 @@ static int file_backend_init(log_backend_t *log)
 		return -1;
 	}
 
+	log->flags = flags;
+	log->maxsize = sizelimit;
 	return 0;
 }
 
@@ -254,7 +263,13 @@ static int file_backend_write(log_backend_t *backend, const syslog_msg_t *msg)
 		log->list = f;
 	}
 
-	return logfile_write(f, msg);
+	if (logfile_write(f, msg))
+		return -1;
+
+	if ((log->flags & LOG_ROTATE_SIZE_LIMIT) && f->size >= log->maxsize)
+		logfile_rotate(f, log->flags);
+
+	return 0;
 }
 
 static void file_backend_rotate(log_backend_t *backend)
@@ -263,7 +278,7 @@ static void file_backend_rotate(log_backend_t *backend)
 	logfile_t *f;
 
 	for (f = log->list; f != NULL; f = f->next)
-		logfile_rotate(f);
+		logfile_rotate(f, log->flags);
 }
 
 log_backend_file_t filebackend = {

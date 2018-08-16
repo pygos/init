@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <getopt.h>
 #include <errno.h>
 #include <stdio.h>
 
@@ -32,9 +33,41 @@
 
 #define SYSLOG_SOCKET "/dev/log"
 
+#define GPL_URL "https://gnu.org/licenses/gpl.html"
+
+
+static const struct option long_opts[] = {
+	{ "help", no_argument, NULL, 'h' },
+	{ "version", no_argument, NULL, 'V' },
+	{ "rotate-replace", no_argument, NULL, 'r' },
+	{ "max-size", required_argument, NULL, 'm' },
+	{ NULL, 0, NULL, 0 },
+};
+
+const char *short_opts = "hVrm:";
+
+const char *version_string =
+"usyslogd (pygos init) " PACKAGE_VERSION "\n"
+"Copyright (C) 2018 David Oberhollenzer\n\n"
+"License GPLv3+: GNU GPL version 3 or later <" GPL_URL ">.\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n";
+
+const char *usage_string =
+"Usage: usyslogd [OPTIONS..]\n\n"
+"The following options are supported:\n"
+"  -h, --help             Print this help text and exit\n"
+"  -V, --version          Print version information and exit\n"
+"  -r, --rotate-replace   Replace old log files when doing log rotation.\n"
+"  -m, --max-size <size>  Automatically rotate log files bigger than this.\n";
+
+
 
 static volatile sig_atomic_t syslog_run = 1;
 static volatile sig_atomic_t syslog_rotate = 0;
+static int log_flags = 0;
+static size_t max_size = 0;
+
 
 
 static void sighandler(int signo)
@@ -82,9 +115,50 @@ static int handle_data(int fd)
 	return logmgr->write(logmgr, &msg);
 }
 
-int main(void)
+static void process_options(int argc, char **argv)
+{
+	char *end;
+	int i;
+
+	for (;;) {
+		i = getopt_long(argc, argv, short_opts, long_opts, NULL);
+		if (i == -1)
+			break;
+
+		switch (i) {
+		case 'r':
+			log_flags |= LOG_ROTATE_OVERWRITE;
+			break;
+		case 'm':
+			log_flags |= LOG_ROTATE_SIZE_LIMIT;
+			max_size = strtol(optarg, &end, 10);
+			if (max_size == 0 || *end != '\0') {
+				fputs("Numeric argument > 0 expected for -m\n",
+				      stderr);
+				goto fail;
+			}
+			break;
+		case 'h':
+			fputs(usage_string, stdout);
+			exit(EXIT_SUCCESS);
+		case 'V':
+			fputs(version_string, stdout);
+			exit(EXIT_SUCCESS);
+		default:
+			goto fail;
+		}
+	}
+	return;
+fail:
+	fputs("Try `usyslogd --help' for more information\n", stderr);
+	exit(EXIT_FAILURE);
+}
+
+int main(int argc, char **argv)
 {
 	int sfd, status = EXIT_FAILURE;
+
+	process_options(argc, argv);
 
 	signal_setup();
 
@@ -92,7 +166,7 @@ int main(void)
 	if (sfd < 0)
 		return EXIT_FAILURE;
 
-	if (logmgr->init(logmgr))
+	if (logmgr->init(logmgr, log_flags, max_size))
 		goto out;
 
 	while (syslog_run) {
