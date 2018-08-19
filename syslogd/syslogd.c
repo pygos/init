@@ -29,15 +29,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "backend.h"
-#include "proto.h"
+#include "syslogd.h"
 #include "util.h"
 
-
-#define SYSLOG_SOCKET PREFIXPATH "/dev/log"
-#define SYSLOG_PATH PREFIXPATH "/var/log"
-#define DEFAULT_USER "syslogd"
-#define DEFAULT_GROUP "syslogd"
 
 #define GPL_URL "https://gnu.org/licenses/gpl.html"
 

@@ -20,7 +20,7 @@
 #include <ctype.h>
 #include <time.h>
 
-#include "proto.h"
+#include "syslogd.h"
 
 static const char *months[] = {
 	"Jan", "Feb", "Mar", "Apr",

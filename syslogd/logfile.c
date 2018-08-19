@@ -24,8 +24,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "backend.h"
-#include "config.h"
+#include "syslogd.h"
 #include "util.h"
 
 

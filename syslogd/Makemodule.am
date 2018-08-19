@@ -1,6 +1,5 @@
-usyslogd_SOURCES = syslogd/main.c
-usyslogd_SOURCES += syslogd/logfile.c syslogd/backend.h
-usyslogd_SOURCES += syslogd/proto.c syslogd/proto.h
+usyslogd_SOURCES = syslogd/syslogd.c syslogd/syslogd.h
+usyslogd_SOURCES += syslogd/proto.c syslogd/logfile.c
 usyslogd_CPPFLAGS = $(AM_CPPFLAGS)
 usyslogd_CFLAGS = $(AM_CFLAGS)
 usyslogd_LDFLAGS = $(AM_LDFLAGS)

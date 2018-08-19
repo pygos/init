@@ -15,10 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef LOGFILE_H
-#define LOGFILE_H
+#ifndef SYSLOGD_H
+#define SYSLOGD_H
 
-#include "proto.h"
+
+#include <sys/types.h>
+#include <time.h>
+
+#include "config.h"
+
+
+#define SYSLOG_SOCKET PREFIXPATH "/dev/log"
+#define SYSLOG_PATH PREFIXPATH "/var/log"
+#define DEFAULT_USER "syslogd"
+#define DEFAULT_GROUP "syslogd"
+
+
+/*
+  encapsulates the split up data from a message received
+  through the local syslog socket.
+ */
+typedef struct {
+	int facility;
+	int level;
+	time_t timestamp;
+	pid_t pid;
+	const char *ident;
+	const char *message;
+} syslog_msg_t;
+
 
 enum {
 	/*
@@ -55,5 +80,10 @@ typedef struct log_backend_t {
 
 extern log_backend_t *logmgr;
 
+/*
+  Parse a message string received from the syslog socket and produce
+  a split up representation for the message.
+ */
+int syslog_msg_parse(syslog_msg_t *msg, char *str);
 
 #endif /* LOGFILE_H */
