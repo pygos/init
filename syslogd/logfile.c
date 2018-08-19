@@ -29,9 +29,6 @@
 #include "util.h"
 
 
-#define SYSLOG_PATH PREFIXPATH "/var/log"
-
-
 static const enum_map_t levels[] = {
 	{ "emergency", 0 },
 	{ "alert", 1 },
@@ -203,18 +200,6 @@ static int file_backend_init(log_backend_t *backend, int flags,
 			     size_t sizelimit)
 {
 	log_backend_file_t *log = (log_backend_file_t *)backend;
-
-	if (mkdir(SYSLOG_PATH, 0755)) {
-		if (errno != EEXIST) {
-			perror("mkdir " SYSLOG_PATH);
-			return -1;
-		}
-	}
-
-	if (chdir(SYSLOG_PATH)) {
-		perror("cd " SYSLOG_PATH);
-		return -1;
-	}
 
 	log->flags = flags;
 	log->maxsize = sizelimit;

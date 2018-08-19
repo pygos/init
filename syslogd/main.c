@@ -25,6 +25,9 @@
 #include <getopt.h>
 #include <errno.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "backend.h"
 #include "proto.h"
@@ -32,6 +35,9 @@
 
 
 #define SYSLOG_SOCKET PREFIXPATH "/dev/log"
+#define SYSLOG_PATH PREFIXPATH "/var/log"
+#define DEFAULT_USER "syslogd"
+#define DEFAULT_GROUP "syslogd"
 
 #define GPL_URL "https://gnu.org/licenses/gpl.html"
 
@@ -41,6 +47,9 @@ static const struct option long_opts[] = {
 	{ "version", no_argument, NULL, 'V' },
 	{ "rotate-replace", no_argument, NULL, 'r' },
 	{ "max-size", required_argument, NULL, 'm' },
+	{ "user", required_argument, NULL, 'u' },
+	{ "group", required_argument, NULL, 'g' },
+	{ "chroot", required_argument, NULL, 'c' },
 	{ NULL, 0, NULL, 0 },
 };
 
@@ -59,7 +68,12 @@ const char *usage_string =
 "  -h, --help             Print this help text and exit\n"
 "  -V, --version          Print version information and exit\n"
 "  -r, --rotate-replace   Replace old log files when doing log rotation.\n"
-"  -m, --max-size <size>  Automatically rotate log files bigger than this.\n";
+"  -m, --max-size <size>  Automatically rotate log files bigger than this.\n"
+"  -u, --user <name>      Run the syslog daemon as this user. If not set,\n"
+"                         try to use the user '" DEFAULT_USER "'.\n"
+"  -g, --group <name>     Run the syslog daemon as this group. If not set,\n"
+"                         try to use the group '" DEFAULT_GROUP "'.\n"
+"  -c, --chroot           If set, do a chroot into the log file path.\n";
 
 
 
@@ -67,6 +81,9 @@ static volatile sig_atomic_t syslog_run = 1;
 static volatile sig_atomic_t syslog_rotate = 0;
 static int log_flags = 0;
 static size_t max_size = 0;
+static uid_t uid = 0;
+static gid_t gid = 0;
+static bool dochroot = false;
 
 
 
@@ -117,8 +134,16 @@ static int handle_data(int fd)
 
 static void process_options(int argc, char **argv)
 {
+	struct passwd *pw = getpwnam(DEFAULT_USER);
+	struct group *grp = getgrnam(DEFAULT_GROUP);
 	char *end;
 	int i;
+
+	if (pw != NULL)
+		uid = pw->pw_uid;
+
+	if (grp != NULL)
+		gid = grp->gr_gid;
 
 	for (;;) {
 		i = getopt_long(argc, argv, short_opts, long_opts, NULL);
@@ -138,6 +163,28 @@ static void process_options(int argc, char **argv)
 				goto fail;
 			}
 			break;
+		case 'u':
+			pw = getpwnam(optarg);
+			if (pw == NULL) {
+				fprintf(stderr, "Cannot get UID for user %s\n",
+					optarg);
+				goto fail;
+			}
+			uid = pw->pw_uid;
+			break;
+		case 'g':
+			grp = getgrnam(optarg);
+			if (grp == NULL) {
+				fprintf(stderr,
+					"Cannot get GID for group %s\n",
+					optarg);
+				goto fail;
+			}
+			gid = grp->gr_gid;
+			break;
+		case 'c':
+			dochroot = true;
+			break;
 		case 'h':
 			fputs(usage_string, stdout);
 			exit(EXIT_SUCCESS);
@@ -154,6 +201,51 @@ fail:
 	exit(EXIT_FAILURE);
 }
 
+static int chroot_setup(void)
+{
+	if (mkdir(SYSLOG_PATH, 0750)) {
+		if (errno != EEXIST) {
+			perror("mkdir " SYSLOG_PATH);
+			return -1;
+		}
+	}
+
+	if (uid > 0 && gid > 0 && chown(SYSLOG_PATH, uid, gid) != 0) {
+		perror("chown " SYSLOG_PATH);
+		return -1;
+	}
+
+	if (chmod(SYSLOG_PATH, 0750)) {
+		perror("chmod " SYSLOG_PATH);
+		return -1;
+	}
+
+	if (chdir(SYSLOG_PATH)) {
+		perror("cd " SYSLOG_PATH);
+		return -1;
+	}
+
+	if (dochroot && chroot(SYSLOG_PATH) != 0) {
+		perror("chroot " SYSLOG_PATH);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int user_setup(void)
+{
+	if (gid > 0 && setresgid(gid, gid, gid) != 0) {
+		perror("setgid");
+		return -1;
+	}
+	if (uid > 0 && setresuid(uid, uid, uid) != 0) {
+		perror("setuid");
+		return -1;
+	}
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int sfd, status = EXIT_FAILURE;
@@ -164,6 +256,17 @@ int main(int argc, char **argv)
 
 	sfd = mksock(SYSLOG_SOCKET, SOCK_FLAG_EVERYONE | SOCK_FLAG_DGRAM);
 	if (sfd < 0)
+		return EXIT_FAILURE;
+
+	if (uid > 0 && gid > 0 && chown(SYSLOG_SOCKET, uid, gid) != 0) {
+		perror("chown " SYSLOG_SOCKET);
+		return -1;
+	}
+
+	if (chroot_setup())
+		return EXIT_FAILURE;
+
+	if (user_setup())
 		return EXIT_FAILURE;
 
 	if (logmgr->init(logmgr, log_flags, max_size))

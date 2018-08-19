@@ -1,5 +1,5 @@
 description "starting usyslogd"
-exec usyslogd --rotate-replace --max-size 8192
+exec usyslogd --chroot --rotate-replace --max-size 8192
 type respawn limit 5
 target boot
 after vfs
