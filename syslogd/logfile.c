@@ -108,6 +108,7 @@ static int logfile_open(logfile_t *file)
 	file->size = sb.st_size;
 	return 0;
 fail:
+	perror(file->filename);
 	close(file->fd);
 	file->fd = -1;
 	return -1;
