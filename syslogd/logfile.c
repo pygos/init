@@ -45,30 +45,30 @@ static const enum_map_t levels[] = {
 };
 
 static const enum_map_t facilities[] = {
-	{ "kernel.log", 0 },
-	{ "user.log", 1 },
-	{ "mail.log", 2 },
-	{ "daemon.log", 3 },
-	{ "auth.log", 4 },
-	{ "syslog.log", 5 },
-	{ "lpr.log", 6 },
-	{ "news.log", 7 },
-	{ "uucp.log", 8 },
-	{ "clock.log", 9 },
-	{ "authpriv.log", 10 },
-	{ "ftp.log", 11 },
-	{ "ntp.log", 12 },
-	{ "audit.log", 13 },
-	{ "alert.log", 14 },
-	{ "cron.log", 15 },
-	{ "local0.log", 16 },
-	{ "local1.log", 17 },
-	{ "local2.log", 18 },
-	{ "local3.log", 19 },
-	{ "local4.log", 20 },
-	{ "local5.log", 21 },
-	{ "local6.log", 22 },
-	{ "local7.log", 23 },
+	{ "kernel", 0 },
+	{ "user", 1 },
+	{ "mail", 2 },
+	{ "daemon", 3 },
+	{ "auth", 4 },
+	{ "syslog", 5 },
+	{ "lpr", 6 },
+	{ "news", 7 },
+	{ "uucp", 8 },
+	{ "clock", 9 },
+	{ "authpriv", 10 },
+	{ "ftp", 11 },
+	{ "ntp", 12 },
+	{ "audit", 13 },
+	{ "alert", 14 },
+	{ "cron", 15 },
+	{ "local0", 16 },
+	{ "local1", 17 },
+	{ "local2", 18 },
+	{ "local3", 19 },
+	{ "local4", 20 },
+	{ "local5", 21 },
+	{ "local6", 22 },
+	{ "local7", 23 },
 	{ NULL, 0 },
 };
 
@@ -135,7 +135,7 @@ static logfile_t *logfile_create(const char *filename)
 
 static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 {
-	const char *lvl_str;
+	const char *lvl_str, *fac_name;
 	char timebuf[32];
 	struct tm tm;
 	int ret;
@@ -150,8 +150,17 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 	gmtime_r(&msg->timestamp, &tm);
 	strftime(timebuf, sizeof(timebuf), "%FT%T", &tm);
 
-	ret = dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str, msg->pid,
-		      msg->message);
+	if (msg->ident != NULL) {
+		fac_name = enum_to_name(facilities, msg->facility);
+		if (fac_name == NULL)
+			return -1;
+
+		ret = dprintf(file->fd, "[%s][%s][%s][%u] %s", timebuf,
+			      fac_name, lvl_str, msg->pid, msg->message);
+	} else {
+		ret = dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str,
+			      msg->pid, msg->message);
+	}
 
 	fsync(file->fd);
 
@@ -229,22 +238,23 @@ static void file_backend_cleanup(log_backend_t *backend)
 static int file_backend_write(log_backend_t *backend, const syslog_msg_t *msg)
 {
 	log_backend_file_t *log = (log_backend_file_t *)backend;
-	const char *fac_name;
+	const char *ident;
 	char *filename;
 	logfile_t *f;
 	size_t len;
 
-	fac_name = enum_to_name(facilities, msg->facility);
-	if (fac_name == NULL)
-		return -1;
-
-	if (msg->ident) {
-		len = strlen(msg->ident) + 1 + strlen(fac_name) + 1;
-		filename = alloca(len);
-		sprintf(filename, "%s/%s", msg->ident, fac_name);
+	if (msg->ident != NULL) {
+		ident = msg->ident;
 	} else {
-		filename = (char *)fac_name;
+		ident = enum_to_name(facilities, msg->facility);
+		if (ident == NULL)
+			return -1;
 	}
+
+	len = strlen(ident) + strlen(".log") + 1;
+	filename = alloca(len);
+	strcpy(filename, ident);
+	strcat(filename, ".log");
 
 	for (f = log->list; f != NULL; f = f->next) {
 		if (strcmp(filename, f->filename) == 0)
@@ -252,12 +262,6 @@ static int file_backend_write(log_backend_t *backend, const syslog_msg_t *msg)
 	}
 
 	if (f == NULL) {
-		if (msg->ident != NULL && mkdir(msg->ident, 0750) != 0 &&
-		    errno != EEXIST) {
-			perror(msg->ident);
-			return -1;
-		}
-
 		f = logfile_create(filename);
 		if (f == NULL)
 			return -1;
