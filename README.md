@@ -1,43 +1,66 @@
 # About
 
-This directory contains the source code for a tiny init devised for
-the Pygos system.
+This directory contains the source code for a tiny service supervision
+framework devised for the Pygos system, consisting of an init daemon,
+a small syslog daemon and various command line utilities.
 
-The main goal of this project is to create a simple framework for:
-
-- system boot up and initialization
-- service supervision
-
-With the additional aims of having something that:
-
-- simply works
-- is easy to understand
-- is easy to configure and maintain
+The individual parts of the framework are designed to be independent of
+each other (for instance, the tiny syslogd is intended to work with *any*
+init system and other components of the framework don't depend on the presence
+of this *specific* syslog implementation) and everything that is not strictly
+part of the init system (such as the syslog daemon) can be disabled through
+the configure script.
 
 
-The init process is intended to run on top of Linux and makes use of some
-Linux specific features (e.g. signalfd), but if sufficient interest exists,
-it should still be possible to make it run on some BSDs or whatever else.
+The programs of this package are developed first and foremost for GNU/Linux
+systems, so there are some GNU and some Linux extensions used and some of the
+code may unintentionally rely on Linux specific behavior.
+
+Nevertheless, if sufficient interest exists, it should be possible to make it
+run on BSDs or other Unix-like systems, but some effort may be required.
+
 
 The init system tries to mimic the concept of unit files from systemd as those
 were considered to be a good design choice.
 
-Those parameterizeable service description files are stored in `/usr/share/init`
-by default. Services are enabled by creating a symlink in `/etc/init.d`. This
-can be done using the `service` command line tool.
+In a typical setup, the parameterizeable service description files are stored
+in `/usr/share/init` by default. Services are enabled by creating a symlink
+in `/etc/init.d`. This can be done more conveniently using the `service`
+command line tool.
 
-See [docs/services.md](docs/services.md) for more information on service
-description files.
 
-See [docs/bootup.md](docs/bootup.md) for more information on what the init
-daemon does during system boot.
+A default setup is provided, as needed for the Pygos system, including helper
+scripts for setting up mount points and for network configuration. If you want
+to use the init daemon for another system, you may have to toss out or adapt
+some of the default configuration and make your own.
 
 
 Right now, the system is in a "basically works" proof of concept stage and
 needs some more work to become usable.
 
-There are plans for *maybe* *eventually* adding support for Linux name
-spaces, seccomp filters and cgroups as needed in the medium future.
+There are plans for *maybe* *eventually* adding more fancy features like
+support for Linux name spaces, seccomp filters and cgroups or network
+back ends for the syslog daemon, but right now, features are added only
+when the need arises.
+
+
+See [docs/init.md](docs/init.md) for more information on the design,
+implementation and caveats of the init daemon.
+
+See [docs/cmdline.md](docs/cmdline.md) for an explanation on the available
+command line tools.
+
+See [docs/services.md](docs/services.md) for more information on service
+description files.
+
+See [docs/network.md](docs/network.md) for information on how the network
+configuration works.
+
+See [docs/defconfig.md](docs/defconfig.md) for an explanation on the default
+services and configuration provided with this package.
+
+See [docs/usyslogd.md](docs/usyslogd.md) for details on the tiny syslog
+implementation.
 
 
 ## Why
