@@ -132,6 +132,7 @@ int syslog_msg_parse(syslog_msg_t *msg, char *str)
 	struct tm tstamp;
 	pid_t pid = 0;
 	int priority;
+	size_t len;
 
 	memset(msg, 0, sizeof(*msg));
 
@@ -176,6 +177,11 @@ int syslog_msg_parse(syslog_msg_t *msg, char *str)
 	msg->pid = pid;
 	msg->ident = ident;
 	msg->message = str;
+
+	len = strlen(str);
+	while (len > 0 && isspace(str[len - 1]))
+		--len;
+	str[len] = '\0';
 
 	if (ident != NULL) {
 		for (ptr = ident; *ptr != '\0'; ++ptr) {

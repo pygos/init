@@ -151,10 +151,10 @@ static int logfile_write(logfile_t *file, const syslog_msg_t *msg)
 		if (fac_name == NULL)
 			return -1;
 
-		ret = dprintf(file->fd, "[%s][%s][%s][%u] %s", timebuf,
+		ret = dprintf(file->fd, "[%s][%s][%s][%u] %s\n", timebuf,
 			      fac_name, lvl_str, msg->pid, msg->message);
 	} else {
-		ret = dprintf(file->fd, "[%s][%s][%u] %s", timebuf, lvl_str,
+		ret = dprintf(file->fd, "[%s][%s][%u] %s\n", timebuf, lvl_str,
 			      msg->pid, msg->message);
 	}
 
