@@ -39,7 +39,6 @@ enum {
 	TGT_BOOT = 0,		/* run service when the system boots */
 	TGT_SHUTDOWN,		/* run service when at system shut down */
 	TGT_REBOOT,		/* run service when during system reboot */
-	TGT_CAD,		/* run service when CTRL+ALT+DEL is pressed */
 
 	TGT_MAX
 };

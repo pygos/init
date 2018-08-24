@@ -41,7 +41,7 @@ static void handle_signal(void)
 		}
 		break;
 	case SIGINT:
-		/* TODO: ctrl-alt-del */
+		supervisor_set_target(TGT_REBOOT);
 		break;
 	}
 }

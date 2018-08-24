@@ -29,7 +29,6 @@ static const enum_map_t target_map[] = {
 	{ "boot", TGT_BOOT },
 	{ "shutdown", TGT_SHUTDOWN },
 	{ "reboot", TGT_REBOOT },
-	{ "ctrlaltdel", TGT_CAD },
 	{ NULL, 0 },
 };
 
