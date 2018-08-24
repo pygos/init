@@ -1,5 +1,0 @@
-description system shutdown
-exec shutdown -npf
-type wait
-target shutdown
-after sync sigkill sigterm

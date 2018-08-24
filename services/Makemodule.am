@@ -1,21 +1,20 @@
 initdir = @TEMPLATEDIR@
 init_DATA = services/agetty services/hostname services/loopback
 init_DATA += services/sysctl services/hwclock services/sysinit
-init_DATA += services/reboot services/shutdown services/sigkill
 init_DATA += services/sigterm services/sync services/devfs
 init_DATA += services/sysfs services/procfs services/tmpfs
 init_DATA += services/vfs services/ifrename services/ifcfg
 init_DATA += services/dhcpcd services/dhcpcdmaster services/unbound
 init_DATA += services/dnsmasq services/ifdown services/modules
 init_DATA += services/network services/hostapd services/swclock
-init_DATA += services/swclocksave services/nft
+init_DATA += services/swclocksave services/nft services/sigkill
 
 if USYSLOGD
 init_DATA += services/usyslogd
 endif
 
 EXTRA_DIST += services/sysinit services/vfs services/agetty services/hostname
-EXTRA_DIST += services/hwclock services/loopback services/reboot
-EXTRA_DIST += services/shutdown services/sync services/sysctl services/tmpfs
+EXTRA_DIST += services/hwclock services/loopback
+EXTRA_DIST += services/sync services/sysctl services/tmpfs
 EXTRA_DIST += services/dhcpcd services/dhcpcdmaster services/unbound
 EXTRA_DIST += services/usyslogd services/dnsmasq services/network

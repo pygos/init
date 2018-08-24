@@ -38,8 +38,6 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/devfs $(DESTDIR)$(SVCDIR)/devfs
 	$(LN_S) $(TEMPLATEDIR)/tmpfs $(DESTDIR)$(SVCDIR)/tmpfs
 	$(LN_S) $(TEMPLATEDIR)/vfs $(DESTDIR)$(SVCDIR)/vfs
-	$(LN_S) $(TEMPLATEDIR)/shutdown $(DESTDIR)$(SVCDIR)/shutdown
-	$(LN_S) $(TEMPLATEDIR)/reboot $(DESTDIR)$(SVCDIR)/reboot
 	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@shutdown
 	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@shutdown

@@ -103,7 +103,13 @@ void target_completed(int target)
 		if (ti_sock == -1)
 			ti_sock = mksock(INITSOCK, SOCK_FLAG_ROOT_ONLY);
 		break;
-	default:
+	case TGT_SHUTDOWN:
+		for (;;)
+			reboot(RB_POWER_OFF);
+		break;
+	case TGT_REBOOT:
+		for (;;)
+			reboot(RB_AUTOBOOT);
 		break;
 	}
 }
