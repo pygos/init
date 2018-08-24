@@ -24,6 +24,9 @@ if USYSLOGD
 include syslogd/Makemodule.am
 endif
 
+install-exec-hook:
+	(cd $(DESTDIR)$(sbindir); $(LN_S) shutdown reboot)
+
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(SVCDIR)
 	$(LN_S) $(TEMPLATEDIR)/loopback $(DESTDIR)$(SVCDIR)/loopback

@@ -19,18 +19,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdio.h>
 #include <errno.h>
 
 #include <sys/reboot.h>
 #include <linux/reboot.h>
 
-#include "telinit.h"
 #include "util.h"
-
-#define STRINIFY(x) #x
-#define STRINIFY_VALUE(x) STRINIFY(x)
-#define PROGRAM_NAME STRINIFY_VALUE(PROGNAME)
 
 #define FL_FORCE 0x01
 #define FL_NOSYNC 0x02
@@ -48,9 +44,9 @@ static const struct option options[] = {
 static const char *shortopt = "hVprfn";
 
 static const char *defact_str = "power-off";
-static int defact = TI_SHUTDOWN;
+static int defact = RB_POWER_OFF;
 
-static NORETURN void usage(int status)
+static NORETURN void usage(const char *progname, int status)
 {
 	fprintf(status == EXIT_SUCCESS ? stdout : stderr,
 "%s [OPTIONS...]\n\n"
@@ -63,32 +59,34 @@ static NORETURN void usage(int status)
 "                   init system.\n"
 "   -n, --no-sync   Don't sync storage media before power-off or reboot.\n\n"
 "If no option is specified, the default action is %s.\n",
-	PROGRAM_NAME, defact_str);
+	progname, defact_str);
 	exit(status);
 }
 
-static NORETURN void version(void)
+static NORETURN void version(const char *progname)
 {
-	fputs(
-PROGRAM_NAME " (Pygos init) " PACKAGE_VERSION "\n"
+	fprintf(stdout, 
+"%s (Pygos init) %s\n"
 "Copyright (C) 2018 David Oberhollenzer\n"
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law.\n",
-	stdout);
+	progname, PACKAGE_VERSION);
 
 	exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char **argv)
 {
-	int c, fd, flags = 0;
-	ti_msg_t msg;
-	ssize_t ret;
+	int c, ret, flags = 0;
+	char *ptr;
 
-	if (!strcmp(PROGRAM_NAME, "reboot")) {
+	ptr = strrchr(argv[0], '/');
+	ptr = (ptr == NULL) ? argv[0] : (ptr + 1);
+
+	if (strcmp(ptr, "reboot") == 0) {
 		defact_str = "reboot";
-		defact = TI_REBOOT;
+		defact = RB_AUTOBOOT;
 	}
 
 	while (1) {
@@ -104,53 +102,42 @@ int main(int argc, char **argv)
 			flags |= FL_NOSYNC;
 			break;
 		case 'p':
-			defact = TI_SHUTDOWN;
+			defact = RB_POWER_OFF;
 			break;
 		case 'r':
-			defact = TI_REBOOT;
+			defact = RB_AUTOBOOT;
 			break;
 		case 'V':
-			version();
+			version(ptr);
 		case 'h':
-			usage(EXIT_SUCCESS);
+			usage(ptr, EXIT_SUCCESS);
 		default:
-			exit(EXIT_FAILURE);
+			usage(ptr, EXIT_FAILURE);
 		}
 	}
 
 	if (flags & FL_FORCE) {
 		if (!(flags & FL_NOSYNC))
 			sync();
-
-		switch (defact) {
-		case TI_REBOOT:
-			reboot(RB_AUTOBOOT);
-			break;
-		case TI_SHUTDOWN:
-			reboot(RB_POWER_OFF);
-			break;
-		}
-
+		reboot(defact);
 		perror("reboot system call");
 		return EXIT_FAILURE;
 	}
 
-	fd = opensock();
-	if (fd < 0)
-		return EXIT_FAILURE;
-
-	msg.type = defact;
-retry:
-	ret = write(fd, &msg, sizeof(msg));
-
-	if (ret < 0) {
-		if (errno == EINTR)
-			goto retry;
-		perror("write on init socket");
-		close(fd);
-		return EXIT_FAILURE;
+	switch (defact) {
+	case RB_AUTOBOOT:
+		ret = kill(1, SIGINT);
+		break;
+	case RB_POWER_OFF:
+		ret = kill(1, SIGTERM);
+		break;
+	default:
+		return EXIT_SUCCESS;
 	}
 
-	close(fd);
+	if (ret) {
+		perror("sending signal to init");
+		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
