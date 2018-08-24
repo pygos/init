@@ -49,18 +49,3 @@ pid_t runsvc(service_t *svc)
 
 	return pid;
 }
-
-int runsvc_wait(service_t *svc)
-{
-	pid_t ret, pid = runsvc(svc);
-	int status;
-
-	if (pid == -1)
-		return EXIT_FAILURE;
-
-	do {
-		ret = waitpid(pid, &status, 0);
-	} while (ret != pid);
-
-	return WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE;
-}

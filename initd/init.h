@@ -18,6 +18,16 @@
 #ifndef INIT_H
 #define INIT_H
 
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <poll.h>
+
 #include <linux/reboot.h>
 #include <sys/signalfd.h>
 #include <sys/reboot.h>
@@ -36,6 +46,10 @@ enum {
 	STATUS_STARTED,
 };
 
+/********** main.c **********/
+
+void target_completed(int target);
+
 /********** runsvc.c **********/
 
 /*
@@ -44,12 +58,6 @@ enum {
 	Returns the pid of the child process containing the runsvc instance.
 */
 pid_t runsvc(service_t *svc);
-
-/*
-	Start a service using runsvc, but wait until the child process
-	terminats and return its exit status.
-*/
-int runsvc_wait(service_t *svc);
 
 /********** status.c **********/
 
@@ -64,25 +72,15 @@ int runsvc_wait(service_t *svc);
 */
 void print_status(const char *msg, int type, bool update);
 
-/********** svclist.c **********/
+/********** supervisor.c **********/
 
-/*
-	Returns true if the list of running services contains
-	single shot processes.
-*/
-bool svclist_have_singleshot(void);
+void supervisor_handle_exited(pid_t pid, int status);
 
-/* Add a service to the list of running services */
-void svclist_add(service_t *svc);
+void supervisor_set_target(int next);
 
-/*
-	Remove a service, identifierd by PID, from the list of
-	running services.
+void supervisor_init(void);
 
-	Returns the service identified by the PID or NULL if there
-	is no such service.
-*/
-service_t *svclist_remove(pid_t pid);
+bool supervisor_process_queues(void);
 
 /********** signal_<platform>.c **********/
 

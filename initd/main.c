@@ -15,60 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/socket.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <errno.h>
-#include <poll.h>
-
 #include "init.h"
 
-static service_list_t cfg;
+static int ti_sock = -1;
+static int sigfd = -1;
 
-static int target = TGT_BOOT;		/* runlevel we are targetting */
-static int runlevel = -1;		/* runlevel we are currently on */
-
-static void handle_exited(service_t *svc)
-{
-	switch (svc->type) {
-	case SVC_RESPAWN:
-		if (target == TGT_REBOOT || target == TGT_SHUTDOWN)
-			break;
-
-		if (svc->rspwn_limit > 0) {
-			svc->rspwn_limit -= 1;
-
-			if (svc->rspwn_limit == 0) {
-				print_status(svc->desc, STATUS_FAIL, false);
-				break;
-			}
-		}
-
-		svc->pid = runsvc(svc);
-		if (svc->pid == -1) {
-			print_status(svc->desc, STATUS_FAIL, false);
-			break;
-		}
-
-		svclist_add(svc);
-		return;
-	case SVC_ONCE:
-		print_status(svc->desc,
-			     svc->status == EXIT_SUCCESS ?
-			     STATUS_OK : STATUS_FAIL, false);
-		break;
-	}
-	delsvc(svc);
-}
-
-static void handle_signal(int sigfd)
+static void handle_signal(void)
 {
 	struct signalfd_siginfo info;
-	service_t *svc;
 	int status;
 	pid_t pid;
 
@@ -83,50 +37,12 @@ static void handle_signal(int sigfd)
 			status = WIFEXITED(status) ? WEXITSTATUS(status) :
 						     EXIT_FAILURE;
 
-			svc = svclist_remove(pid);
-
-			if (svc != NULL)
-				handle_exited(svc);
+			supervisor_handle_exited(pid, status);
 		}
 		break;
 	case SIGINT:
 		/* TODO: ctrl-alt-del */
 		break;
-	}
-}
-
-static void start_runlevel(int level)
-{
-	service_t *svc;
-	int status;
-
-	while (cfg.targets[level] != NULL) {
-		svc = cfg.targets[level];
-		cfg.targets[level] = svc->next;
-
-		if (svc->type == SVC_WAIT) {
-			print_status(svc->desc, STATUS_WAIT, false);
-
-			status = runsvc_wait(svc);
-
-			print_status(svc->desc,
-				     status == EXIT_SUCCESS ?
-				     STATUS_OK : STATUS_FAIL,
-				     true);
-			delsvc(svc);
-		} else {
-			svc->pid = runsvc(svc);
-			if (svc->pid == -1) {
-				print_status(svc->desc, STATUS_FAIL, false);
-				delsvc(svc);
-				continue;
-			}
-
-			if (svc->type == SVC_RESPAWN)
-				print_status(svc->desc, STATUS_STARTED, false);
-
-			svclist_add(svc);
-		}
 	}
 }
 
@@ -151,7 +67,7 @@ retry:
 	return 0;
 }
 
-static void handle_tellinit(int ti_sock)
+static void handle_tellinit(void)
 {
 	ti_msg_t msg;
 	int fd;
@@ -167,19 +83,31 @@ static void handle_tellinit(int ti_sock)
 
 	switch (msg.type) {
 	case TI_SHUTDOWN:
-		target = TGT_SHUTDOWN;
+		supervisor_set_target(TGT_SHUTDOWN);
 		break;
 	case TI_REBOOT:
-		target = TGT_REBOOT;
+		supervisor_set_target(TGT_REBOOT);
 		break;
 	}
 
 	close(fd);
 }
 
+void target_completed(int target)
+{
+	switch (target) {
+	case TGT_BOOT:
+		if (ti_sock == -1)
+			ti_sock = mksock(INITSOCK, SOCK_FLAG_ROOT_ONLY);
+		break;
+	default:
+		break;
+	}
+}
+
 int main(void)
 {
-	int ti_sock = -1, sfd, ret, count;
+	int ret, count;
 	struct pollfd pfd[2];
 
 	if (getpid() != 1) {
@@ -187,44 +115,35 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	if (svcscan(SVCDIR, &cfg, RDSVC_NO_EXEC | RDSVC_NO_CTTY)) {
-		fputs("Error reading service list from " SVCDIR "\n"
-			"Trying to continue anyway\n", stderr);
-	}
+	supervisor_init();
 
-	sfd = sigsetup();
-	if (sfd < 0)
+	sigfd = sigsetup();
+	if (sigfd < 0)
 		return -1;
 
-	memset(pfd, 0, sizeof(pfd));
-	pfd[0].fd = sfd;
-	pfd[0].events = POLLIN;
-	count = 1;
-
 	for (;;) {
-		if (!svclist_have_singleshot() && target != runlevel) {
-			start_runlevel(target);
-			runlevel = target;
+		while (supervisor_process_queues())
+			;
 
-			if (target == TGT_BOOT && ti_sock == -1) {
-				ti_sock = mksock(INITSOCK, SOCK_FLAG_ROOT_ONLY);
-				if (ti_sock != -1) {
-					pfd[1].fd = ti_sock;
-					pfd[1].events = POLLIN;
-					count = 2;
-				}
-			}
-			continue;
+		memset(pfd, 0, sizeof(pfd));
+		pfd[0].fd = sigfd;
+		pfd[0].events = POLLIN;
+		count = 1;
+
+		if (ti_sock != -1) {
+			pfd[1].fd = ti_sock;
+			pfd[1].events = POLLIN;
+			count = 2;
 		}
 
 		ret = poll(pfd, count, -1);
 
 		if (ret > 0) {
 			if (pfd[0].revents & POLLIN)
-				handle_signal(sfd);
+				handle_signal();
 
 			if (ti_sock != -1 && pfd[1].revents & POLLIN)
-				handle_tellinit(ti_sock);
+				handle_tellinit();
 		}
 	}
 
