@@ -40,6 +40,9 @@ static void handle_signal(void)
 			supervisor_handle_exited(pid, status);
 		}
 		break;
+	case SIGTERM:
+		supervisor_set_target(TGT_SHUTDOWN);
+		break;
 	case SIGINT:
 		supervisor_set_target(TGT_REBOOT);
 		break;
