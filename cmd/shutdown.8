@@ -1,0 +1,48 @@
+.TH shutdown 8 "August 2018" "Pygos Init"
+.SH NAME
+shutdown \- shutdown or reboot the system
+.SH SYNOPSIS
+.B shutdown
+[options]
+.SH DESCRIPTION
+The shutdown command can notify the init system to shut the system down or to
+reboot the system.
+.PP
+If no option is specified, the default action is to initiate a shutdown.
+.PP
+If invoked as reboot, for instance through a symlink or hard link, the default
+action is to reboot the system.
+.SH OPTIONS
+.TP
+.BR \-h , " \-\-help"
+Display a help text and exit.
+.TP
+.BR \-V , " \-\-version"
+Print version information and exit.
+.TP
+.BR \-p , " \-\-poweroff"
+Do a shutdown and turn the system power off if possible.
+.TP
+.BR \-r , " \-\-reboot"
+Do a system reboot.
+.TP
+.BR \-f , " \-\-force"
+Bypass the init system and directly call the kernel to do a hard
+shutdown or reboot.
+.TP
+.BR \-n , " \-\-no-sync"
+If \-\-force is specified, do not call
+.BR sync (2)
+before bringing the system down.
+.SH AVAILABILITY
+This program is part of the Pygos init system.
+.SH COPYRIGHT
+Copyright \(co 2018 David Oberhollenzer
+.br
+License: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+.BR sync (2),
+.BR reboot (2)

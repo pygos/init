@@ -35,6 +35,8 @@ syslog_LDADD = libinit.a
 bin_PROGRAMS += syslog
 endif
 
+dist_man8_MANS += cmd/shutdown.8
+
 EXTRA_DIST += $(SRVHEADERS)
 
 sbin_PROGRAMS += service shutdown
