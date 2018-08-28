@@ -33,6 +33,7 @@ syslog_LDFLAGS = $(AM_LDFLAGS)
 syslog_LDADD = libinit.a
 
 bin_PROGRAMS += syslog
+dist_man1_MANS += cmd/syslog.1
 endif
 
 dist_man8_MANS += cmd/shutdown.8

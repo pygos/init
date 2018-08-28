@@ -14,6 +14,7 @@ helperdir = @SCRIPTDIR@
 helper_PROGRAMS =
 helper_SCRIPTS =
 
+dist_man1_MANS =
 dist_man8_MANS =
 
 include lib/Makemodule.am
