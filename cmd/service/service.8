@@ -1,0 +1,53 @@
+.TH service 8 "August 2018" "Pygos Init"
+.SH NAME
+service \- configure or administrate system services
+.SH SYNOPSIS
+.B service
+<command>
+[options]
+.SH DESCRIPTION
+The service command can be used to configure, control and administrate services
+supervised by the init daemon.
+.SH COMMANDS
+.TP
+.BR help " " \fI[command]\fP
+If no arguments are provided, displays a short help text and a list of all
+available commands with a short description for each.
+
+If a command name is specified, displays a more elaborate description and
+usage information for the specified command.
+.TP
+.BR list " " \fI[target]\fP
+Displays a list of currently enabled services. If an optional target is
+specified, lists services only for this target, otherwise, list services
+for all targets.
+.TP
+.BR enable " " \fI<command>\fP " " \fI[arguments]\fP
+Enable (but do not start) a system service by creating a symlink in the
+configuration directory, pointing to the service template file.
+
+An optional argument can be supplied to parameterize the template.
+.TP
+.BR disable " " \fI<command>\fP " " \fI[arguments]\fP
+Disable (but do not stop) a system service by removing the corresponding
+symlink in the configuration directory.
+
+If the service is parameterized, arguments have to be specified to disable
+the desired service instance.
+.TP
+.BR dumpscript " " \fI<command>\fP " " \fI[arguments]\fP
+
+Parse a service file from and produce a pseudo shell script containing the
+exact commands executed when starting the service.
+.SH AVAILABILITY
+This program is part of the Pygos init system.
+.SH COPYRIGHT
+Copyright \(co 2018 David Oberhollenzer
+.br
+License: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+.BR sync (2),
+.BR reboot (2)

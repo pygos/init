@@ -36,7 +36,7 @@ bin_PROGRAMS += syslog
 dist_man1_MANS += cmd/syslog.1
 endif
 
-dist_man8_MANS += cmd/shutdown.8
+dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 
 EXTRA_DIST += $(SRVHEADERS)
 
