@@ -30,6 +30,11 @@ int sigsetup(void)
 		return -1;
 	}
 
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGCHLD);
+	sigaddset(&mask, SIGINT);
+	sigaddset(&mask, SIGTERM);
+
 	sfd = signalfd(-1, &mask, SFD_CLOEXEC);
 	if (sfd == -1) {
 		perror("signalfd");
