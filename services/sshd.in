@@ -1,0 +1,5 @@
+description "OpenSSH server"
+type respawn limit 5
+target boot
+after network sshd_keygen
+exec "@SBINPATH@/sshd" -D

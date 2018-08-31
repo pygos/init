@@ -104,3 +104,7 @@ For the shutdown and reboot targets, the following services are executed:
    restores a somewhat usable time from a file during boot.
  * swclocksave - For systems that don't have a hardware clock, this service
    saves the current time to a file during shutdown or reboot.
+ * sshd_keygen - A wait type service that generates host keys for the OpenSSH
+   server and then disables itself.
+ * sshd - Starts an OpenSSH server after the network pseudo service and after
+   the sshd_keygen service.
