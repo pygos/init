@@ -1,3 +1,4 @@
+if USYSLOGD
 usyslogd_SOURCES = syslogd/syslogd.c syslogd/syslogd.h
 usyslogd_SOURCES += syslogd/proto.c syslogd/logfile.c
 usyslogd_CPPFLAGS = $(AM_CPPFLAGS)
@@ -6,3 +7,13 @@ usyslogd_LDFLAGS = $(AM_LDFLAGS)
 usyslogd_LDADD = libinit.a
 
 sbin_PROGRAMS += usyslogd
+endif
+
+if KLOGD
+klogd_SOURCES = syslogd/klogd.c
+klogd_CPPFLAGS = $(AM_CPPFLAGS)
+klogd_CFLAGS = $(AM_CFLAGS)
+klogd_LDFLAGS = $(AM_LDFLAGS)
+
+sbin_PROGRAMS += klogd
+endif

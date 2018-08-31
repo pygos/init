@@ -22,6 +22,7 @@ killall5
 runsvc
 syslog
 usyslogd
+klogd
 
 services/sigkill
 services/sigterm

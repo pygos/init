@@ -46,6 +46,15 @@ AC_ARG_WITH([usyslogd],
 	esac],
 	[AM_CONDITIONAL([USYSLOGD], [true])])
 
+AC_ARG_WITH([klogd],
+	[AS_HELP_STRING([--without-klogd], [Build without kernel log daemon])],
+	[case "${withval}" in
+	yes) AM_CONDITIONAL([KLOGD], [true]) ;;
+	no) AM_CONDITIONAL([KLOGD], [false]) ;;
+	*) AC_MSG_ERROR([bad value ${withval} for --without-klogd]) ;;
+	esac],
+	[AM_CONDITIONAL([KLOGD], [true])])
+
 
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])

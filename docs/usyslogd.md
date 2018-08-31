@@ -12,6 +12,15 @@ the log messages into files in the processes working directory (by default
 A simple log rotation scheme has been implemented.
 
 
+## Kernel Message Logging
+
+An additional small `klogd` daemon is provided that redirects kernel messages
+to the syslog daemon.
+
+It can be enabled or disabled independently of the `usyslogd` daemon and is
+designed to work with any other syslogd implementation.
+
+
 ## Security Considerations
 
 By default, the daemon switches its working directory to `/var/log`. The

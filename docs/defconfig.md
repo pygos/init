@@ -55,8 +55,10 @@ the `vfs` target and *before* the `sysinit` target:
 
  * hostname - reload hostname `/etc/hostname`
  * loopback - bring the loopback device up
- * usyslogd - if the `usyslogd` services is compiled with this package, this
+ * usyslogd - if the `usyslogd` service is compiled with this package, this
    service is enabled by default and starts `usyslogd`.
+ * klogd - if the `klogd` daemon is compiled with this package, this service
+   is enabled by default and starts after `usyslogd`.
  * modules - iterate over the file `/etc/modules` and try to load each module
    using modprobe.
  * sysctl - restore kernel parameters using `sysctl --system`. See `sysctl(8)`

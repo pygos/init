@@ -22,10 +22,7 @@ include cmd/Makemodule.am
 include initd/Makemodule.am
 include scripts/Makemodule.am
 include services/Makemodule.am
-
-if USYSLOGD
 include syslogd/Makemodule.am
-endif
 
 install-exec-hook:
 	(cd $(DESTDIR)$(sbindir); $(LN_S) shutdown reboot)
@@ -56,4 +53,7 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/network $(DESTDIR)$(SVCDIR)/network
 if USYSLOGD
 	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
+endif
+if KLOGD
+	$(LN_S) $(TEMPLATEDIR)/klogd $(DESTDIR)$(SVCDIR)/klogd
 endif

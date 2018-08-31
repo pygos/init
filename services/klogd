@@ -1,0 +1,6 @@
+description "starting uklogd"
+exec klogd
+type respawn limit 5
+target boot
+after usyslogd
+before sysinit
