@@ -3,4 +3,5 @@ type once
 target boot
 after dhcpcdmaster network
 
+tty /dev/null
 exec dhcpcd -n %0

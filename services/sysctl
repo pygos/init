@@ -1,4 +1,5 @@
 description configure kernel paramters
+tty /dev/null
 exec sysctl --system
 type wait
 target boot
