@@ -70,5 +70,8 @@ const char *enum_to_name(const enum_map_t *map, int value);
 */
 int mksock(const char *path, int flags);
 
+/* print a default version info and license string */
+NORETURN void print_version(const char *program);
+
 #endif /* UTIL_H */
 

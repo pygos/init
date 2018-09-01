@@ -2,6 +2,7 @@ shutdown_SOURCES = cmd/shutdown.c
 shutdown_CPPFLAGS = $(AM_CPPFLAGS)
 shutdown_CFLAGS = $(AM_CFLAGS)
 shutdown_LDFLAGS = $(AM_LDFLAGS)
+shutdown_LDADD = libinit.a
 
 runsvc_SOURCES = cmd/runsvc/runsvc.c cmd/runsvc/env.c cmd/runsvc/runsvc.h
 runsvc_CPPFLAGS = $(AM_CPPFLAGS)

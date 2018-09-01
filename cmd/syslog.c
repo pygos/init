@@ -72,13 +72,6 @@ static const struct option options[] = {
 
 static const char *shortopt = "hVcf:l:i:";
 
-static const char *versiontext =
-"syslog (Pygos init) "PACKAGE_VERSION"\n"
-"Copyright (C) 2018 David Oberhollenzer\n"
-"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n"
-"This is free software: you are free to change and redistribute it.\n"
-"There is NO WARRANTY, to the extent permitted by law.\n";
-
 static const char *helptext =
 "Usage: syslog [OPTION]... [STRING]...\n\n"
 "Concatenate the given STRINGs and send a log message to the syslog daemon.\n"
@@ -123,12 +116,6 @@ static NORETURN void usage(int status)
 	}
 
 	exit(status);
-}
-
-static NORETURN void version(void)
-{
-	fputs(versiontext, stdout);
-	exit(EXIT_SUCCESS);
 }
 
 static int readint(const char *str)
@@ -188,7 +175,7 @@ static void process_options(int argc, char **argv)
 		case 'h':
 			usage(EXIT_SUCCESS);
 		case 'V':
-			version();
+			print_version("syslog");
 		default:
 			usage(EXIT_FAILURE);
 		}

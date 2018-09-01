@@ -14,6 +14,7 @@ klogd_SOURCES = syslogd/klogd.c
 klogd_CPPFLAGS = $(AM_CPPFLAGS)
 klogd_CFLAGS = $(AM_CFLAGS)
 klogd_LDFLAGS = $(AM_LDFLAGS)
+klogd_LDADD = libinit.a
 
 sbin_PROGRAMS += klogd
 endif
