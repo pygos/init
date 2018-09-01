@@ -40,14 +40,14 @@ static const struct option long_opts[] = {
 	{ "help", no_argument, NULL, 'h' },
 	{ "version", no_argument, NULL, 'V' },
 	{ "rotate-replace", no_argument, NULL, 'r' },
+	{ "chroot", no_argument, NULL, 'c' },
 	{ "max-size", required_argument, NULL, 'm' },
 	{ "user", required_argument, NULL, 'u' },
 	{ "group", required_argument, NULL, 'g' },
-	{ "chroot", required_argument, NULL, 'c' },
 	{ NULL, 0, NULL, 0 },
 };
 
-const char *short_opts = "hVrm:";
+static const char *short_opts = "hVcrm:u:g:";
 
 const char *version_string =
 "usyslogd (pygos init) " PACKAGE_VERSION "\n"
