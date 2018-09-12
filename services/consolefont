@@ -1,0 +1,6 @@
+description set console font
+type once
+target boot
+before sysinit
+after vfs
+exec setfont %0

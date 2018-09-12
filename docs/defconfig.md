@@ -86,6 +86,8 @@ For the shutdown and reboot targets, the following services are executed:
 
  * agetty - A parameterizeable, respawn type `agetty` service. The first
    parameter is the terminal device that the getty should run on.
+ * consolefont - If enabled, run once before sysinit. Sets the console font
+   to the first parameter.
  * dhcpcdmaster - If one or more network interfaces should be configured using
    dhcpcd, this service starts a central `dhcpcd` master instance.
  * dhcpcd - A parameterizeable single shot service that signals the `dhcpcd`
