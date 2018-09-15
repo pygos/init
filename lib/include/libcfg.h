@@ -95,4 +95,13 @@ int unescape(char *src);
 */
 int pack_argv(char *str);
 
+/*
+	Split the current input line into a space seperted keyword
+	(alphabetical characters only) and a value (the rest of the line).
+
+	If errors are encounted, prints a diagnostic message to stderr and
+	returns -1. On success, zero is returned.
+ */
+int splitkv(rdline_t *rd, char **k, char **v);
+
 #endif /* LIBCONFIG_H */

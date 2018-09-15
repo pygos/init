@@ -226,33 +226,6 @@ static const struct svc_param {
 	{ "after", 0, RDSVC_NO_DEPS, svc_after },
 };
 
-static int splitkv(rdline_t *rd, char **k, char **v)
-{
-	char *key = rd->buffer, *value = rd->buffer;
-
-	while (*value != ' ' && *value != '\0') {
-		if (!isalpha(*value)) {
-			fprintf(stderr,
-				"%s: %zu: unexpected '%c' in keyword\n",
-				rd->filename, rd->lineno, *value);
-			return -1;
-		}
-		++value;
-	}
-
-	if (*value != ' ') {
-		fprintf(stderr, "%s: %zu: expected argument after '%s'\n",
-			rd->filename, rd->lineno, key);
-		return -1;
-	}
-
-	*(value++) = '\0';
-
-	*k = key;
-	*v = value;
-	return 0;
-}
-
 static const struct svc_param *find_param(rdline_t *rd, const char *name)
 {
 	size_t i;

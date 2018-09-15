@@ -9,6 +9,7 @@ libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
 libcfg_a_SOURCES = lib/libcfg/rdline.c lib/libcfg/unescape.c
+libcfg_a_SOURCES += lib/libcfg/splitkv.c
 libcfg_a_SOURCES += lib/libcfg/pack_argv.c lib/include/libcfg.h
 libcfg_a_CPPFLAGS = $(AM_CPPFLAGS)
 libcfg_a_CFLAGS = $(AM_CFLAGS)
