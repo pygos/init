@@ -19,6 +19,7 @@
 #define LIBCONFIG_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct {
 	int fd;			/* input file descriptor */
@@ -37,6 +38,20 @@ typedef struct {
 	bool escape;		/* reading an escape sequence? */
 	bool comment;		/* inside a comment */
 } rdline_t;
+
+typedef struct {
+	/* keyword to map the callback to */
+	const char *key;
+
+	/*
+		If set, allow grouping repetitions of the keyword in a single
+		multi line '{' ... '}' block. The callback is called for each
+		line.
+	 */
+	unsigned int allow_block : 1;
+
+	int (*handle)(void *obj, char *arg, rdline_t *rd, int flags);
+} cfg_param_t;
 
 /*
 	Initialize the config line scanner.
@@ -103,5 +118,14 @@ int pack_argv(char *str);
 	returns -1. On success, zero is returned.
  */
 int splitkv(rdline_t *rd, char **k, char **v);
+
+/*
+	Parse a configuration file containing '<keyword> [arguments...]' lines.
+	The cfgobj and flags are passed to the callback in the params array.
+
+	Returns zero on success.
+ */
+int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
+	  int flags);
 
 #endif /* LIBCONFIG_H */

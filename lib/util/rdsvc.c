@@ -60,16 +60,24 @@ static int try_pack_argv(char *str, rdline_t *rd)
 	return count;
 }
 
-static int svc_desc(service_t *svc, char *arg, rdline_t *rd)
+static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
+	(void)flags;
+
 	if (try_unescape(arg, rd))
 		return -1;
 	svc->desc = try_strdup(arg, rd);
 	return svc->desc == NULL ? -1 : 0;
 }
 
-static int svc_tty(service_t *svc, char *arg, rdline_t *rd)
+static int svc_tty(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
+
+	if (flags & RDSVC_NO_CTTY)
+		return 0;
+
 	if (strncmp(arg, "truncate", 8) == 0 && isspace(arg[8])) {
 		svc->flags |= SVC_FLAG_TRUNCATE_OUT;
 		arg += 8;
@@ -84,9 +92,13 @@ static int svc_tty(service_t *svc, char *arg, rdline_t *rd)
 	return svc->ctty == NULL ? -1 : 0;
 }
 
-static int svc_exec(service_t *svc, char *arg, rdline_t *rd)
+static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
 	exec_t *e, *end;
+
+	if (flags & RDSVC_NO_EXEC)
+		return 0;
 
 	e = calloc(1, sizeof(*e) + strlen(arg) + 1);
 	if (e == NULL) {
@@ -111,8 +123,13 @@ static int svc_exec(service_t *svc, char *arg, rdline_t *rd)
 	return 0;
 }
 
-static int svc_before(service_t *svc, char *arg, rdline_t *rd)
+static int svc_before(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
+
+	if (flags & RDSVC_NO_DEPS)
+		return 0;
+
 	if (svc->before != NULL) {
 		fprintf(stderr, "%s: %zu: 'before' dependencies respecified\n",
 			rd->filename, rd->lineno);
@@ -127,8 +144,13 @@ static int svc_before(service_t *svc, char *arg, rdline_t *rd)
 	return (svc->num_before < 0) ? -1 : 0;
 }
 
-static int svc_after(service_t *svc, char *arg, rdline_t *rd)
+static int svc_after(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
+
+	if (flags & RDSVC_NO_DEPS)
+		return 0;
+
 	if (svc->after != NULL) {
 		fprintf(stderr, "%s: %zu: 'after' dependencies respecified\n",
 			rd->filename, rd->lineno);
@@ -143,9 +165,11 @@ static int svc_after(service_t *svc, char *arg, rdline_t *rd)
 	return (svc->num_after < 0) ? -1 : 0;
 }
 
-static int svc_type(service_t *svc, char *arg, rdline_t *rd)
+static int svc_type(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
 	int count = try_pack_argv(arg, rd);
+	(void)flags;
 
 	if (count < 1)
 		return -1;
@@ -189,9 +213,11 @@ fail_limit:
 	return -1;
 }
 
-static int svc_target(service_t *svc, char *arg, rdline_t *rd)
+static int svc_target(void *user, char *arg, rdline_t *rd, int flags)
 {
+	service_t *svc = user;
 	int target;
+	(void)flags;
 
 	if (try_unescape(arg, rd))
 		return -1;
@@ -208,48 +234,23 @@ static int svc_target(service_t *svc, char *arg, rdline_t *rd)
 	return 0;
 }
 
-static const struct svc_param {
-	const char *key;
-
-	unsigned int allow_block : 1;
-
-	int flags;
-
-	int (*handle)(service_t *svc, char *arg, rdline_t *rd);
-} svc_params[] = {
-	{ "description", 0, 0, svc_desc },
-	{ "exec", 1, RDSVC_NO_EXEC, svc_exec },
-	{ "type", 0, 0, svc_type },
-	{ "target", 0, 0, svc_target },
-	{ "tty", 0, RDSVC_NO_CTTY, svc_tty },
-	{ "before", 0, RDSVC_NO_DEPS, svc_before },
-	{ "after", 0, RDSVC_NO_DEPS, svc_after },
+static const cfg_param_t svc_params[] = {
+	{ "description", 0, svc_desc },
+	{ "exec", 1, svc_exec },
+	{ "type", 0, svc_type },
+	{ "target", 0, svc_target },
+	{ "tty", 0, svc_tty },
+	{ "before", 0, svc_before },
+	{ "after", 0, svc_after },
 };
-
-static const struct svc_param *find_param(rdline_t *rd, const char *name)
-{
-	size_t i;
-
-	for (i = 0; i < ARRAY_SIZE(svc_params); ++i) {
-		if (!strcmp(svc_params[i].key, name))
-			return svc_params + i;
-	}
-
-	fprintf(stderr, "%s: %zu: unknown keyword '%s'\n",
-		rd->filename, rd->lineno, name);
-	return NULL;
-}
-
 
 service_t *rdsvc(int dirfd, const char *filename, int flags)
 {
-	const struct svc_param *p;
 	const char *arg, *args[1];
 	service_t *svc = NULL;
-	char *key, *value;
 	size_t argc, nlen;
 	rdline_t rd;
-	int fd, ret;
+	int fd;
 
 	fd = openat(dirfd, filename, O_RDONLY);
 	if (fd < 0) {
@@ -281,54 +282,11 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 
 	memcpy(svc->name, filename, nlen);
 
-	while ((ret = rdline(&rd)) == 0) {
-		if (splitkv(&rd, &key, &value))
-			goto fail;
-
-		p = find_param(&rd, key);
-		if (p == NULL)
-			goto fail;
-
-		if (p->allow_block && *value == '{') {
-			for (++value; *value == ' '; ++value)
-				;
-
-			if (!(flags & p->flags)) {
-				if (*value != '\0' &&
-				    p->handle(svc, value, &rd)) {
-					goto fail;
-				}
-			}
-
-			while ((ret = rdline(&rd)) == 0) {
-				if (strcmp(rd.buffer, "}") == 0)
-					break;
-				if (flags & p->flags)
-					continue;
-				if (p->handle(svc, rd.buffer, &rd))
-					goto fail;
-			}
-
-			if (ret < 0)
-				goto fail;
-			if (ret > 0)
-				goto fail_bra;
-		} else {
-			if (flags & p->flags)
-				continue;
-			if (p->handle(svc, value, &rd))
-				goto fail;
-		}
-	}
-
-	if (ret < 0)
+	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags))
 		goto fail;
 
 	close(fd);
 	return svc;
-fail_bra:
-	fprintf(stderr, "%s: missing '}' before end-of-file\n", filename);
-	goto fail;
 fail_oom:
 	fputs("out of memory\n", stderr);
 fail:

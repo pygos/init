@@ -9,11 +9,16 @@ libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
 libcfg_a_SOURCES = lib/libcfg/rdline.c lib/libcfg/unescape.c
-libcfg_a_SOURCES += lib/libcfg/splitkv.c
+libcfg_a_SOURCES += lib/libcfg/splitkv.c lib/libcfg/rdcfg.c
 libcfg_a_SOURCES += lib/libcfg/pack_argv.c lib/include/libcfg.h
 libcfg_a_CPPFLAGS = $(AM_CPPFLAGS)
 libcfg_a_CFLAGS = $(AM_CFLAGS)
 
-EXTRA_DIST += $(HEADRS) lib/include/libcfg.h
+libcron_a_SOURCES = lib/cron/rdcron.c lib/cron/delcron.c lib/cron/crontab.c
+libcron_a_SOURCES += lib/cron/cronscan.c lib/include/crontab.h
+libcron_a_CPPFLAGS = $(AM_CPPFLAGS)
+libcron_a_CFLAGS = $(AM_CFLAGS)
 
-noinst_LIBRARIES += libinit.a libcfg.a
+EXTRA_DIST += $(HEADRS) lib/include/libcfg.h lib/include/crontab.h
+
+noinst_LIBRARIES += libinit.a libcfg.a libcron.a
