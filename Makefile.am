@@ -20,6 +20,7 @@ dist_man8_MANS =
 include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am
+include crond/Makemodule.am
 include scripts/Makemodule.am
 include services/Makemodule.am
 include syslogd/Makemodule.am
@@ -51,6 +52,10 @@ install-data-local:
 	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg
 	$(LN_S) $(TEMPLATEDIR)/modules $(DESTDIR)$(SVCDIR)/modules
 	$(LN_S) $(TEMPLATEDIR)/network $(DESTDIR)$(SVCDIR)/network
+if GCROND
+	$(MKDIR_P) $(DESTDIR)$(GCRONDIR)
+	$(LN_S) $(TEMPLATEDIR)/gcrond $(DESTDIR)$(SVCDIR)/gcrond
+endif
 if USYSLOGD
 	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
 endif

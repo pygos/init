@@ -20,6 +20,8 @@
 
 #include <sys/types.h>
 
+#include "util.h"
+
 enum {
 	/*
 		Start the service in the background and continue with
@@ -122,6 +124,10 @@ int svc_type_from_string(const char *type);
 const char *svc_target_to_string(int target);
 
 int svc_target_from_string(const char *target);
+
+int setup_tty(const char *tty, bool truncate);
+
+NORETURN void argv_exec(exec_t *e);
 
 #endif /* SERVICE_H */
 

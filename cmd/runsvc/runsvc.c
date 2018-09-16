@@ -17,51 +17,6 @@
  */
 #include "runsvc.h"
 
-static int setup_tty(service_t *svc)
-{
-	int fd;
-
-	if (svc->ctty != NULL) {
-		fd = open(svc->ctty, O_RDWR);
-		if (fd < 0) {
-			perror(svc->ctty);
-			return -1;
-		}
-
-		if (svc->flags & SVC_FLAG_TRUNCATE_OUT)
-			ftruncate(fd, 0);
-
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
-
-		setsid();
-
-		dup2(fd, STDIN_FILENO);
-		dup2(fd, STDOUT_FILENO);
-		dup2(fd, STDERR_FILENO);
-		close(fd);
-	}
-
-	return 0;
-}
-
-/*****************************************************************************/
-
-static NORETURN void argv_exec(exec_t *e)
-{
-	char **argv = alloca(e->argc + 1), *ptr;
-	int i;
-
-	for (ptr = e->args, i = 0; i < e->argc; ++i, ptr += strlen(ptr) + 1)
-		argv[i] = ptr;
-
-	argv[i] = NULL;
-	execvp(argv[0], argv);
-	perror(argv[0]);
-	exit(EXIT_FAILURE);
-}
-
 static int runlst_wait(exec_t *list)
 {
 	pid_t ret, pid;
@@ -128,7 +83,7 @@ int main(int argc, char **argv)
 	if (initenv())
 		goto out;
 
-	if (setup_tty(svc))
+	if (setup_tty(svc->ctty, (svc->flags & SVC_FLAG_TRUNCATE_OUT) != 0))
 		goto out;
 
 	if (svc->exec->next == NULL)

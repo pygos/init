@@ -490,6 +490,11 @@ crontab_t *rdcron(int dirfd, const char *filename)
 	}
 
 	cron->pid = -1;
+	cron->minute = 0xFFFFFFFFFFFFFFFFUL;
+	cron->hour = 0xFFFFFFFF;
+	cron->dayofmonth = 0xFFFFFFFF;
+	cron->month = 0xFFFF;
+	cron->dayofweek = 0xFF;
 
 	rdline_init(&rd, fd, filename, 0, NULL);
 	ret = rdcfg(cron, &rd, cron_params, ARRAY_SIZE(cron_params), 0);

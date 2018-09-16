@@ -23,6 +23,7 @@ runsvc
 syslog
 usyslogd
 klogd
+gcrond
 
 services/sigkill
 services/sigterm

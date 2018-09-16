@@ -55,9 +55,19 @@ AC_ARG_WITH([klogd],
 	esac],
 	[AM_CONDITIONAL([KLOGD], [true])])
 
+AC_ARG_WITH([gcrond],
+	[AS_HELP_STRING([--without-gcrond], [Build without gcron daemon])],
+	[case "${withval}" in
+	yes) AM_CONDITIONAL([GCROND], [true]) ;;
+	no) AM_CONDITIONAL([GCROND], [false]) ;;
+	*) AC_MSG_ERROR([bad value ${withval} for --without-gcron]) ;;
+	esac],
+	[AM_CONDITIONAL([GCROND], [true])])
+
 
 AC_CONFIG_HEADERS([lib/include/config.h])
 AC_DEFINE_DIR(SVCDIR, sysconfdir/init.d, [Startup service directory])
+AC_DEFINE_DIR(GCRONDIR, sysconfdir/gcron.d, [Cron service directory])
 AC_DEFINE_DIR(TEMPLATEDIR, datadir/init, [Service template directory])
 AC_DEFINE_DIR(SCRIPTDIR, libexecdir/init, [Helper script directory])
 AC_DEFINE_DIR(SOCKDIR, localstatedir/run, [Directory for initd socket])
