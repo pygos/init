@@ -71,6 +71,12 @@ the `sysinit` target and *before* the `network` target:
  * ifcfg - static network configuration
    Does the static network configuration outlined in [network.md](network.md)
 
+The following services are enabled by default and configured to run *after*
+the `network` target:
+
+ * gcrond - if the `gcrond` daemon is compiled with this package, this service
+   is enabled by default.
+
 
 ## Default Shutdown and Reboot Services
 
@@ -98,8 +104,6 @@ For the shutdown and reboot targets, the following services are executed:
    type service can be enabled to manage an instace of the `hostapd` program.
  * unbound - A respawn type service that manages an instance of the `unbound`
    name resolver.
- * usyslogd - A respawn type service that manages an instance of the `usyslogd`
-   syslogd implementation that is part of this package.
  * hwclock - If the system has a hardware clock, this service can restore the
    kernels clock from the hardware at bootup, between the `vfs` and `sysinit`
    targets.

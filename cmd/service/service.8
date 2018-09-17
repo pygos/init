@@ -22,7 +22,7 @@ Displays a list of currently enabled services. If an optional target is
 specified, lists services only for this target, otherwise, list services
 for all targets.
 .TP
-.BR enable " " \fI<command>\fP " " \fI[arguments]\fP
+.BR enable " " \fI<service>\fP " " \fI[arguments]\fP
 Enable (but do not start) a system service by creating a symlink in the
 configuration directory, pointing to the service template file.
 
@@ -34,7 +34,7 @@ in the gcrond configuration directory, pointing to the service file.
 
 The extension \fB.gcron\fP is automatically appended to the service name.
 .TP
-.BR disable " " \fI<command>\fP " " \fI[arguments]\fP
+.BR disable " " \fI<service>\fP " " \fI[arguments]\fP
 Disable (but do not stop) a system service by removing the corresponding
 symlink in the configuration directory.
 
@@ -45,7 +45,7 @@ the desired service instance.
 If built with support for gcrond, disable a gcron service by removing the
 corresponding symlink in the gcron configuration directory.
 .TP
-.BR dumpscript " " \fI<command>\fP " " \fI[arguments]\fP
+.BR dumpscript " " \fI<service>\fP " " \fI[arguments]\fP
 Parse a service file from and produce a pseudo shell script containing the
 exact commands executed when starting the service.
 .SH AVAILABILITY

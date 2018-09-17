@@ -13,6 +13,10 @@ Currently available service commands are:
  * disable - disable a service. If the service is parameterized, requires the
    same arguments used for enabling, to disable the specific instance of the
    service.
+ * schedule - enable a gcrond service. Only available if this package is built
+   with gcrond.
+ * unschedule - disnable a gcrond service. Only available if this package is
+   built with gcrond.
  * dumpscript - generate an equivalent shell script from the `exec` lines of
    a service after applying all parameter substitutions.
  * list - list all enabled service. A target can be specified to only list

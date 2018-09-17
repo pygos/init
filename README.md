@@ -2,7 +2,8 @@
 
 This directory contains the source code for a tiny service supervision
 framework devised for the Pygos system, consisting of an init daemon,
-a small syslog daemon and various command line utilities.
+a small syslog daemon, a _definitely_ non standards compliant cron
+implementation and various command line utilities.
 
 The individual parts of the framework are designed to be independent of
 each other (for instance, the tiny syslogd is intended to work with *any*
@@ -62,6 +63,8 @@ services and configuration provided with this package.
 See [docs/usyslogd.md](docs/usyslogd.md) for details on the tiny syslog
 implementation.
 
+See [docs/gcron.md](docs/gcron.md) for details on the cron implementation.
+
 
 ## Why
 
@@ -110,4 +113,3 @@ that have been considered include:
 
     Nice and simple. Probably the best fit if the rest of your user space is
     busybox as well.
-
