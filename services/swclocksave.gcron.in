@@ -1,0 +1,3 @@
+interval hourly
+tty truncate @STATEFILESPATH@/swclock
+exec date --utc +%%m%%d%%H%%M%%Y.%%S

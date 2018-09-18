@@ -10,6 +10,10 @@ init_DATA += services/network services/hostapd services/swclock
 init_DATA += services/swclocksave services/nft services/sigkill
 init_DATA += services/sshd services/sshd_keygen services/consolefont
 
+if GCROND
+init_DATA += services/swclocksave.gcron
+endif
+
 if USYSLOGD
 init_DATA += services/usyslogd
 endif
