@@ -26,6 +26,11 @@ service_CFLAGS = $(AM_CFLAGS)
 service_LDFLAGS = $(AM_LDFLAGS)
 service_LDADD = libinit.a libcfg.a
 
+if GCROND
+service_SOURCES += cmd/service/schedule.c
+service_SOURCES += cmd/service/unschedule.c
+endif
+
 if USYSLOGD
 syslog_SOURCES = cmd/syslog.c
 syslog_CPPFLAGS = $(AM_CPPFLAGS)
