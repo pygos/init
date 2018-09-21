@@ -489,7 +489,6 @@ crontab_t *rdcron(int dirfd, const char *filename)
 		goto out;
 	}
 
-	cron->pid = -1;
 	cron->minute = 0xFFFFFFFFFFFFFFFFUL;
 	cron->hour = 0xFFFFFFFF;
 	cron->dayofmonth = 0xFFFFFFFF;

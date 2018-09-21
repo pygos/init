@@ -33,10 +33,8 @@ int runjob(crontab_t *tab)
 		return -1;
 	}
 
-	if (pid != 0) {
-		tab->pid = pid;
+	if (pid != 0)
 		return 0;
-	}
 
 	/* XXX: inside the child process */
 	memset(&act, 0, sizeof(act));
@@ -44,6 +42,7 @@ int runjob(crontab_t *tab)
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGTERM, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
+	sigaction(SIGCHLD, &act, NULL);
 
 	if (setup_tty(tab->ctty, tab->tty_truncate))
 		exit(EXIT_FAILURE);

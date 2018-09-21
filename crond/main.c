@@ -79,6 +79,8 @@ static void runjobs(void)
 
 static void sighandler(int signo)
 {
+	pid_t pid;
+
 	switch (signo) {
 	case SIGINT:
 	case SIGTERM:
@@ -87,6 +89,10 @@ static void sighandler(int signo)
 	case SIGHUP:
 		rescan = 1;
 		break;
+	case SIGCHLD:
+		while ((pid = waitpid(-1, NULL, WNOHANG)) != -1)
+			;
+		break;
 	}
 }
 
@@ -94,15 +100,14 @@ int main(void)
 {
 	struct timespec stime;
 	struct sigaction act;
-	crontab_t *t;
 	int timeout;
-	pid_t pid;
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = sighandler;
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGTERM, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
+	sigaction(SIGCHLD, &act, NULL);
 
 	while (run) {
 		if (rescan == 1) {
@@ -122,15 +127,6 @@ int main(void)
 			if (errno != EINTR) {
 				perror("nanosleep");
 				break;
-			}
-		}
-
-		while ((pid = waitpid(-1, NULL, WNOHANG)) != -1) {
-			for (t = jobs; t != NULL; t = t->next) {
-				if (t->pid == pid) {
-					t->pid = -1;
-					break;
-				}
 			}
 		}
 	}
