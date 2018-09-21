@@ -1,4 +1,5 @@
 helper_SCRIPTS += scripts/devfs.sh scripts/trymount.sh scripts/ifrename.sh
 helper_SCRIPTS += scripts/ifcfg.sh scripts/ifdown.sh scripts/modules_load.sh
+helper_SCRIPTS += scripts/setntpdate.sh
 
-EXTRA_DIST += scripts/trymount.sh scripts/ifdown.sh
+EXTRA_DIST += scripts/trymount.sh scripts/ifdown.sh scripts/setntpdate.sh
