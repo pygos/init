@@ -116,3 +116,5 @@ For the shutdown and reboot targets, the following services are executed:
    server and then disables itself.
  * sshd - Starts an OpenSSH server after the network pseudo service and after
    the sshd_keygen service.
+ * nginx - Starts the Nginx server after the network pseudo serivce.
+

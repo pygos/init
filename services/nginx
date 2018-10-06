@@ -1,0 +1,5 @@
+description "start nginx web server"
+type once
+target boot
+after network
+exec nginx
