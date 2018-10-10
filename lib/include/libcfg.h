@@ -20,23 +20,16 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct {
-	int fd;			/* input file descriptor */
-	const char *argstr;	/* if not NULL, read from this instead */
-
 	const char *filename;	/* input file name */
 	size_t lineno;		/* current line number */
-
-	size_t i;		/* buffer offset */
-	char buffer[256];	/* current line, null-terminated */
+	FILE *fp;
+	char *line;
 
 	int argc;
 	const char *const *argv;
-
-	bool string;		/* inside a string? */
-	bool escape;		/* reading an escape sequence? */
-	bool comment;		/* inside a comment */
 } rdline_t;
 
 typedef struct {
@@ -63,6 +56,8 @@ typedef struct {
 void rdline_init(rdline_t *t, int fd, const char *filename,
 		 int argc, const char *const *argv);
 
+void rdline_cleanup(rdline_t *t);
+
 /*
 	Read from file until end-of-file or a line feed is encountered.
 
@@ -84,9 +79,8 @@ void rdline_init(rdline_t *t, int fd, const char *filename,
 	   outside the bounds set by argc, processing fails. On success,
 	   the argv value is inserted and processed as described above.
 	 - A '%' character can be escaped by writing '%%' or, if inside
-	   a double quite string, by writing \%.
-	 - An attempt to use such an indexed argument inside an argument
-	   expansion, results in failure.
+	   a double quoted string, by writing \%.
+	 - Arguments are pasted as is. Substitution is not recursive.
 	 - If the resulting line is empty, processing is restarted.
 */
 int rdline(rdline_t *t);
@@ -109,15 +103,6 @@ int unescape(char *src);
 	space in between.
 */
 int pack_argv(char *str);
-
-/*
-	Split the current input line into a space seperted keyword
-	(alphabetical characters only) and a value (the rest of the line).
-
-	If errors are encounted, prints a diagnostic message to stderr and
-	returns -1. On success, zero is returned.
- */
-int splitkv(rdline_t *rd, char **k, char **v);
 
 /*
 	Parse a configuration file containing '<keyword> [arguments...]' lines.

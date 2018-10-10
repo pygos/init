@@ -486,7 +486,8 @@ crontab_t *rdcron(int dirfd, const char *filename)
 	cron = calloc(1, sizeof(*cron));
 	if (cron == NULL) {
 		fputs("out of memory\n", stderr);
-		goto out;
+		close(fd);
+		return NULL;
 	}
 
 	cron->minute = 0xFFFFFFFFFFFFFFFFUL;
@@ -501,7 +502,6 @@ crontab_t *rdcron(int dirfd, const char *filename)
 		delcron(cron);
 		cron = NULL;
 	}
-out:
-	close(fd);
+	rdline_cleanup(&rd);
 	return cron;
 }

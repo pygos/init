@@ -266,8 +266,6 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 		argc = 0;
 	}
 
-	rdline_init(&rd, fd, filename, argc, args);
-
 	nlen = (arg != NULL) ? (size_t)(arg - filename) : strlen(filename);
 
 	svc = calloc(1, sizeof(*svc) + nlen + 1);
@@ -282,14 +280,17 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 
 	memcpy(svc->name, filename, nlen);
 
-	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags))
-		goto fail;
+	rdline_init(&rd, fd, filename, argc, args);
 
-	close(fd);
+	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags)) {
+		delsvc(svc);
+		svc = NULL;
+	}
+
+	rdline_cleanup(&rd);
 	return svc;
 fail_oom:
 	fputs("out of memory\n", stderr);
-fail:
 	delsvc(svc);
 	close(fd);
 	return NULL;

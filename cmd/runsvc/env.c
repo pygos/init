@@ -41,7 +41,7 @@ static struct entry *parse_list(rdline_t *rd)
 	char *ptr;
 
 	while (rdline(rd) == 0) {
-		ptr = rd->buffer;
+		ptr = rd->line;
 
 		while (*ptr != '\0' && *ptr != ' ' && *ptr != '=')
 			++ptr;
@@ -66,11 +66,11 @@ static struct entry *parse_list(rdline_t *rd)
 			continue;
 		}
 
-		e = calloc(1, sizeof(*e) + strlen(rd->buffer) + 1);
+		e = calloc(1, sizeof(*e) + strlen(rd->line) + 1);
 		if (e == NULL)
 			goto fail_oom;
 
-		strcpy(e->data, rd->buffer);
+		strcpy(e->data, rd->line);
 		e->next = list;
 		list = e;
 	}

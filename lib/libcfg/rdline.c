@@ -24,151 +24,144 @@
 
 #include "libcfg.h"
 
-static int rdline_getc(rdline_t *t)
-{
-	int ret;
-	char c;
-
-	if (t->argstr != NULL) {
-		c = *(t->argstr++);
-		if (c != '\0')
-			goto out;
-
-		t->argstr = NULL;
-	}
-
-	do {
-		ret = read(t->fd, &c, 1);
-	} while (ret < 0 && errno == EINTR);
-
-	if (ret < 0)
-		return -1;
-
-	if (ret == 0) {
-		if (t->i == 0) {
-			errno = 0;
-			return -1;
-		}
-		c = '\0';
-	}
-out:
-	return (c == '\n') ? '\0' : c;
-}
-
-static int rdline_append(rdline_t *t, int c)
-{
-	if (t->comment) {
-		if (c != '\0')
-			return 0;
-	} else if (t->string) {
-		if (t->escape) {
-			t->escape = false;
-		} else {
-			if (c == '\\')
-				t->escape = true;
-			if (c == '"')
-				t->string = false;
-		}
-	} else {
-		if (isspace(c))
-			c = ' ';
-		if (c == ' ' && (t->i == 0 || t->buffer[t->i - 1] == ' '))
-			return 0;
-		if (c == '#') {
-			t->comment = true;
-			return 0;
-		}
-		if (c == '"')
-			t->string = true;
-	}
-
-	if (c == '\0') {
-		while (t->i > 0 && t->buffer[t->i - 1] == ' ')
-			t->i -= 1;
-	}
-
-	if (t->i == sizeof(t->buffer))
-		return -1;
-
-	t->buffer[t->i++] = c;
-	return 0;
-}
-
 void rdline_init(rdline_t *t, int fd, const char *filename,
 		 int argc, const char *const *argv)
 {
 	memset(t, 0, sizeof(*t));
-	t->fd = fd;
+	t->fp = fdopen(fd, "r");
 	t->filename = filename;
 	t->argc = argc;
 	t->argv = argv;
 }
 
-int rdline(rdline_t *t)
+void rdline_cleanup(rdline_t *t)
 {
-	const char *errstr;
-	int c;
-retry:
-	t->i = 0;
-	t->argstr = NULL;
-	t->string = t->escape = t->comment = false;
+	free(t->line);
+	fclose(t->fp);
+}
+
+static int read_raw_line(rdline_t *t)
+{
+	size_t len = 0;
+
+	free(t->line);
+	t->line = NULL;
+
+	errno = 0;
+
+	if (getline(&t->line, &len, t->fp) < 0) {
+		if (errno) {
+			fprintf(stderr, "%s: %zu: %s\n", t->filename,
+				t->lineno, strerror(errno));
+			return -1;
+		}
+		return 1;
+	}
+
 	t->lineno += 1;
-
-	do {
-		errno = 0;
-		c = rdline_getc(t);
-		if (c < 0) {
-			if (errno == 0)
-				return 1;
-			errstr = strerror(errno);
-			goto fail;
-		}
-		if (c == 0 && t->string) {
-			errstr = "missing \"";
-			goto fail;
-		}
-
-		if (c == '%') {
-			c = rdline_getc(t);
-			if (c == 0) {
-				errstr = "unexpected end of line after '%%'";
-				goto fail;
-			}
-			if (c < 0) {
-				errstr = strerror(errno);
-				goto fail;
-			}
-
-			if (c != '%') {
-				if (!isdigit(c)) {
-					errstr = "exptected digit after '%%'";
-					goto fail;
-				}
-				if ((c - '0') >= t->argc) {
-					errstr = "argument out of range";
-					goto fail;
-				}
-				if (t->argstr != NULL) {
-					errstr = "recursive argument "
-						 "expansion";
-					goto fail;
-				}
-				t->argstr = t->argv[c - '0'];
-				continue;
-			}
-		}
-
-		if (rdline_append(t, c)) {
-			errstr = "line too long";
-			goto fail;
-		}
-	} while (c != '\0');
-
-	if (t->buffer[0] == '\0')
-		goto retry;
-
 	return 0;
+}
+
+static int normalize_line(rdline_t *t)
+{
+	char *dst = t->line, *src = t->line;
+	bool string = false;
+	const char *errstr;
+	int c, ret = 0;
+
+	while (isspace(*src))
+		++src;
+
+	while (*src != '\0' && (string || *src != '#')) {
+		c = *(src++);
+
+		if (c == '"') {
+			string = !string;
+		} else if (!string && isspace(c)) {
+			c = ' ';
+			if (dst > t->line && dst[-1] == ' ')
+				continue;
+		} else if (c == '%') {
+			*(dst++) = c;
+			c = *(src++);
+			if (c != '%' && !isdigit(c)) {
+				errstr = "expected digit after '%%'";
+				goto fail;
+			}
+			if (isdigit(c) && (c - '0') >= t->argc) {
+				errstr = "argument out of range";
+				goto fail;
+			}
+			ret += strlen(t->argv[c - '0']);
+		} else if (string && c == '\\' && *src != '\0') {
+			*(dst++) = c;
+			c = *(src++);
+		}
+
+		*(dst++) = c;
+	}
+
+	if (string) {
+		errstr = "missing \"";
+		goto fail;
+	}
+
+	while (dst > t->line && dst[-1] == ' ')
+		--dst;
+	*dst = '\0';
+	return ret;
 fail:
 	fprintf(stderr, "%s: %zu: %s\n", t->filename, t->lineno, errstr);
 	return -1;
+}
+
+static void substitute(rdline_t *t, char *dst, char *src)
+{
+	bool string = false;
+
+	while (*src != '\0') {
+		if (src[0] == '%' && isdigit(src[1])) {
+			strcpy(dst, t->argv[src[1] - '0']);
+			src += 2;
+			while (*dst != '\0')
+				++dst;
+		} else {
+			if (*src == '"')
+				string = !string;
+			if (string && *src == '\\')
+				*(dst++) = *(src++);
+			*(dst++) = *(src++);
+		}
+	}
+}
+
+int rdline(rdline_t *t)
+{
+	char *buffer = NULL;
+	int ret;
+
+	do {
+		if ((ret = read_raw_line(t)))
+			goto out;
+		if ((ret = normalize_line(t)) < 0)
+			goto out;
+	} while (t->line[0] == '\0');
+
+	if (ret == 0)
+		return 0;
+
+	buffer = calloc(1, strlen(t->line) + ret + 1);
+	if (buffer == NULL) {
+		fprintf(stderr, "%s: %zu: out of memory\n",
+			t->filename, t->lineno);
+		ret = -1;
+		goto out;
+	}
+
+	substitute(t, buffer, t->line);
+	ret = 0;
+out:
+	free(t->line);
+	t->line = buffer;
+	return ret;
 }

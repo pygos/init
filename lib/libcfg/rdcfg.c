@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 static const cfg_param_t *find_param(rdline_t *rd, const char *name,
 				     const cfg_param_t *params, size_t count)
@@ -33,6 +34,33 @@ static const cfg_param_t *find_param(rdline_t *rd, const char *name,
 	fprintf(stderr, "%s: %zu: unknown keyword '%s'\n",
 		rd->filename, rd->lineno, name);
 	return NULL;
+}
+
+static int splitkv(rdline_t *rd, char **k, char **v)
+{
+	char *key = rd->line, *value = rd->line;
+
+	while (*value != ' ' && *value != '\0') {
+		if (!isalpha(*value)) {
+			fprintf(stderr,
+				"%s: %zu: unexpected '%c' in keyword\n",
+				rd->filename, rd->lineno, *value);
+			return -1;
+		}
+		++value;
+	}
+
+	if (*value != ' ') {
+		fprintf(stderr, "%s: %zu: expected argument after '%s'\n",
+			rd->filename, rd->lineno, key);
+		return -1;
+	}
+
+	*(value++) = '\0';
+
+	*k = key;
+	*v = value;
+	return 0;
 }
 
 int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
@@ -61,9 +89,9 @@ int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
 			}
 
 			while ((ret = rdline(rd)) == 0) {
-				if (strcmp(rd->buffer, "}") == 0)
+				if (strcmp(rd->line, "}") == 0)
 					break;
-				if (p->handle(cfgobj, rd->buffer, rd, flags))
+				if (p->handle(cfgobj, rd->line, rd, flags))
 					return -1;
 			}
 
