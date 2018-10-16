@@ -54,7 +54,7 @@ int setup_tty(const char *tty, bool truncate)
 
 void argv_exec(exec_t *e)
 {
-	char **argv = alloca(e->argc + 1), *ptr;
+	char **argv = alloca(sizeof(char *) * (e->argc + 1)), *ptr;
 	int i;
 
 	for (ptr = e->args, i = 0; i < e->argc; ++i, ptr += strlen(ptr) + 1)
