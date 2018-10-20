@@ -125,6 +125,9 @@ static void substitute(rdline_t *t, char *dst, char *src)
 			src += 2;
 			while (*dst != '\0')
 				++dst;
+		} else if (src[0] == '%' && src[1] == '%') {
+			*(dst++) = '%';
+			src += 2;
 		} else {
 			if (*src == '"')
 				string = !string;
