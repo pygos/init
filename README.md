@@ -2,15 +2,8 @@
 
 This directory contains the source code for a tiny service supervision
 framework devised for the Pygos system, consisting of an init daemon,
-a small syslog daemon, a _definitely_ non standards compliant cron
-implementation and various command line utilities.
-
-The individual parts of the framework are designed to be independent of
-each other (for instance, the tiny syslogd is intended to work with *any*
-init system and other components of the framework don't depend on the presence
-of this *specific* syslog implementation) and everything that is not strictly
-part of the init system (such as the syslog daemon) can be disabled through
-the configure script.
+a _definitely_ non standards compliant cron implementation and various
+command line utilities.
 
 
 The programs of this package are developed first and foremost for GNU/Linux
@@ -40,9 +33,8 @@ Right now, the system is in a "basically works" proof of concept stage and
 needs some more work to become usable.
 
 There are plans for *maybe* *eventually* adding more fancy features like
-support for Linux name spaces, seccomp filters and cgroups or network
-back ends for the syslog daemon, but right now, features are added only
-when the need arises.
+support for Linux name spaces, seccomp filters and cgroups, but right now,
+features are added only when the need arises.
 
 
 See [docs/init.md](docs/init.md) for more information on the design,
@@ -59,9 +51,6 @@ configuration works.
 
 See [docs/defconfig.md](docs/defconfig.md) for an explanation on the default
 services and configuration provided with this package.
-
-See [docs/usyslogd.md](docs/usyslogd.md) for details on the tiny syslog
-implementation.
 
 See [docs/gcron.md](docs/gcron.md) for details on the cron implementation.
 

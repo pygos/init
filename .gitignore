@@ -20,9 +20,6 @@ reboot
 shutdown
 killall5
 runsvc
-syslog
-usyslogd
-klogd
 gcrond
 
 services/sigkill

@@ -23,7 +23,6 @@ include initd/Makemodule.am
 include crond/Makemodule.am
 include scripts/Makemodule.am
 include services/Makemodule.am
-include syslogd/Makemodule.am
 
 install-exec-hook:
 	(cd $(DESTDIR)$(sbindir); $(LN_S) shutdown reboot)
@@ -55,10 +54,4 @@ install-data-local:
 if GCROND
 	$(MKDIR_P) $(DESTDIR)$(GCRONDIR)
 	$(LN_S) $(TEMPLATEDIR)/gcrond $(DESTDIR)$(SVCDIR)/gcrond
-endif
-if USYSLOGD
-	$(LN_S) $(TEMPLATEDIR)/usyslogd $(DESTDIR)$(SVCDIR)/usyslogd
-endif
-if KLOGD
-	$(LN_S) $(TEMPLATEDIR)/klogd $(DESTDIR)$(SVCDIR)/klogd
 endif

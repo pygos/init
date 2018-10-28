@@ -31,17 +31,6 @@ service_SOURCES += cmd/service/schedule.c
 service_SOURCES += cmd/service/unschedule.c
 endif
 
-if USYSLOGD
-syslog_SOURCES = cmd/syslog.c
-syslog_CPPFLAGS = $(AM_CPPFLAGS)
-syslog_CFLAGS = $(AM_CFLAGS)
-syslog_LDFLAGS = $(AM_LDFLAGS)
-syslog_LDADD = libinit.a
-
-bin_PROGRAMS += syslog
-dist_man1_MANS += cmd/syslog.1
-endif
-
 dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 
 EXTRA_DIST += $(SRVHEADERS)

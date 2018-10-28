@@ -21,7 +21,7 @@ The pseudo targets are (in the order that they are executed):
 
    The system has reached a sane state, i.e. the hostname is set, the system
    clock has a sane value, modules and kernel parameters are loaded, some
-   very basic, fundamental services are running (e.g. syslog).
+   very basic, fundamental services are running.
    Everything that is part of that setup process goes between `vfs` and
    `sysinit`, everything that requires a sane setup goes *after* `sysinit`.
 
@@ -55,10 +55,6 @@ the `vfs` target and *before* the `sysinit` target:
 
  * hostname - reload hostname `/etc/hostname`
  * loopback - bring the loopback device up
- * usyslogd - if the `usyslogd` service is compiled with this package, this
-   service is enabled by default and starts `usyslogd`.
- * klogd - if the `klogd` daemon is compiled with this package, this service
-   is enabled by default and starts after `usyslogd`.
  * modules - iterate over the file `/etc/modules` and try to load each module
    using modprobe.
  * sysctl - restore kernel parameters using `sysctl --system`. See `sysctl(8)`
@@ -117,4 +113,7 @@ For the shutdown and reboot targets, the following services are executed:
  * sshd - Starts an OpenSSH server after the network pseudo service and after
    the sshd_keygen service.
  * nginx - Starts the Nginx server after the network pseudo serivce.
-
+ * usyslogd - Starts and supervises the `usyslogd` syslog implementation as
+   part of the `sysinit` target.
+ * klogd - Stats and supervises the `klogd` daemon as part of the `sysinit`
+   target. The `klogd` daemon is part of the `usyslog` package.

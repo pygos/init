@@ -33,15 +33,3 @@ The option `-f` or `--force` can be used to by pass the init system entirely
 and force a hard reset or power off by directly signalling the kernel.
 
 Running any one of those programs requires superuser privileges.
-
-
-## syslog
-
-If the `usyslogd` service is built as part of this package, a program called
-`syslog` is built that can be used from the command line to send syslog
-messages.
-
-This can for instance be used to produce log messages from shell scripts.
-
-The log level, facility and identity string can be specified.
-See `syslog --help` for more information.
