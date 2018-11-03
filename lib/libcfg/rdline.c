@@ -84,15 +84,16 @@ static int normalize_line(rdline_t *t)
 		} else if (c == '%') {
 			*(dst++) = c;
 			c = *(src++);
-			if (c != '%' && !isdigit(c)) {
+			if (isdigit(c)) {
+				if ((c - '0') >= t->argc) {
+					errstr = "argument out of range";
+					goto fail;
+				}
+				ret += strlen(t->argv[c - '0']);
+			} else if (c != '%') {
 				errstr = "expected digit after '%%'";
 				goto fail;
 			}
-			if (isdigit(c) && (c - '0') >= t->argc) {
-				errstr = "argument out of range";
-				goto fail;
-			}
-			ret += strlen(t->argv[c - '0']);
 		} else if (string && c == '\\' && *src != '\0') {
 			*(dst++) = c;
 			c = *(src++);
