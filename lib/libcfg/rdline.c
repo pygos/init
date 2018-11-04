@@ -23,15 +23,23 @@
 #include <stdio.h>
 
 #include "libcfg.h"
+#include "util.h"
 
-void rdline_init(rdline_t *t, int fd, const char *filename,
-		 int argc, const char *const *argv)
+int rdline_init(rdline_t *t, int dirfd, const char *filename,
+		int argc, const char *const *argv)
 {
 	memset(t, 0, sizeof(*t));
-	t->fp = fdopen(fd, "r");
+
+	t->fp = fopenat(dirfd, filename, "r");
+	if (t->fp == NULL) {
+		perror(filename);
+		return -1;
+	}
+
 	t->filename = filename;
 	t->argc = argc;
 	t->argv = argv;
+	return 0;
 }
 
 void rdline_cleanup(rdline_t *t)

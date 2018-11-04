@@ -250,13 +250,6 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 	service_t *svc = NULL;
 	size_t argc, nlen;
 	rdline_t rd;
-	int fd;
-
-	fd = openat(dirfd, filename, O_RDONLY);
-	if (fd < 0) {
-		perror(filename);
-		return NULL;
-	}
 
 	arg = strchr(filename, '@');
 	if (arg != NULL) {
@@ -265,6 +258,9 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 	} else {
 		argc = 0;
 	}
+
+	if (rdline_init(&rd, dirfd, filename, argc, args))
+		return NULL;
 
 	nlen = (arg != NULL) ? (size_t)(arg - filename) : strlen(filename);
 
@@ -280,18 +276,16 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 
 	memcpy(svc->name, filename, nlen);
 
-	rdline_init(&rd, fd, filename, argc, args);
+	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags))
+		goto fail;
 
-	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags)) {
-		delsvc(svc);
-		svc = NULL;
-	}
-
+out:
 	rdline_cleanup(&rd);
 	return svc;
 fail_oom:
 	fputs("out of memory\n", stderr);
+fail:
 	delsvc(svc);
-	close(fd);
-	return NULL;
+	svc = NULL;
+	goto out;
 }

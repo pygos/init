@@ -473,21 +473,17 @@ static const cfg_param_t cron_params[] = {
 
 crontab_t *rdcron(int dirfd, const char *filename)
 {
-	crontab_t *cron;
+	crontab_t *cron = NULL;
 	rdline_t rd;
-	int fd, ret;
+	int ret;
 
-	fd = openat(dirfd, filename, O_RDONLY);
-	if (fd < 0) {
-		perror(filename);
+	if (rdline_init(&rd, dirfd, filename, 0, NULL))
 		return NULL;
-	}
 
 	cron = calloc(1, sizeof(*cron));
 	if (cron == NULL) {
 		fputs("out of memory\n", stderr);
-		close(fd);
-		return NULL;
+		goto out;
 	}
 
 	cron->minute = 0xFFFFFFFFFFFFFFFFUL;
@@ -496,12 +492,12 @@ crontab_t *rdcron(int dirfd, const char *filename)
 	cron->month = 0xFFFF;
 	cron->dayofweek = 0xFF;
 
-	rdline_init(&rd, fd, filename, 0, NULL);
 	ret = rdcfg(cron, &rd, cron_params, ARRAY_SIZE(cron_params), 0);
 	if (ret) {
 		delcron(cron);
 		cron = NULL;
 	}
+out:
 	rdline_cleanup(&rd);
 	return cron;
 }

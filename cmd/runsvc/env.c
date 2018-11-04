@@ -86,17 +86,12 @@ static struct entry *list_from_file(void)
 {
 	struct entry *list;
 	rdline_t rd;
-	int fd;
 
-	fd = open(ENVFILE, O_RDONLY);
-	if (fd < 0) {
-		perror(ENVFILE);
+	if (rdline_init(&rd, AT_FDCWD, ENVFILE, 0, NULL))
 		return NULL;
-	}
 
-	rdline_init(&rd, fd, ENVFILE, 0, NULL);
 	list = parse_list(&rd);
-	close(fd);
+	rdline_cleanup(&rd);
 	return list;
 }
 

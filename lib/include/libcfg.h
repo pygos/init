@@ -49,12 +49,14 @@ typedef struct {
 /*
 	Initialize the config line scanner.
 
-	The scanner reads from the provided fd. The filename is used for
-	error reporting. An argument count and vector can be set for argument
-	substitution in rdline.
+	The scanner opens the filename relative to the passed dirfd. An
+	argument count and vector can be set for argument substitution
+	in rdline.
+
+	Returns 0 on success.
 */
-void rdline_init(rdline_t *t, int fd, const char *filename,
-		 int argc, const char *const *argv);
+int rdline_init(rdline_t *t, int dirfd, const char *filename,
+		int argc, const char *const *argv);
 
 void rdline_cleanup(rdline_t *t);
 
