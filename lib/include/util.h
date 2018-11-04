@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "config.h"
 
@@ -82,6 +83,12 @@ NORETURN void print_version(const char *program);
 int setup_tty(const char *tty, bool truncate);
 
 NORETURN void argv_exec(exec_t *e);
+
+/*
+	Similar to openat: opens a file relative to a dirfd, but returns
+	a FILE pointer instead of an fd.
+ */
+FILE *fopenat(int fd, const char *filename, const char *mode);
 
 #endif /* UTIL_H */
 

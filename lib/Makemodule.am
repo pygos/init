@@ -8,7 +8,8 @@ libinit_a_CFLAGS = $(AM_CFLAGS)
 
 libutil_a_SOURCES = lib/util/argv_exec.c lib/util/enum_by_name.c
 libutil_a_SOURCES += lib/util/enum_to_name.c lib/util/mksock.c
-libutil_a_SOURCES += lib/util/print_version.c $(HEADRS)
+libutil_a_SOURCES += lib/util/print_version.c lib/util/fopenat.c
+libutil_a_SOURCES += lib/include/util.h
 libutil_a_CPPFLAGS = $(AM_CPPFLAGS)
 libutil_a_CFLAGS = $(AM_CFLAGS)
 
