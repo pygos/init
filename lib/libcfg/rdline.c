@@ -72,15 +72,17 @@ static int normalize_line(rdline_t *t)
 	while (isspace(*src))
 		++src;
 
-	while (*src != '\0' && (string || *src != '#')) {
+	do {
 		c = *(src++);
 
 		if (c == '"') {
 			string = !string;
+		} else if (!string && c == '#') {
+			c = '\0';
 		} else if (!string && isspace(c)) {
-			c = ' ';
-			if (dst > t->line && dst[-1] == ' ')
+			if (*src == '#' || *src == '\0' || isspace(*src))
 				continue;
+			c = ' ';
 		} else if (c == '%') {
 			*(dst++) = c;
 			c = *(src++);
@@ -100,16 +102,12 @@ static int normalize_line(rdline_t *t)
 		}
 
 		*(dst++) = c;
-	}
+	} while (c != '\0');
 
 	if (string) {
 		errstr = "missing \"";
 		goto fail;
 	}
-
-	while (dst > t->line && dst[-1] == ' ')
-		--dst;
-	*dst = '\0';
 	return ret;
 fail:
 	fprintf(stderr, "%s: %zu: %s\n", t->filename, t->lineno, errstr);
@@ -123,9 +121,8 @@ static void substitute(rdline_t *t, char *dst, char *src)
 	while (*src != '\0') {
 		if (src[0] == '%' && isdigit(src[1])) {
 			strcpy(dst, t->argv[src[1] - '0']);
+			dst += strlen(dst);
 			src += 2;
-			while (*dst != '\0')
-				++dst;
 		} else if (src[0] == '%' && src[1] == '%') {
 			*(dst++) = '%';
 			src += 2;
