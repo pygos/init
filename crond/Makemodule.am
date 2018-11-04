@@ -1,9 +1,11 @@
 if GCROND
 gcrond_SOURCES = crond/main.c crond/gcrond.h crond/runjob.c
+gcrond_SOURCES += crond/rdcron.c crond/delcron.c crond/crontab.c
+gcrond_SOURCES += crond/cronscan.c crond/crontab.h
 gcrond_CPPFLAGS = $(AM_CPPFLAGS)
 gcrond_CFLAGS = $(AM_CFLAGS)
 gcrond_LDFLAGS = $(AM_LDFLAGS)
-gcrond_LDADD = libcron.a libcfg.a libutil.a
+gcrond_LDADD = libcfg.a libutil.a
 
 sbin_PROGRAMS += gcrond
 endif
