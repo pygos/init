@@ -34,7 +34,6 @@
 #include <signal.h>
 
 #include "service.h"
-#include "telinit.h"
 #include "util.h"
 
 #define RUNSVCBIN SCRIPTDIR "/runsvc"

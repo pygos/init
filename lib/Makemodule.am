@@ -2,14 +2,13 @@ HEADRS = lib/include/util.h lib/include/service.h lib/include/telinit.h
 
 libinit_a_SOURCES = lib/init/delsvc.c lib/init/svcmap.c lib/init/rdsvc.c
 libinit_a_SOURCES += lib/init/svcscan.c lib/init/del_svc_list.c
-libinit_a_SOURCES += lib/init/svc_tsort.c lib/init/opensock.c $(HEADRS)
+libinit_a_SOURCES += lib/init/svc_tsort.c $(HEADRS)
 libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
 libutil_a_SOURCES = lib/util/argv_exec.c lib/util/enum_by_name.c
-libutil_a_SOURCES += lib/util/enum_to_name.c lib/util/mksock.c
-libutil_a_SOURCES += lib/util/print_version.c lib/util/fopenat.c
-libutil_a_SOURCES += lib/include/util.h
+libutil_a_SOURCES += lib/util/enum_to_name.c lib/util/print_version.c
+libutil_a_SOURCES += lib/util/fopenat.c lib/include/util.h
 libutil_a_CPPFLAGS = $(AM_CPPFLAGS)
 libutil_a_CFLAGS = $(AM_CFLAGS)
 

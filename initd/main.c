@@ -17,7 +17,6 @@
  */
 #include "init.h"
 
-static int ti_sock = -1;
 static int sigfd = -1;
 
 static void handle_signal(void)
@@ -49,59 +48,10 @@ static void handle_signal(void)
 	}
 }
 
-static int read_msg(int fd, ti_msg_t *msg)
-{
-	ssize_t ret;
-retry:
-	ret = read(fd, msg, sizeof(*msg));
-
-	if (ret < 0) {
-		if (errno == EINTR)
-			goto retry;
-		perror("read on telinit socket");
-		return -1;
-	}
-
-	if ((size_t)ret < sizeof(*msg)) {
-		fputs("short read on telinit socket", stderr);
-		return -1;
-	}
-
-	return 0;
-}
-
-static void handle_tellinit(void)
-{
-	ti_msg_t msg;
-	int fd;
-
-	fd = accept(ti_sock, NULL, NULL);
-	if (fd == -1)
-		return;
-
-	if (read_msg(fd, &msg)) {
-		close(fd);
-		return;
-	}
-
-	switch (msg.type) {
-	case TI_SHUTDOWN:
-		supervisor_set_target(TGT_SHUTDOWN);
-		break;
-	case TI_REBOOT:
-		supervisor_set_target(TGT_REBOOT);
-		break;
-	}
-
-	close(fd);
-}
-
 void target_completed(int target)
 {
 	switch (target) {
 	case TGT_BOOT:
-		if (ti_sock == -1)
-			ti_sock = mksock(INITSOCK, SOCK_FLAG_ROOT_ONLY);
 		break;
 	case TGT_SHUTDOWN:
 		for (;;)
@@ -139,20 +89,11 @@ int main(void)
 		pfd[0].events = POLLIN;
 		count = 1;
 
-		if (ti_sock != -1) {
-			pfd[1].fd = ti_sock;
-			pfd[1].events = POLLIN;
-			count = 2;
-		}
-
 		ret = poll(pfd, count, -1);
 
 		if (ret > 0) {
 			if (pfd[0].revents & POLLIN)
 				handle_signal();
-
-			if (ti_sock != -1 && pfd[1].revents & POLLIN)
-				handle_tellinit();
 		}
 	}
 

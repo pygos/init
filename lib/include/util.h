@@ -67,16 +67,6 @@ const enum_map_t *enum_by_name(const enum_map_t *map, const char *name);
 */
 const char *enum_to_name(const enum_map_t *map, int value);
 
-/*
-	Create a UNIX stream socket at the given path.
-
-	Returns the socket fd, -1 on failure. The function takes care of
-	printing error messages on failure.
-
-	The socket has the CLOEXEC flag set.
-*/
-int mksock(const char *path, int flags);
-
 /* print a default version info and license string */
 NORETURN void print_version(const char *program);
 
