@@ -57,12 +57,6 @@ enum {
 	SVC_FLAG_TRUNCATE_OUT = 0x01,
 };
 
-typedef struct exec_t {
-	struct exec_t *next;
-	int argc;		/* number of elements in argument vector */
-	char args[];		/* argument vectot string blob */
-} exec_t;
-
 typedef struct service_t {
 	struct service_t *next;
 
@@ -124,10 +118,6 @@ int svc_type_from_string(const char *type);
 const char *svc_target_to_string(int target);
 
 int svc_target_from_string(const char *target);
-
-int setup_tty(const char *tty, bool truncate);
-
-NORETURN void argv_exec(exec_t *e);
 
 #endif /* SERVICE_H */
 

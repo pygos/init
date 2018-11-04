@@ -3,7 +3,7 @@ gcrond_SOURCES = crond/main.c crond/gcrond.h crond/runjob.c
 gcrond_CPPFLAGS = $(AM_CPPFLAGS)
 gcrond_CFLAGS = $(AM_CFLAGS)
 gcrond_LDFLAGS = $(AM_LDFLAGS)
-gcrond_LDADD = libcron.a libinit.a libcfg.a
+gcrond_LDADD = libcron.a libutil.a libcfg.a
 
 sbin_PROGRAMS += gcrond
 endif

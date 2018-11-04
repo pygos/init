@@ -35,6 +35,12 @@ typedef struct {
 	int value;
 } enum_map_t;
 
+typedef struct exec_t {
+	struct exec_t *next;
+	int argc;		/* number of elements in argument vector */
+	char args[];		/* argument vectot string blob */
+} exec_t;
+
 enum {
 	/* only allow root to connect */
 	SOCK_FLAG_ROOT_ONLY = 0x01,
@@ -72,6 +78,10 @@ int mksock(const char *path, int flags);
 
 /* print a default version info and license string */
 NORETURN void print_version(const char *program);
+
+int setup_tty(const char *tty, bool truncate);
+
+NORETURN void argv_exec(exec_t *e);
 
 #endif /* UTIL_H */
 
