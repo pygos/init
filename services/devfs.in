@@ -1,6 +1,0 @@
-description "mount /dev"
-type wait
-target boot
-after procfs sysfs
-before vfs
-exec "@SCRIPTDIR@/devfs.sh"

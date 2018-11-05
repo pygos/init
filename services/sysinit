@@ -1,5 +1,0 @@
-description basic system initialization
-type wait
-target boot
-after vfs
-before network

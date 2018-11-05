@@ -1,9 +1,0 @@
-description send SIGTERM to all processes
-type wait
-target %0
-before sigkill sync reboot shutdown
-
-exec {
-	"@SCRIPTDIR@/killall5" 15
-	sleep 5
-}

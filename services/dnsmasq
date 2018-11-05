@@ -1,6 +1,0 @@
-description "dnsmasq DNS & DHCP server"
-type respawn limit 5
-target boot
-after network unbound
-
-exec dnsmasq -k

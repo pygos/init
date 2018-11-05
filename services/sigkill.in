@@ -1,6 +1,0 @@
-description send SIGKILL to remaining processes
-exec "@SCRIPTDIR@/killall5" 9
-type wait
-target %0
-after sigterm
-before sync shutdown reboot

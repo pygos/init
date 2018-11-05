@@ -22,26 +22,4 @@ killall5
 runsvc
 gcrond
 
-services/sigkill
-services/sigterm
-services/devfs
-services/procfs
-services/sysfs
-services/ifrename
-services/ifcfg
-services/ifdown
-services/modules
-services/hostapd
-services/swclock
-services/swclocksave
-services/nft
-services/sshd
-services/sshd_keygen
-services/swclocksave.gcron
-
-scripts/devfs.sh
-scripts/ifrename.sh
-scripts/ifcfg.sh
-scripts/modules_load.sh
-
 etc/initd.env

@@ -23,10 +23,10 @@ in `/etc/init.d`. This can be done more conveniently using the `service`
 command line tool.
 
 
-A default setup is provided, as needed for the Pygos system, including helper
-scripts for setting up mount points and for network configuration. If you want
-to use the init daemon for another system, you may have to toss out or adapt
-some of the default configuration and make your own.
+A default setup for the Pygos system, including helper scripts for setting up
+mount points and for network configuration, is provided in a seperate package.
+This package only contains the bare init framework without any default
+configuration.
 
 
 Right now, the system is in a "basically works" proof of concept stage and
@@ -45,12 +45,6 @@ command line tools.
 
 See [docs/services.md](docs/services.md) for more information on service
 description files.
-
-See [docs/network.md](docs/network.md) for information on how the network
-configuration works.
-
-See [docs/defconfig.md](docs/defconfig.md) for an explanation on the default
-services and configuration provided with this package.
 
 See [docs/gcron.md](docs/gcron.md) for details on the cron implementation.
 

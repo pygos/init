@@ -1,9 +1,0 @@
-description "mount /proc"
-type wait
-target boot
-before vfs
-
-exec {
-	mount -t proc proc /proc
-	"@SCRIPTDIR@/trymount.sh" /proc/sys/fs/binfmt_misc binfmt_misc nodev,noexec,nosuid
-}

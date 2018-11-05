@@ -1,6 +1,0 @@
-description reload hostname
-exec hostname --file /etc/hostname
-type wait
-target boot
-before sysinit
-after hwclock vfs

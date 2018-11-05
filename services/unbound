@@ -1,6 +1,0 @@
-description "Unbound resolver"
-type respawn limit 5
-target boot
-after network
-
-exec unbound -d

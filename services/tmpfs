@@ -1,5 +1,0 @@
-description "mount /tmp"
-type wait
-target boot
-before vfs
-exec mount -t tmpfs none /tmp

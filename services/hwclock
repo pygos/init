@@ -1,6 +1,0 @@
-description restore time from RTC
-exec hwclock --hctosys --utc
-type wait
-target boot
-before sysinit
-after vfs modules

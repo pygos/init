@@ -1,7 +1,0 @@
-description "load kernel modules"
-type wait
-target boot
-after vfs usyslogd
-before sysinit
-
-exec "@SCRIPTDIR@/modules_load.sh"

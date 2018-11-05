@@ -1,5 +1,0 @@
-description start gcron daemon
-exec gcrond
-type respawn
-target boot
-after network

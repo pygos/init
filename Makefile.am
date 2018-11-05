@@ -6,13 +6,14 @@ AM_CFLAGS = $(WARN_CFLAGS)
 bin_PROGRAMS =
 sbin_PROGRAMS =
 noinst_LIBRARIES =
-nobase_sysconf_DATA = netcfg/ifrename
+nobase_sysconf_DATA =
 sysconf_DATA = etc/initd.env
-EXTRA_DIST = README.md LICENSE docs netcfg
 
 helperdir = @SCRIPTDIR@
 helper_PROGRAMS =
 helper_SCRIPTS =
+
+EXTRA_DIST = README.md LICENSE docs
 
 dist_man1_MANS =
 dist_man8_MANS =
@@ -21,8 +22,6 @@ include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am
 include crond/Makemodule.am
-include scripts/Makemodule.am
-include services/Makemodule.am
 
 install-exec-hook:
 	(cd $(DESTDIR)$(sbindir); $(LN_S) shutdown reboot)
@@ -31,27 +30,7 @@ install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(man8dir)
 	(cd $(DESTDIR)$(man8dir); $(LN_S) shutdown.8 reboot.8)
 	$(MKDIR_P) $(DESTDIR)$(SVCDIR)
-	$(LN_S) $(TEMPLATEDIR)/loopback $(DESTDIR)$(SVCDIR)/loopback
-	$(LN_S) $(TEMPLATEDIR)/hostname $(DESTDIR)$(SVCDIR)/hostname
-	$(LN_S) $(TEMPLATEDIR)/sysctl $(DESTDIR)$(SVCDIR)/sysctl
-	$(LN_S) $(TEMPLATEDIR)/sysinit $(DESTDIR)$(SVCDIR)/sysinit
-	$(LN_S) $(TEMPLATEDIR)/procfs $(DESTDIR)$(SVCDIR)/procfs
-	$(LN_S) $(TEMPLATEDIR)/sysfs $(DESTDIR)$(SVCDIR)/sysfs
-	$(LN_S) $(TEMPLATEDIR)/devfs $(DESTDIR)$(SVCDIR)/devfs
-	$(LN_S) $(TEMPLATEDIR)/tmpfs $(DESTDIR)$(SVCDIR)/tmpfs
-	$(LN_S) $(TEMPLATEDIR)/vfs $(DESTDIR)$(SVCDIR)/vfs
-	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@shutdown
-	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@shutdown
-	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@shutdown
-	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@shutdown
-	$(LN_S) $(TEMPLATEDIR)/sync $(DESTDIR)$(SVCDIR)/sync@reboot
-	$(LN_S) $(TEMPLATEDIR)/sigkill $(DESTDIR)$(SVCDIR)/sigkill@reboot
-	$(LN_S) $(TEMPLATEDIR)/sigterm $(DESTDIR)$(SVCDIR)/sigterm@reboot
-	$(LN_S) $(TEMPLATEDIR)/ifdown $(DESTDIR)$(SVCDIR)/ifdown@reboot
-	$(LN_S) $(TEMPLATEDIR)/ifcfg $(DESTDIR)$(SVCDIR)/ifcfg
-	$(LN_S) $(TEMPLATEDIR)/modules $(DESTDIR)$(SVCDIR)/modules
-	$(LN_S) $(TEMPLATEDIR)/network $(DESTDIR)$(SVCDIR)/network
+	$(MKDIR_P) $(DESTDIR)$(TEMPLATEDIR)
 if GCROND
 	$(MKDIR_P) $(DESTDIR)$(GCRONDIR)
-	$(LN_S) $(TEMPLATEDIR)/gcrond $(DESTDIR)$(SVCDIR)/gcrond
 endif

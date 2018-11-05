@@ -1,4 +1,0 @@
-description "static network configuration completed"
-type wait
-target boot
-after sysinit

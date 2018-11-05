@@ -1,6 +1,0 @@
-description "start nginx web server"
-type once
-target boot
-after network
-tty /dev/null
-exec nginx
