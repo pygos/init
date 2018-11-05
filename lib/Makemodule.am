@@ -1,8 +1,6 @@
-HEADRS = lib/include/util.h lib/include/service.h lib/include/telinit.h
-
 libinit_a_SOURCES = lib/init/delsvc.c lib/init/svcmap.c lib/init/rdsvc.c
 libinit_a_SOURCES += lib/init/svcscan.c lib/init/del_svc_list.c
-libinit_a_SOURCES += lib/init/svc_tsort.c $(HEADRS)
+libinit_a_SOURCES += lib/init/svc_tsort.c lib/include/service.h
 libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
@@ -16,7 +14,5 @@ libcfg_a_SOURCES = lib/libcfg/rdline.c lib/libcfg/unescape.c lib/libcfg/rdcfg.c
 libcfg_a_SOURCES += lib/libcfg/pack_argv.c lib/include/libcfg.h
 libcfg_a_CPPFLAGS = $(AM_CPPFLAGS)
 libcfg_a_CFLAGS = $(AM_CFLAGS)
-
-EXTRA_DIST += $(HEADRS) lib/include/libcfg.h
 
 noinst_LIBRARIES += libinit.a libcfg.a libutil.a
