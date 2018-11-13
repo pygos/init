@@ -142,6 +142,8 @@ static void substitute(rdline_t *t, char *dst, char *src)
 			*(dst++) = *(src++);
 		}
 	}
+
+	*(dst++) = '\0';
 }
 
 int rdline(rdline_t *t)
@@ -156,8 +158,10 @@ int rdline(rdline_t *t)
 			goto out;
 	} while (t->line[0] == '\0');
 
-	if (ret == 0)
+	if (ret == 0) {
+		substitute(t, t->line, t->line);
 		return 0;
+	}
 
 	buffer = calloc(1, strlen(t->line) + ret + 1);
 	if (buffer == NULL) {
