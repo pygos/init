@@ -26,11 +26,6 @@ service_CFLAGS = $(AM_CFLAGS)
 service_LDFLAGS = $(AM_LDFLAGS)
 service_LDADD = libinit.a libcfg.a libutil.a
 
-if GCROND
-service_SOURCES += cmd/service/schedule.c
-service_SOURCES += cmd/service/unschedule.c
-endif
-
 dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 
 EXTRA_DIST += $(SRVHEADERS)

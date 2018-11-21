@@ -28,22 +28,12 @@ configuration directory, pointing to the service template file.
 
 An optional argument can be supplied to parameterize the template.
 .TP
-.BR schedule " " \fI<service>\fP
-If built with support for gcrond, enable a gcron service by creating a symlink
-in the gcrond configuration directory, pointing to the service file.
-
-The extension \fB.gcron\fP is automatically appended to the service name.
-.TP
 .BR disable " " \fI<service>\fP " " \fI[arguments]\fP
 Disable (but do not stop) a system service by removing the corresponding
 symlink in the configuration directory.
 
 If the service is parameterized, arguments have to be specified to disable
 the desired service instance.
-.TP
-.BR unschedule " " \fI<service>\fP
-If built with support for gcrond, disable a gcron service by removing the
-corresponding symlink in the gcron configuration directory.
 .TP
 .BR dumpscript " " \fI<service>\fP " " \fI[arguments]\fP
 Parse a service file from and produce a pseudo shell script containing the

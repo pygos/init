@@ -1,9 +1,8 @@
 # About
 
 This directory contains the source code for a tiny service supervision
-framework devised for the Pygos system, consisting of an init daemon,
-a _definitely_ non standards compliant cron implementation and various
-command line utilities.
+framework devised for the Pygos system, consisting of an init daemon and
+accompanying command line utilities.
 
 
 The programs of this package are developed first and foremost for GNU/Linux
@@ -45,8 +44,6 @@ command line tools.
 
 See [docs/services.md](docs/services.md) for more information on service
 description files.
-
-See [docs/gcron.md](docs/gcron.md) for details on the cron implementation.
 
 
 ## Why

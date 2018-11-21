@@ -21,7 +21,6 @@ dist_man8_MANS =
 include lib/Makemodule.am
 include cmd/Makemodule.am
 include initd/Makemodule.am
-include crond/Makemodule.am
 
 install-exec-hook:
 	(cd $(DESTDIR)$(sbindir); $(LN_S) shutdown reboot)
@@ -31,6 +30,3 @@ install-data-local:
 	(cd $(DESTDIR)$(man8dir); $(LN_S) shutdown.8 reboot.8)
 	$(MKDIR_P) $(DESTDIR)$(SVCDIR)
 	$(MKDIR_P) $(DESTDIR)$(TEMPLATEDIR)
-if GCROND
-	$(MKDIR_P) $(DESTDIR)$(GCRONDIR)
-endif
