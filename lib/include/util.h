@@ -15,11 +15,6 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-typedef struct {
-	const char *name;
-	int value;
-} enum_map_t;
-
 typedef struct exec_t {
 	struct exec_t *next;
 	int argc;		/* number of elements in argument vector */
@@ -37,31 +32,8 @@ enum {
 	SOCK_FLAG_DGRAM = 0x04,
 };
 
-/*
-	Search through an array of enum_map_t entries to resolve a string to
-	a numeric value. The end of the map is indicated by a sentinel entry
-	with the name set to NULL.
-*/
-const enum_map_t *enum_by_name(const enum_map_t *map, const char *name);
-
-/*
-	Search through an array of enum_map_t entries to resolve a numeric
-	value to a string name. The end of the map is indicated by a sentinel
-	entry with the name set to NULL.
-*/
-const char *enum_to_name(const enum_map_t *map, int value);
-
-/* print a default version info and license string */
-NORETURN void print_version(const char *program);
-
 int setup_tty(const char *tty, bool truncate);
 
 NORETURN void argv_exec(exec_t *e);
-
-/*
-	Similar to openat: opens a file relative to a dirfd, but returns
-	a FILE pointer instead of an fd.
- */
-FILE *fopenat(int fd, const char *filename, const char *mode);
 
 #endif /* UTIL_H */

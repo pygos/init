@@ -17,7 +17,6 @@
 
 static const struct option options[] = {
 	{ "help", no_argument, NULL, 'h' },
-	{ "version", no_argument, NULL, 'V' },
 	{ "poweroff", no_argument, NULL, 'p' },
 	{ "reboot", no_argument, NULL, 'r' },
 	{ "force", no_argument, NULL, 'f' },
@@ -25,7 +24,7 @@ static const struct option options[] = {
 	{ NULL, 0, NULL, 0 },
 };
 
-static const char *shortopt = "hVprfn";
+static const char *shortopt = "hprfn";
 
 static const char *defact_str = "power-off";
 static int defact = RB_POWER_OFF;
@@ -78,8 +77,6 @@ int main(int argc, char **argv)
 		case 'r':
 			defact = RB_AUTOBOOT;
 			break;
-		case 'V':
-			print_version(ptr);
 		case 'h':
 			usage(ptr, EXIT_SUCCESS);
 		default:

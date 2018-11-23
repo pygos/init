@@ -19,6 +19,8 @@ enum {
 		it terminates.
 	*/
 	SVC_RESPAWN,
+
+	SVC_MAX
 };
 
 enum {

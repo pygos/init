@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "libcfg.h"
 #include "util.h"
@@ -12,18 +13,26 @@
 int rdline_init(rdline_t *t, int dirfd, const char *filename,
 		int argc, const char *const *argv)
 {
+	int fd = openat(dirfd, filename, O_RDONLY);
+
+	if (fd == -1)
+		goto fail_open;
+
 	memset(t, 0, sizeof(*t));
 
-	t->fp = fopenat(dirfd, filename, "r");
+	t->fp = fdopen(fd, "r");
 	if (t->fp == NULL) {
-		perror(filename);
-		return -1;
+		close(fd);
+		goto fail_open;
 	}
 
 	t->filename = filename;
 	t->argc = argc;
 	t->argv = argv;
 	return 0;
+fail_open:
+	perror(filename);
+	return -1;
 }
 
 void rdline_cleanup(rdline_t *t)

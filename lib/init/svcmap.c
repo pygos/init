@@ -1,41 +1,49 @@
 /* SPDX-License-Identifier: ISC */
+#include <string.h>
 #include "service.h"
-#include "util.h"
 
-static const enum_map_t type_map[] = {
-	{ "once", SVC_ONCE },
-	{ "wait", SVC_WAIT },
-	{ "respawn", SVC_RESPAWN },
-	{ NULL, 0 },
+static const char *type_map[] = {
+	"once",
+	"wait",
+	"respawn",
 };
 
-static const enum_map_t target_map[] = {
-	{ "boot", TGT_BOOT },
-	{ "shutdown", TGT_SHUTDOWN },
-	{ "reboot", TGT_REBOOT },
-	{ NULL, 0 },
+static const char *target_map[] = {
+	"boot",
+	"shutdown",
+	"reboot",
 };
 
 const char *svc_type_to_string(int type)
 {
-	return enum_to_name(type_map, type);
+	return type >= 0 && type < SVC_MAX ? type_map[type] : NULL;
 }
 
 int svc_type_from_string(const char *type)
 {
-	const enum_map_t *ent = enum_by_name(type_map, type);
+	size_t i;
 
-	return ent == NULL ? -1 : ent->value;
+	for (i = 0; i < ARRAY_SIZE(type_map); ++i) {
+		if (strcmp(type_map[i], type) == 0)
+			return i;
+	}
+
+	return -1;
 }
 
 const char *svc_target_to_string(int target)
 {
-	return enum_to_name(target_map, target);
+	return target >= 0 && target < TGT_MAX ? target_map[target] : NULL;
 }
 
 int svc_target_from_string(const char *target)
 {
-	const enum_map_t *ent = enum_by_name(target_map, target);
+	size_t i;
 
-	return ent == NULL ? -1 : ent->value;
+	for (i = 0; i < ARRAY_SIZE(target_map); ++i) {
+		if (strcmp(target_map[i], target) == 0)
+			return i;
+	}
+
+	return -1;
 }
