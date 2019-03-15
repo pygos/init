@@ -7,6 +7,7 @@ static int target = -1;
 static service_t *running = NULL;
 static service_t *terminated = NULL;
 static service_t *queue = NULL;
+static service_t *completed = NULL;
 static int singleshot = 0;
 static bool waiting = false;
 
@@ -15,7 +16,8 @@ static int start_service(service_t *svc)
 	svc->pid = runsvc(svc);
 	if (svc->pid == -1) {
 		print_status(svc->desc, STATUS_FAIL, false);
-		delsvc(svc);
+		svc->next = completed;
+		completed = svc;
 		return -1;
 	}
 
@@ -59,7 +61,8 @@ static void handle_terminated_service(service_t *svc)
 			target_completed(target);
 		break;
 	}
-	delsvc(svc);
+	svc->next = completed;
+	completed = svc;
 }
 
 void supervisor_handle_exited(pid_t pid, int status)
