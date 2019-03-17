@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,6 +18,7 @@
 #include <sys/reboot.h>
 #include <signal.h>
 
+#include "initsock.h"
 #include "service.h"
 #include "util.h"
 

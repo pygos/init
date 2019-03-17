@@ -2,6 +2,7 @@
 #include "init.h"
 
 static int sigfd = -1;
+static int sockfd = -1;
 
 static void handle_signal(void)
 {
@@ -29,13 +30,27 @@ static void handle_signal(void)
 	case SIGINT:
 		supervisor_set_target(TGT_REBOOT);
 		break;
+	case SIGUSR1:
+		if (sockfd >= 0) {
+			close(sockfd);
+			unlink(INIT_SOCK_PATH);
+			sockfd = -1;
+		}
+		sockfd = init_socket_create();
+		break;
 	}
+}
+
+static void handle_request(void)
+{
 }
 
 void target_completed(int target)
 {
 	switch (target) {
 	case TGT_BOOT:
+		if (sockfd < 0)
+			sockfd = init_socket_create();
 		break;
 	case TGT_SHUTDOWN:
 		for (;;)
@@ -50,7 +65,7 @@ void target_completed(int target)
 
 int main(void)
 {
-	int ret, count;
+	int i, ret, count;
 	struct pollfd pfd[2];
 
 	if (getpid() != 1) {
@@ -69,15 +84,29 @@ int main(void)
 			;
 
 		memset(pfd, 0, sizeof(pfd));
-		pfd[0].fd = sigfd;
-		pfd[0].events = POLLIN;
-		count = 1;
+		count = 0;
+
+		pfd[count].fd = sigfd;
+		pfd[count].events = POLLIN;
+		++count;
+
+		if (sockfd >= 0) {
+			pfd[count].fd = sockfd;
+			pfd[count].events = POLLIN;
+			++count;
+		}
 
 		ret = poll(pfd, count, -1);
+		if (ret <= 0)
+			continue;
 
-		if (ret > 0) {
-			if (pfd[0].revents & POLLIN)
-				handle_signal();
+		for (i = 0; i < count; ++i) {
+			if (pfd[i].revents & POLLIN) {
+				if (pfd[i].fd == sigfd)
+					handle_signal();
+				if (pfd[i].fd == sockfd)
+					handle_request();
+			}
 		}
 	}
 
