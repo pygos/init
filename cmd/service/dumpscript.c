@@ -10,9 +10,8 @@
 
 static service_t *try_load(const char *directory, const char *filename)
 {
-	int dirfd, type;
-	struct stat sb;
 	service_t *svc;
+	int dirfd;
 
 	dirfd = open(directory, O_RDONLY | O_DIRECTORY);
 
@@ -20,18 +19,6 @@ static service_t *try_load(const char *directory, const char *filename)
 		perror(directory);
 		return NULL;
 	}
-
-	if (fstatat(dirfd, filename, &sb, AT_SYMLINK_NOFOLLOW)) {
-		fprintf(stderr, "stat %s/%s: %s\n",
-			directory, filename, strerror(errno));
-		close(dirfd);
-		return NULL;
-	}
-
-	type = (sb.st_mode & S_IFMT);
-
-	if (type != S_IFREG && type != S_IFLNK)
-		return NULL;
 
 	svc = rdsvc(dirfd, filename, 0);
 	close(dirfd);

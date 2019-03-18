@@ -39,9 +39,10 @@ the desired service instance.
 Parse a service file from and produce a pseudo shell script containing the
 exact commands executed when starting the service.
 .TP
-.BR status
+.BR status " " \fI[--detail|-d]\fP " " \fI[services...]\fP
 Print a status report of all supervised services, i.e. if they are currently
-running, have exited or waiting to be scheduled.
+running, have exited or waiting to be scheduled. A specific list of services
+can be specified. Shell globbing patterns can be used.
 .SH AVAILABILITY
 This program is part of the Pygos init system.
 .SH COPYRIGHT
