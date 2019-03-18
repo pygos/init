@@ -167,3 +167,29 @@ bool supervisor_process_queues(void)
 		target_completed(target);
 	return true;
 }
+
+static int send_svc_list(int fd, const void *dst, size_t addrlen,
+			 E_SERVICE_STATE state, service_t *list)
+{
+	while (list != NULL) {
+		if (init_socket_send_status(fd, dst, addrlen, state, list))
+			return -1;
+
+		list = list->next;
+	}
+
+	return 0;
+}
+
+void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen)
+{
+	if (send_svc_list(fd, dst, addrlen, ESS_RUNNING, running))
+		return;
+	if (send_svc_list(fd, dst, addrlen, ESS_EXITED, completed))
+		return;
+	if (send_svc_list(fd, dst, addrlen, ESS_ENQUEUED, queue))
+		return;
+	if (send_svc_list(fd, dst, addrlen, ESS_ENQUEUED, terminated))
+		return;
+	init_socket_send_status(fd, dst, addrlen, ESS_NONE, NULL);
+}

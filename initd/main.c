@@ -43,6 +43,27 @@ static void handle_signal(void)
 
 static void handle_request(void)
 {
+	struct sockaddr_un addr;
+	init_request_t rq;
+	socklen_t addrlen;
+	ssize_t ret;
+retry:
+	memset(&rq, 0, sizeof(rq));
+	addrlen = sizeof(addr);
+	ret = recvfrom(sockfd, &rq, sizeof(rq), MSG_DONTWAIT | MSG_TRUNC,
+		       &addr, &addrlen);
+
+	if (ret < 0 && errno == EINTR)
+		goto retry;
+
+	if ((size_t)ret < sizeof(rq))
+		return;
+
+	switch (rq.rq) {
+	case EIR_STATUS:
+		supervisor_answer_status_request(sockfd, &addr, addrlen);
+		break;
+	}
 }
 
 void target_completed(int target)
