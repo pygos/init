@@ -19,6 +19,7 @@ SRVHEADERS = cmd/service/servicecmd.h
 service_SOURCES = cmd/service/servicecmd.c cmd/service/help.c
 service_SOURCES += cmd/service/enable.c cmd/service/disable.c
 service_SOURCES += cmd/service/dumpscript.c cmd/service/list.c
+service_SOURCES += cmd/service/status.c
 service_SOURCES += $(SRVHEADERS)
 service_CPPFLAGS = $(AM_CPPFLAGS)
 service_CFLAGS = $(AM_CFLAGS)
