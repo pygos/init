@@ -3,6 +3,8 @@ libinit_a_SOURCES += lib/init/svcscan.c lib/init/del_svc_list.c
 libinit_a_SOURCES += lib/init/svc_tsort.c lib/include/service.h
 libinit_a_SOURCES += lib/init/init_socket_open.c lib/init/init_socket_create.c
 libinit_a_SOURCES += lib/include/initsock.h lib/init/init_socket_send_request.c
+libinit_a_SOURCES += lib/init/init_socket_send_status.c
+libinit_a_SOURCES += lib/init/init_socket_recv_status.c
 libinit_a_CPPFLAGS = $(AM_CPPFLAGS)
 libinit_a_CFLAGS = $(AM_CFLAGS)
 
