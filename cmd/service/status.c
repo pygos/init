@@ -4,7 +4,16 @@
 #include "service.h"
 #include "config.h"
 
+#include <fnmatch.h>
+#include <getopt.h>
 #include <unistd.h>
+
+static const struct option long_opts[] = {
+	{ "detail", no_argument, NULL, 'd' },
+	{ NULL, 0, NULL, 0 },
+};
+
+static const char *short_opts = "d";
 
 static void free_resp(init_status_response_t *resp)
 {
@@ -14,14 +23,26 @@ static void free_resp(init_status_response_t *resp)
 
 static int cmd_status(int argc, char **argv)
 {
+	bool is_tty, found, show_details = false;
+	int i, fd, ret = EXIT_FAILURE;
 	init_status_response_t resp;
-	int fd, ret = EXIT_FAILURE;
 	char tmppath[256];
 	const char *state;
-	bool is_tty;
 
-	if (check_arguments(argv[0], argc, 1, 1))
-		return EXIT_FAILURE;
+	for (;;) {
+		i = getopt_long(argc, argv, short_opts, long_opts, NULL);
+		if (i == -1)
+			break;
+
+		switch (i) {
+		case 'd':
+			show_details = true;
+			break;
+		default:
+			tell_read_help(argv[0]);
+			return EXIT_FAILURE;
+		}
+	}
 
 	sprintf(tmppath, "/tmp/svcstatus.%d.sock", (int)getpid());
 	fd = init_socket_open(tmppath);
@@ -48,6 +69,20 @@ static int cmd_status(int argc, char **argv)
 		if (resp.state == ESS_NONE) {
 			free_resp(&resp);
 			break;
+		}
+
+		if (optind < argc) {
+			found = false;
+
+			for (i = optind; i < argc; ++i) {
+				if (fnmatch(argv[i], resp.filename, 0) == 0) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+				continue;
 		}
 
 		switch (resp.state) {
@@ -85,7 +120,14 @@ static int cmd_status(int argc, char **argv)
 			break;
 		}
 
-		printf("[%s] %s\n", state, resp.filename);
+		if (show_details) {
+			printf("Service: %s\n", resp.filename);
+			printf("\tStatus: %s\n", state);
+			printf("\tTemplate name: %s\n", resp.service_name);
+			printf("\tExit status: %d\n", resp.exit_status);
+		} else {
+			printf("[%s] %s\n", state, resp.filename);
+		}
 
 		free_resp(&resp);
 	}
@@ -99,11 +141,14 @@ out:
 
 static command_t status = {
 	.cmd = "status",
-	.usage = "",
+	.usage = "[-d|--detail] [services...]",
 	.s_desc = "report the status of the currently enabled services",
 	.l_desc = "Gathers a list of all currently running services and the "
 		  "state that they are in (currently running, done, failed, "
-		  "wating to get scheduled).",
+		  "wating to get scheduled). A list of services with wildcard "
+		  "globbing patterns can be specified. If ommitted, produces "
+		  "a general overview of all services. If the --detail "
+		  "is given, more details are shown about a service.",
 	.run_cmd = cmd_status,
 };
 
