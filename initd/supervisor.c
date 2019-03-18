@@ -8,6 +8,7 @@ static service_t *running = NULL;
 static service_t *terminated = NULL;
 static service_t *queue = NULL;
 static service_t *completed = NULL;
+static service_t *failed = NULL;
 static int singleshot = 0;
 static bool waiting = false;
 
@@ -38,7 +39,7 @@ static void handle_terminated_service(service_t *svc)
 
 			if (svc->rspwn_limit == 0) {
 				print_status(svc->desc, STATUS_FAIL, false);
-				break;
+				goto out_failure;
 			}
 		}
 
@@ -51,6 +52,8 @@ static void handle_terminated_service(service_t *svc)
 			     STATUS_OK : STATUS_FAIL, true);
 		if (singleshot == 0 && queue == NULL)
 			target_completed(target);
+		if (svc->status != EXIT_SUCCESS)
+			goto out_failure;
 		break;
 	case SVC_ONCE:
 		singleshot -= 1;
@@ -59,10 +62,16 @@ static void handle_terminated_service(service_t *svc)
 			     STATUS_OK : STATUS_FAIL, false);
 		if (singleshot == 0 && queue == NULL && !waiting)
 			target_completed(target);
+		if (svc->status != EXIT_SUCCESS)
+			goto out_failure;
 		break;
 	}
 	svc->next = completed;
 	completed = svc;
+	return;
+out_failure:
+	svc->next = failed;
+	failed = svc;
 }
 
 void supervisor_handle_exited(pid_t pid, int status)
@@ -185,7 +194,9 @@ void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen)
 {
 	if (send_svc_list(fd, dst, addrlen, ESS_RUNNING, running))
 		return;
-	if (send_svc_list(fd, dst, addrlen, ESS_EXITED, completed))
+	if (send_svc_list(fd, dst, addrlen, ESS_DONE, completed))
+		return;
+	if (send_svc_list(fd, dst, addrlen, ESS_FAILED, failed))
 		return;
 	if (send_svc_list(fd, dst, addrlen, ESS_ENQUEUED, queue))
 		return;

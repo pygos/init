@@ -53,31 +53,35 @@ static int cmd_status(int argc, char **argv)
 		switch (resp.state) {
 		case ESS_RUNNING:
 			if (!is_tty) {
-				state = "Running";
+				state = "UP";
 				break;
 			}
-			state = "\033[22;32mRunning\033[0m";
+			state = "\033[22;32m UP \033[0m";
 			break;
 		case ESS_ENQUEUED:
-			state = " Queue ";
+			state = "SCHED";
 			break;
-		case ESS_EXITED:
+		case ESS_FAILED:
 			if (!is_tty) {
-				state = "Exited ";
+				state = "FAIL";
 				break;
 			}
-			if (resp.exit_status == EXIT_SUCCESS) {
-				state = "\033[22;33mExited \033[0m";
-			} else {
-				state = "\033[22;31mExited \033[0m";
+			state = "\033[22;31mFAIL\033[0m";
+			break;
+		case ESS_DONE:
+			if (!is_tty) {
+				state = "DONE";
+				break;
 			}
+
+			state = "\033[22;33mDONE\033[0m";
 			break;
 		default:
 			if (!is_tty) {
-				state = "Unknown";
+				state = "UNKNOWN";
 				break;
 			}
-			state = "\033[22;31mUnknown\033[0m";
+			state = "\033[22;31mUNKNOWN\033[0m";
 			break;
 		}
 
@@ -98,8 +102,8 @@ static command_t status = {
 	.usage = "",
 	.s_desc = "report the status of the currently enabled services",
 	.l_desc = "Gathers a list of all currently running services and the "
-		  "state that they are in (currently running, exited, wating "
-		  "to get scheduled).",
+		  "state that they are in (currently running, done, failed, "
+		  "wating to get scheduled).",
 	.run_cmd = cmd_status,
 };
 

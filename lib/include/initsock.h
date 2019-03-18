@@ -15,7 +15,8 @@ typedef enum {
 	ESS_NONE = 0x00,
 	ESS_RUNNING = 0x01,
 	ESS_ENQUEUED = 0x02,
-	ESS_EXITED = 0x03,
+	ESS_DONE = 0x03,
+	ESS_FAILED = 0x04
 } E_SERVICE_STATE;
 
 typedef struct {
