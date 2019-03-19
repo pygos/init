@@ -28,6 +28,7 @@ static int cmd_status(int argc, char **argv)
 	init_status_response_t resp;
 	char tmppath[256];
 	const char *state;
+	service_t *svc;
 
 	for (;;) {
 		i = getopt_long(argc, argv, short_opts, long_opts, NULL);
@@ -125,6 +126,21 @@ static int cmd_status(int argc, char **argv)
 			printf("\tStatus: %s\n", state);
 			printf("\tTemplate name: %s\n", resp.service_name);
 			printf("\tExit status: %d\n", resp.exit_status);
+
+			svc = loadsvc(SVCDIR, resp.filename,
+				      RDSVC_NO_EXEC | RDSVC_NO_DEPS |
+				      RDSVC_NO_CTTY | RDSVC_NO_FNAME);
+
+			if (svc == NULL) {
+				fputs("\tError loading service file\n", stdout);
+			} else {
+				printf("\tDescription: %s\n", svc->desc);
+				printf("\tType: %s\n",
+				       svc_type_to_string(svc->type));
+				printf("\tTarget: %s\n",
+				       svc_target_to_string(svc->target));
+				delsvc(svc);
+			}
 		} else {
 			printf("[%s] %s\n", state, resp.filename);
 		}
