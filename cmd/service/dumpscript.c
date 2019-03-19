@@ -6,24 +6,6 @@
 #include <errno.h>
 
 #include "servicecmd.h"
-#include "service.h"
-
-static service_t *try_load(const char *directory, const char *filename)
-{
-	service_t *svc;
-	int dirfd;
-
-	dirfd = open(directory, O_RDONLY | O_DIRECTORY);
-
-	if (dirfd < 0) {
-		perror(directory);
-		return NULL;
-	}
-
-	svc = rdsvc(dirfd, filename, 0);
-	close(dirfd);
-	return svc;
-}
 
 enum {
 	NEED_QUOTES = 0x01,
@@ -111,7 +93,7 @@ static int cmd_dumpscript(int argc, char **argv)
 		strcat(filename, argv[i]);
 	}
 
-	svc = try_load(SVCDIR, filename);
+	svc = loadsvc(SVCDIR, filename, 0);
 
 	if (svc == NULL) {
 		fprintf(stderr, "Could not load service '%s'\n", filename);

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "service.h"
 #include "util.h"
 
 /*
@@ -37,6 +38,8 @@ typedef struct command_t {
 
 /* Global list of available commands */
 extern command_t *commands;
+
+service_t *loadsvc(const char *directory, const char *filename, int flags);
 
 /*
 	Implemented in servicecmd.c. Prints program usage message and
