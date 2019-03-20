@@ -51,7 +51,7 @@ retry:
 	memset(&rq, 0, sizeof(rq));
 	addrlen = sizeof(addr);
 	ret = recvfrom(sockfd, &rq, sizeof(rq), MSG_DONTWAIT | MSG_TRUNC,
-		       &addr, &addrlen);
+		       (struct sockaddr *)&addr, &addrlen);
 
 	if (ret < 0 && errno == EINTR)
 		goto retry;
