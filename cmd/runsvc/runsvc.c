@@ -1,12 +1,15 @@
 /* SPDX-License-Identifier: ISC */
 #include "runsvc.h"
 
-static int runlst_wait(exec_t *list)
+static int run_sequentially(exec_t *list)
 {
 	pid_t ret, pid;
 	int status;
 
 	for (; list != NULL; list = list->next) {
+		if (list->next == NULL)
+			argv_exec(list);
+
 		pid = fork();
 
 		if (pid == 0)
@@ -35,46 +38,35 @@ static int runlst_wait(exec_t *list)
 
 int main(int argc, char **argv)
 {
-	int dirfd, ret = EXIT_FAILURE;
 	service_t *svc = NULL;
+	int dirfd;
 
 	if (argc != 3) {
 		fputs("usage: runsvc <directory> <filename>\n", stderr);
-		goto out;
+		return EXIT_FAILURE;
 	}
 
 	if (getppid() != 1) {
 		fputs("must be run by init!\n", stderr);
-		goto out;
+		return EXIT_FAILURE;
 	}
 
 	dirfd = open(argv[1], O_RDONLY | O_DIRECTORY);
 	if (dirfd < 0) {
 		perror(argv[1]);
-		goto out;
+		return EXIT_FAILURE;
 	}
 
 	svc = rdsvc(dirfd, argv[2], RDSVC_NO_FNAME | RDSVC_NO_DEPS);
 	close(dirfd);
 	if (svc == NULL)
-		goto out;
-
-	if (svc->exec == NULL) {
-		ret = EXIT_SUCCESS;
-		goto out;
-	}
+		return EXIT_FAILURE;
 
 	if (initenv())
-		goto out;
+		return EXIT_FAILURE;
 
 	if (setup_tty(svc->ctty, (svc->flags & SVC_FLAG_TRUNCATE_OUT) != 0))
-		goto out;
+		return EXIT_FAILURE;
 
-	if (svc->exec->next == NULL)
-		argv_exec(svc->exec);
-
-	ret = runlst_wait(svc->exec);
-out:
-	delsvc(svc);
-	return ret;
+	return run_sequentially(svc->exec);
 }
