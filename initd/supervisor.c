@@ -156,6 +156,14 @@ bool supervisor_process_queues(void)
 	svc = queue;
 	queue = queue->next;
 
+	if (!(svc->flags & SVC_FLAG_HAS_EXEC)) {
+		print_status(svc->desc, STATUS_OK, false);
+		svc->status = EXIT_SUCCESS;
+		svc->next = completed;
+		completed = svc;
+		goto out;
+	}
+
 	if (start_service(svc) != 0)
 		return true;
 
@@ -171,7 +179,7 @@ bool supervisor_process_queues(void)
 		singleshot += 1;
 		break;
 	}
-
+out:
 	if (singleshot == 0 && queue == NULL && !waiting)
 		target_completed(target);
 	return true;

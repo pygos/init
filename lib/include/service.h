@@ -41,6 +41,8 @@ enum {
 enum {
 	/* truncate stdout */
 	SVC_FLAG_TRUNCATE_OUT = 0x01,
+
+	SVC_FLAG_HAS_EXEC = 0x10,
 };
 
 typedef struct service_t {

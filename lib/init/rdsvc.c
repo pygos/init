@@ -81,6 +81,8 @@ static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
 	service_t *svc = user;
 	exec_t *e, *end;
 
+	svc->flags |= SVC_FLAG_HAS_EXEC;
+
 	if (flags & RDSVC_NO_EXEC)
 		return 0;
 
