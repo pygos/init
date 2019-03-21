@@ -76,6 +76,11 @@ static int cmd_status(int argc, char **argv)
 			found = false;
 
 			for (i = optind; i < argc; ++i) {
+				if (fnmatch(argv[i],
+					    resp.service_name, 0) == 0) {
+					found = true;
+					break;
+				}
 				if (fnmatch(argv[i], resp.filename, 0) == 0) {
 					found = true;
 					break;
