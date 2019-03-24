@@ -14,6 +14,11 @@ killall5_CPPFLAGS = $(AM_CPPFLAGS)
 killall5_CFLAGS = $(AM_CFLAGS)
 killall5_LDFLAGS = $(AM_LDFLAGS)
 
+waitfile_SOURCES = cmd/waitfile.c
+waitfile_CPPFLAGS = $(AM_CPPFLAGS)
+waitfile_CFLAGS = $(AM_CFLAGS)
+waitfile_LDFLAGS = $(AM_LDFLAGS)
+
 SRVHEADERS = cmd/service/servicecmd.h
 
 service_SOURCES = cmd/service/servicecmd.c cmd/service/help.c
@@ -31,4 +36,4 @@ dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 EXTRA_DIST += $(SRVHEADERS)
 
 sbin_PROGRAMS += service shutdown
-helper_PROGRAMS += killall5 runsvc
+helper_PROGRAMS += killall5 runsvc waitfile
