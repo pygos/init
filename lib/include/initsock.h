@@ -2,6 +2,8 @@
 #ifndef INITSOCK_H
 #define INITSOCK_H
 
+#include <stdint.h>
+
 #include "config.h"
 #include "service.h"
 
@@ -20,7 +22,7 @@ typedef enum {
 } E_SERVICE_STATE;
 
 typedef struct {
-	E_INIT_REQUEST rq;
+	uint8_t rq;
 } init_request_t;
 
 typedef struct {
