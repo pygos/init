@@ -19,6 +19,7 @@ int sigsetup(void)
 	sigaddset(&mask, SIGINT);
 	sigaddset(&mask, SIGTERM);
 	sigaddset(&mask, SIGUSR1);
+	sigaddset(&mask, SIGHUP);
 
 	sfd = signalfd(-1, &mask, SFD_CLOEXEC);
 	if (sfd == -1) {

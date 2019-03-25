@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -59,6 +60,8 @@ static int cmd_enable(int argc, char **argv)
 			linkname, target, strerror(errno));
 		goto out;
 	}
+
+	kill(1, SIGHUP);
 
 	ret = EXIT_SUCCESS;
 out:

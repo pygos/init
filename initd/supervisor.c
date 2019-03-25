@@ -13,6 +13,46 @@ static service_t *failed = NULL;
 static int singleshot = 0;
 static bool waiting = false;
 
+static bool find_service(service_t *list, service_t *svc)
+{
+	while (list != NULL) {
+		if (strcmp(list->fname, svc->fname) == 0)
+			return true;
+
+		list = list->next;
+	}
+	return false;
+}
+
+static void remove_not_in_list(service_t **current, service_t *list, int tgt)
+{
+	service_t *it = *current, *prev = NULL;
+
+	while (it != NULL) {
+		if (it->target == tgt && !find_service(list, it)) {
+			if (prev == NULL) {
+				delsvc(it);
+				*current = (*current)->next;
+				it = *current;
+			} else {
+				prev->next = it->next;
+				delsvc(it);
+				it = prev->next;
+			}
+		} else {
+			prev = it;
+			it = it->next;
+		}
+	}
+}
+
+static bool have_service(service_t *svc)
+{
+	return find_service(running, svc) || find_service(terminated, svc) ||
+		find_service(queue, svc) || find_service(completed, svc) ||
+		find_service(failed, svc);
+}
+
 static int start_service(service_t *svc)
 {
 	if (svc->id < 1)
@@ -143,6 +183,45 @@ void supervisor_init(void)
 	cfg.targets[TGT_BOOT] = NULL;
 
 	print_status("reading configuration from " SVCDIR, status, false);
+}
+
+void supervisor_reload_config(void)
+{
+	service_list_t newcfg;
+	service_t *svc;
+	int i;
+
+	if (svcscan(SVCDIR, &newcfg, RDSVC_NO_EXEC | RDSVC_NO_CTTY))
+		return;
+
+	for (i = 0; i < TGT_MAX; ++i) {
+		if (cfg.targets[i] == NULL) {
+			remove_not_in_list(&queue, newcfg.targets[i], i);
+			remove_not_in_list(&terminated, newcfg.targets[i], i);
+			remove_not_in_list(&completed, newcfg.targets[i], i);
+			remove_not_in_list(&failed, newcfg.targets[i], i);
+
+			while (newcfg.targets[i] != NULL) {
+				svc = newcfg.targets[i];
+				newcfg.targets[i] = svc->next;
+
+				if (have_service(svc)) {
+					delsvc(svc);
+				} else {
+					svc->id = service_id++;
+					svc->status = EXIT_SUCCESS;
+					svc->next = completed;
+					completed = svc;
+				}
+			}
+		} else {
+			svc = cfg.targets[i];
+			cfg.targets[i] = newcfg.targets[i];
+			newcfg.targets[i] = svc;
+		}
+	}
+
+	del_svc_list(&newcfg);
 }
 
 bool supervisor_process_queues(void)

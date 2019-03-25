@@ -30,6 +30,9 @@ static void handle_signal(void)
 	case SIGINT:
 		supervisor_set_target(TGT_REBOOT);
 		break;
+	case SIGHUP:
+		supervisor_reload_config();
+		break;
 	case SIGUSR1:
 		if (sockfd >= 0) {
 			close(sockfd);
