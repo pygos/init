@@ -68,7 +68,7 @@ void supervisor_init(void);
 bool supervisor_process_queues(void);
 
 void supervisor_answer_status_request(int fd, const void *dest_addr,
-				      size_t addrlen);
+				      size_t addrlen, E_SERVICE_STATE filter);
 
 /********** signal_<platform>.c **********/
 

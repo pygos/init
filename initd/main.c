@@ -61,7 +61,8 @@ retry:
 
 	switch (rq.rq) {
 	case EIR_STATUS:
-		supervisor_answer_status_request(sockfd, &addr, addrlen);
+		supervisor_answer_status_request(sockfd, &addr, addrlen,
+						 rq.arg.status.filter);
 		break;
 	}
 }

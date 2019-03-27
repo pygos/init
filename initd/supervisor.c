@@ -186,8 +186,12 @@ out:
 }
 
 static int send_svc_list(int fd, const void *dst, size_t addrlen,
-			 E_SERVICE_STATE state, service_t *list)
+			 E_SERVICE_STATE filter, E_SERVICE_STATE state,
+			 service_t *list)
 {
+	if (filter != ESS_NONE && filter != state)
+		return 0;
+
 	while (list != NULL) {
 		if (init_socket_send_status(fd, dst, addrlen, state, list))
 			return -1;
@@ -198,17 +202,18 @@ static int send_svc_list(int fd, const void *dst, size_t addrlen,
 	return 0;
 }
 
-void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen)
+void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen,
+				      E_SERVICE_STATE filter)
 {
-	if (send_svc_list(fd, dst, addrlen, ESS_RUNNING, running))
+	if (send_svc_list(fd, dst, addrlen, filter, ESS_RUNNING, running))
 		return;
-	if (send_svc_list(fd, dst, addrlen, ESS_DONE, completed))
+	if (send_svc_list(fd, dst, addrlen, filter, ESS_DONE, completed))
 		return;
-	if (send_svc_list(fd, dst, addrlen, ESS_FAILED, failed))
+	if (send_svc_list(fd, dst, addrlen, filter, ESS_FAILED, failed))
 		return;
-	if (send_svc_list(fd, dst, addrlen, ESS_ENQUEUED, queue))
+	if (send_svc_list(fd, dst, addrlen, filter, ESS_ENQUEUED, queue))
 		return;
-	if (send_svc_list(fd, dst, addrlen, ESS_ENQUEUED, terminated))
+	if (send_svc_list(fd, dst, addrlen, filter, ESS_ENQUEUED, terminated))
 		return;
 	init_socket_send_status(fd, dst, addrlen, ESS_NONE, NULL);
 }

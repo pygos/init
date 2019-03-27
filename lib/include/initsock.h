@@ -23,6 +23,14 @@ typedef enum {
 
 typedef struct {
 	uint8_t rq;
+	uint8_t padd[3];
+
+	union {
+		struct {
+			uint8_t filter;
+			uint8_t padd[3];
+		} status;
+	} arg;
 } init_request_t;
 
 typedef struct {
@@ -36,7 +44,7 @@ int init_socket_create(void);
 
 int init_socket_open(const char *tmppath);
 
-int init_socket_send_request(int fd, E_INIT_REQUEST rq);
+int init_socket_send_request(int fd, E_INIT_REQUEST rq, ...);
 
 int init_socket_send_status(int fd, const void *dest_addr, size_t addrlen,
 			    E_SERVICE_STATE state, service_t *svc);

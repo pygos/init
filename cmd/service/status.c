@@ -53,7 +53,7 @@ static int cmd_status(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (init_socket_send_request(fd, EIR_STATUS))
+	if (init_socket_send_request(fd, EIR_STATUS, ESS_NONE))
 		goto out;
 
 	is_tty = (isatty(STDOUT_FILENO) == 1);
