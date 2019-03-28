@@ -43,6 +43,12 @@ exact commands executed when starting the service.
 Print a status report of all supervised services, i.e. if they are currently
 running, have exited or waiting to be scheduled. A specific list of services
 can be specified. Shell globbing patterns can be used.
+.TP
+.BR start " " \fIservices...\fP
+Start one or more currently not running services. Shell globbing patterns can be used.
+.TP
+.BR stop " " \fIservices...\fP
+Stop one or more currently running services. Shell globbing patterns can be used.
 .SH AVAILABILITY
 This program is part of the Pygos init system.
 .SH COPYRIGHT
