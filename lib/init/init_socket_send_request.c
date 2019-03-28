@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdarg.h>
+#include <endian.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -20,6 +21,10 @@ int init_socket_send_request(int fd, E_INIT_REQUEST rq, ...)
 	switch (rq) {
 	case EIR_STATUS:
 		request.arg.status.filter = va_arg(ap, E_SERVICE_STATE);
+		break;
+	case EIR_START:
+	case EIR_STOP:
+		request.arg.startstop.id = htobe32(va_arg(ap, int));
 		break;
 	default:
 		break;

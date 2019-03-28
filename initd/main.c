@@ -64,6 +64,14 @@ retry:
 		supervisor_answer_status_request(sockfd, &addr, addrlen,
 						 rq.arg.status.filter);
 		break;
+	case EIR_START:
+		rq.arg.startstop.id = be32toh(rq.arg.startstop.id);
+		supervisor_start(rq.arg.startstop.id);
+		break;
+	case EIR_STOP:
+		rq.arg.startstop.id = be32toh(rq.arg.startstop.id);
+		supervisor_stop(rq.arg.startstop.id);
+		break;
 	}
 }
 

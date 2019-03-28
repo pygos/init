@@ -11,6 +11,8 @@
 
 typedef enum {
 	EIR_STATUS = 0x00,
+	EIR_START = 0x01,
+	EIR_STOP = 0x02,
 } E_INIT_REQUEST;
 
 typedef enum {
@@ -30,6 +32,10 @@ typedef struct {
 			uint8_t filter;
 			uint8_t padd[3];
 		} status;
+
+		struct {
+			uint32_t id;
+		} startstop;
 	} arg;
 } init_request_t;
 

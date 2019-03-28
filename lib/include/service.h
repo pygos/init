@@ -43,6 +43,7 @@ enum {
 	SVC_FLAG_TRUNCATE_OUT = 0x01,
 
 	SVC_FLAG_HAS_EXEC = 0x10,
+	SVC_FLAG_ADMIN_STOPPED = 0x20,
 };
 
 typedef struct service_t {

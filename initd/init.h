@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <endian.h>
 #include <stdio.h>
 #include <errno.h>
 #include <poll.h>
@@ -69,6 +70,10 @@ bool supervisor_process_queues(void);
 
 void supervisor_answer_status_request(int fd, const void *dest_addr,
 				      size_t addrlen, E_SERVICE_STATE filter);
+
+void supervisor_start(int id);
+
+void supervisor_stop(int id);
 
 /********** signal_<platform>.c **********/
 

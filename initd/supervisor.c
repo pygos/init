@@ -38,6 +38,9 @@ static void handle_terminated_service(service_t *svc)
 		if (target == TGT_REBOOT || target == TGT_SHUTDOWN)
 			break;
 
+		if (svc->flags & SVC_FLAG_ADMIN_STOPPED)
+			break;
+
 		if (svc->rspwn_limit > 0) {
 			svc->rspwn_limit -= 1;
 
@@ -220,4 +223,43 @@ void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen,
 	if (send_svc_list(fd, dst, addrlen, filter, ESS_ENQUEUED, terminated))
 		return;
 	init_socket_send_status(fd, dst, addrlen, ESS_NONE, NULL);
+}
+
+void supervisor_start(int id)
+{
+	service_t *svc;
+
+	for (svc = completed; svc != NULL; svc = svc->next) {
+		if (svc->id == id)
+			goto found;
+	}
+
+	for (svc = failed; svc != NULL; svc = svc->next) {
+		if (svc->id == id)
+			goto found;
+	}
+	return;
+found:
+	if (svc->type == SVC_RESPAWN)
+		svc->rspwn_limit = 0;
+
+	svc->flags &= ~SVC_FLAG_ADMIN_STOPPED;
+	svc->next = queue;
+	queue = svc;
+}
+
+void supervisor_stop(int id)
+{
+	service_t *svc;
+
+	for (svc = running; svc != NULL; svc = svc->next) {
+		if (svc->id == id)
+			break;
+	}
+
+	if (svc != NULL) {
+		/* TODO: something more sophisticated? */
+		svc->flags |= SVC_FLAG_ADMIN_STOPPED;
+		kill(svc->pid, SIGTERM);
+	}
 }
