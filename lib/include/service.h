@@ -68,6 +68,7 @@ typedef struct service_t {
 
 	pid_t pid;
 	int status;		/* process exit status */
+	int id;			/* service ID used by initd */
 
 	char name[];		/* canonical service name */
 } service_t;

@@ -3,6 +3,7 @@
 
 static service_list_t cfg;
 
+static int service_id = 1;
 static int target = -1;
 static service_t *running = NULL;
 static service_t *terminated = NULL;
@@ -14,6 +15,9 @@ static bool waiting = false;
 
 static int start_service(service_t *svc)
 {
+	if (svc->id < 1)
+		svc->id = service_id++;
+
 	svc->pid = runsvc(svc);
 	if (svc->pid == -1) {
 		print_status(svc->desc, STATUS_FAIL, false);

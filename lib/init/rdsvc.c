@@ -261,6 +261,7 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 	}
 
 	memcpy(svc->name, filename, nlen);
+	svc->id = -1;
 
 	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags))
 		goto fail;
