@@ -100,4 +100,11 @@ int sigsetup(void);
 */
 void sigreset(void);
 
+/********** initsock.c **********/
+
+int init_socket_create(void);
+
+int init_socket_send_status(int fd, const void *dest_addr, size_t addrlen,
+			    E_SERVICE_STATE state, service_t *svc);
+
 #endif /* INIT_H */
