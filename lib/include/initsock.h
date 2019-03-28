@@ -36,6 +36,7 @@ typedef struct {
 typedef struct {
 	E_SERVICE_STATE state;
 	int exit_status;
+	int id;
 	char *filename;
 	char *service_name;
 } init_status_response_t;

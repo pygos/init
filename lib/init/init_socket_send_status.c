@@ -42,17 +42,24 @@ static int send_string(int fd, const void *dst, size_t addrlen,
 int init_socket_send_status(int fd, const void *dest_addr, size_t addrlen,
 			    E_SERVICE_STATE state, service_t *svc)
 {
-	uint8_t info[2];
+	uint8_t info[8];
 
 	if (svc == NULL || state == ESS_NONE) {
 		info[0] = ESS_NONE;
 		info[1] = 0;
+		info[2] = info[3] = 0;
+		info[4] = info[5] = info[6] = info[7] = 0xFF;
 	} else {
 		info[0] = state;
 		info[1] = svc->status & 0xFF;
+		info[2] = info[3] = 0;
+		info[4] = (svc->id >> 24) & 0xFF;
+		info[5] = (svc->id >> 16) & 0xFF;
+		info[6] = (svc->id >> 8) & 0xFF;
+		info[7] = svc->id & 0xFF;
 	}
 
-	if (send_retry(fd, dest_addr, addrlen, info, 2))
+	if (send_retry(fd, dest_addr, addrlen, info, sizeof(info)))
 		return -1;
 
 	if (svc != NULL && state != ESS_NONE) {

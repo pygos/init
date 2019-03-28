@@ -63,15 +63,18 @@ static char *read_string(int fd)
 
 int init_socket_recv_status(int fd, init_status_response_t *resp)
 {
-	uint8_t info[2];
+	uint8_t info[8];
 
 	memset(resp, 0, sizeof(*resp));
 
-	if (read_retry(fd, info, 2) <= 0)
+	if (read_retry(fd, info, sizeof(info)) <= 0)
 		return -1;
 
 	resp->state = info[0];
 	resp->exit_status = info[1];
+
+	resp->id = ((int)info[4] << 24) | ((int)info[5] << 16) |
+		((int)info[6] << 8) | (int)info[7];
 
 	if (resp->state == ESS_NONE)
 		return 0;
