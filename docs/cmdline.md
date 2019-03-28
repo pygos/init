@@ -18,6 +18,10 @@ Currently available service commands are:
  * list - list all enabled service. A target can be specified to only list
    services for the specified target.
  * help - display a short help text and a list of available commands.
+ * start - start one or more services listed on the command line.
+ * stop - stop one or more services listed on the command line.
+ * status - display status of all services or the ones specified
+   on the command line.
 
 
 ## shutdown and reboot
