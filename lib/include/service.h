@@ -56,6 +56,7 @@ typedef struct service_t {
 	char *desc;		/* description string */
 	char *ctty;		/* controlling tty or log file */
 	int rspwn_limit;	/* maximum respawn count */
+	int rspwn_count;	/* services respawn counter */
 	unsigned int flags;	/* SVC_FLAG_* bit field */
 
 	/* linked list of command lines to execute */

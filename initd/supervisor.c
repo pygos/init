@@ -82,9 +82,9 @@ static void handle_terminated_service(service_t *svc)
 			break;
 
 		if (svc->rspwn_limit > 0) {
-			svc->rspwn_limit -= 1;
+			svc->rspwn_count += 1;
 
-			if (svc->rspwn_limit == 0) {
+			if (svc->rspwn_count >= svc->rspwn_limit) {
 				print_status(svc->desc, STATUS_FAIL, false);
 				goto out_failure;
 			}
@@ -319,9 +319,7 @@ void supervisor_start(int id)
 	}
 	return;
 found:
-	if (svc->type == SVC_RESPAWN)
-		svc->rspwn_limit = 0;
-
+	svc->rspwn_count = 0;
 	svc->flags &= ~SVC_FLAG_ADMIN_STOPPED;
 	svc->next = queue;
 	queue = svc;
