@@ -40,6 +40,13 @@ typedef struct {
 } init_request_t;
 
 typedef struct {
+	uint8_t state;
+	uint8_t exit_status;
+	uint8_t padd[2];
+	int32_t id;
+} init_response_status_t;
+
+typedef struct {
 	E_SERVICE_STATE state;
 	int exit_status;
 	int id;

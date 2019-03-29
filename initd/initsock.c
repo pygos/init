@@ -20,12 +20,13 @@ static int send_string(int fd, const void *dst, size_t addrlen,
 		       const char *str)
 {
 	size_t len = strlen(str);
-	uint8_t raw_len[2];
+	uint16_t raw;
 
-	raw_len[0] = (len >> 8) & 0xFF;
-	raw_len[1] = len & 0xFF;
+	if (len > 0xFFFF)
+		return -1;
 
-	if (send_retry(fd, dst, addrlen, raw_len, 2))
+	raw = htobe16(len);
+	if (send_retry(fd, dst, addrlen, &raw, 2))
 		return -1;
 
 	return len > 0 ? send_retry(fd, dst, addrlen, str, len) : 0;
@@ -61,24 +62,20 @@ int init_socket_create(void)
 int init_socket_send_status(int fd, const void *dest_addr, size_t addrlen,
 			    E_SERVICE_STATE state, service_t *svc)
 {
-	uint8_t info[8];
+	init_response_status_t info;
+
+	memset(&info, 0, sizeof(info));
 
 	if (svc == NULL || state == ESS_NONE) {
-		info[0] = ESS_NONE;
-		info[1] = 0;
-		info[2] = info[3] = 0;
-		info[4] = info[5] = info[6] = info[7] = 0xFF;
+		info.state = ESS_NONE;
+		info.id = -1;
 	} else {
-		info[0] = state;
-		info[1] = svc->status & 0xFF;
-		info[2] = info[3] = 0;
-		info[4] = (svc->id >> 24) & 0xFF;
-		info[5] = (svc->id >> 16) & 0xFF;
-		info[6] = (svc->id >> 8) & 0xFF;
-		info[7] = svc->id & 0xFF;
+		info.state = state;
+		info.exit_status = svc->status & 0xFF;
+		info.id = htobe32(svc->id);
 	}
 
-	if (send_retry(fd, dest_addr, addrlen, info, sizeof(info)))
+	if (send_retry(fd, dest_addr, addrlen, &info, sizeof(info)))
 		return -1;
 
 	if (svc != NULL && state != ESS_NONE) {

@@ -31,18 +31,17 @@ retry:
 
 static char *read_string(int fd)
 {
-	uint8_t size_raw[2];
+	uint16_t len;
 	char *buffer;
-	size_t len;
 	int ret;
 
-	ret = read_retry(fd, size_raw, 2);
+	ret = read_retry(fd, &len, sizeof(len));
 	if (ret <= 0)
 		return NULL;
 
-	len = (((size_t)size_raw[0]) << 8) | (size_t)size_raw[1];
+	len = be16toh(len);
 
-	buffer = malloc(len + 1);
+	buffer = calloc(1, len + 1);
 	if (buffer == NULL)
 		return NULL;
 
@@ -57,24 +56,21 @@ static char *read_string(int fd)
 		}
 	}
 
-	buffer[len] = '\0';
 	return buffer;
 }
 
 int init_socket_recv_status(int fd, init_status_t *resp)
 {
-	uint8_t info[8];
+	init_response_status_t info;
 
 	memset(resp, 0, sizeof(*resp));
 
-	if (read_retry(fd, info, sizeof(info)) <= 0)
+	if (read_retry(fd, &info, sizeof(info)) <= 0)
 		return -1;
 
-	resp->state = info[0];
-	resp->exit_status = info[1];
-
-	resp->id = ((int)info[4] << 24) | ((int)info[5] << 16) |
-		((int)info[6] << 8) | (int)info[7];
+	resp->state = info.state;
+	resp->exit_status = info.exit_status;
+	resp->id = be32toh(info.id);
 
 	if (resp->state == ESS_NONE)
 		return 0;
