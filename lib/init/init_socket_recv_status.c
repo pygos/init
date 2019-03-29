@@ -61,7 +61,7 @@ static char *read_string(int fd)
 	return buffer;
 }
 
-int init_socket_recv_status(int fd, init_status_response_t *resp)
+int init_socket_recv_status(int fd, init_status_t *resp)
 {
 	uint8_t info[8];
 

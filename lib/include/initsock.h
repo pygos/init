@@ -45,12 +45,14 @@ typedef struct {
 	int id;
 	char *filename;
 	char *service_name;
-} init_status_response_t;
+} init_status_t;
 
 int init_socket_open(const char *tmppath);
 
 int init_socket_send_request(int fd, E_INIT_REQUEST rq, ...);
 
-int init_socket_recv_status(int fd, init_status_response_t *resp);
+int init_socket_recv_status(int fd, init_status_t *resp);
+
+void free_init_status(init_status_t *resp);
 
 #endif /* INITSOCK_H */

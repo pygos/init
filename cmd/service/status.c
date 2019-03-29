@@ -15,17 +15,11 @@ static const struct option long_opts[] = {
 
 static const char *short_opts = "d";
 
-static void free_resp(init_status_response_t *resp)
-{
-	free(resp->filename);
-	free(resp->service_name);
-}
-
 static int cmd_status(int argc, char **argv)
 {
 	bool is_tty, found, show_details = false;
 	int i, fd, ret = EXIT_FAILURE;
-	init_status_response_t resp;
+	init_status_t resp;
 	char tmppath[256];
 	const char *state;
 	service_t *svc;
@@ -63,12 +57,12 @@ static int cmd_status(int argc, char **argv)
 
 		if (init_socket_recv_status(fd, &resp)) {
 			perror("reading from initd socket");
-			free_resp(&resp);
+			free_init_status(&resp);
 			goto out;
 		}
 
 		if (resp.state == ESS_NONE) {
-			free_resp(&resp);
+			free_init_status(&resp);
 			break;
 		}
 
@@ -87,8 +81,10 @@ static int cmd_status(int argc, char **argv)
 				}
 			}
 
-			if (!found)
+			if (!found) {
+				free_init_status(&resp);
 				continue;
+			}
 		}
 
 		switch (resp.state) {
@@ -150,7 +146,7 @@ static int cmd_status(int argc, char **argv)
 			printf("[%s] %s\n", state, resp.filename);
 		}
 
-		free_resp(&resp);
+		free_init_status(&resp);
 	}
 
 	ret = EXIT_SUCCESS;

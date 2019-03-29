@@ -8,17 +8,11 @@
 #include <getopt.h>
 #include <unistd.h>
 
-static void free_resp(init_status_response_t *resp)
-{
-	free(resp->filename);
-	free(resp->service_name);
-}
-
 static int cmd_startstop(int argc, char **argv,
 			 E_SERVICE_STATE filter, E_INIT_REQUEST action)
 {
 	int i, fd, ret = EXIT_FAILURE;
-	init_status_response_t resp;
+	init_status_t resp;
 	char tmppath[256];
 	bool found;
 
@@ -41,12 +35,12 @@ static int cmd_startstop(int argc, char **argv,
 
 		if (init_socket_recv_status(fd, &resp)) {
 			perror("reading from initd socket");
-			free_resp(&resp);
+			free_init_status(&resp);
 			goto out;
 		}
 
 		if (resp.state == ESS_NONE) {
-			free_resp(&resp);
+			free_init_status(&resp);
 			break;
 		}
 
@@ -68,7 +62,7 @@ static int cmd_startstop(int argc, char **argv,
 				goto out;
 		}
 
-		free_resp(&resp);
+		free_init_status(&resp);
 	}
 
 	ret = EXIT_SUCCESS;
