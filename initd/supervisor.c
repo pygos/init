@@ -304,19 +304,38 @@ void supervisor_answer_status_request(int fd, const void *dst, size_t addrlen,
 	init_socket_send_status(fd, dst, addrlen, ESS_NONE, NULL);
 }
 
+static service_t *remove_by_id(service_t **list, int id)
+{
+	service_t *svc = *list, *prev = NULL;
+
+	while (svc != NULL && svc->id != id) {
+		prev = svc;
+		svc = svc->next;
+	}
+
+	if (svc != NULL) {
+		if (prev == NULL) {
+			*list = svc->next;
+		} else {
+			prev = svc->next;
+		}
+	}
+
+	return svc;
+}
+
 void supervisor_start(int id)
 {
 	service_t *svc;
 
-	for (svc = completed; svc != NULL; svc = svc->next) {
-		if (svc->id == id)
-			goto found;
-	}
+	svc = remove_by_id(&completed, id);
+	if (svc != NULL)
+		goto found;
 
-	for (svc = failed; svc != NULL; svc = svc->next) {
-		if (svc->id == id)
-			goto found;
-	}
+	svc = remove_by_id(&failed, id);
+	if (svc != NULL)
+		goto found;
+
 	return;
 found:
 	svc->rspwn_count = 0;
