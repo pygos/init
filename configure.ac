@@ -1,6 +1,6 @@
 AC_PREREQ([2.60])
 
-m4_define([RELEASE], 0.9)
+m4_define([RELEASE], 0.10)
 
 AC_INIT([init], [RELEASE], [goliath@infraroot.at], init)
 AC_CONFIG_MACRO_DIR([m4])
