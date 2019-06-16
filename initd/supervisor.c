@@ -317,7 +317,7 @@ static service_t *remove_by_id(service_t **list, int id)
 		if (prev == NULL) {
 			*list = svc->next;
 		} else {
-			prev = svc->next;
+			prev->next = svc->next;
 		}
 	}
 
