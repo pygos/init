@@ -47,7 +47,9 @@ static int try_pack_argv(char *str, rdline_t *rd)
 static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
-	(void)flags;
+
+	if (flags & RDSVC_NO_DESC)
+		return 0;
 
 	if (try_unescape(arg, rd))
 		return -1;

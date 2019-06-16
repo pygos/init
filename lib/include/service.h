@@ -36,6 +36,7 @@ enum {
 	RDSVC_NO_EXEC = 0x02,	/* do not store executable script */
 	RDSVC_NO_CTTY = 0x04,	/* do not store the controlling tty */
 	RDSVC_NO_DEPS = 0x08,	/* do not store dependencies */
+	RDSVC_NO_DESC = 0x10,	/* do not store description */
 };
 
 enum {
