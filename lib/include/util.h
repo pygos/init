@@ -21,17 +21,6 @@ typedef struct exec_t {
 	char args[];		/* argument vectot string blob */
 } exec_t;
 
-enum {
-	/* only allow root to connect */
-	SOCK_FLAG_ROOT_ONLY = 0x01,
-
-	/* allow everyone to connect */
-	SOCK_FLAG_EVERYONE = 0x02,
-
-	/* create a datagram socket, otherwise use a stream socket */
-	SOCK_FLAG_DGRAM = 0x04,
-};
-
 int setup_tty(const char *tty, bool truncate);
 
 NORETURN void argv_exec(exec_t *e);
