@@ -96,6 +96,29 @@ void target_completed(int target)
 	}
 }
 
+static int sigsetup(void)
+{
+	sigset_t mask;
+	int sfd;
+
+	sigfillset(&mask);
+	if (sigprocmask(SIG_SETMASK, &mask, NULL) == -1) {
+		perror("sigprocmask");
+		return -1;
+	}
+
+	sfd = signalfd(-1, &mask, SFD_CLOEXEC);
+	if (sfd == -1) {
+		perror("signalfd");
+		return -1;
+	}
+
+	if (reboot(LINUX_REBOOT_CMD_CAD_OFF))
+		perror("cannot disable CTRL+ALT+DEL");
+
+	return sfd;
+}
+
 int main(void)
 {
 	int i, ret, count;

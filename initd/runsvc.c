@@ -10,6 +10,7 @@
 pid_t runsvc(service_t *svc)
 {
 	char *argv[4], *envp[1];
+	sigset_t mask;
 	pid_t pid;
 
 	argv[0] = (char *)RUNSVCBIN;
@@ -25,7 +26,9 @@ pid_t runsvc(service_t *svc)
 		perror("fork");
 
 	if (pid == 0) {
-		sigreset();
+		sigemptyset(&mask);
+		sigprocmask(SIG_SETMASK, &mask, NULL);
+
 		execve(argv[0], argv, envp);
 		perror(argv[0]);
 		exit(EXIT_FAILURE);

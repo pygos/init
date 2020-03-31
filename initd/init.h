@@ -77,29 +77,6 @@ void supervisor_start(int id);
 
 void supervisor_stop(int id);
 
-/********** signal_<platform>.c **********/
-
-/*
-	Setup signal handling. Returns -1 on error, a file descriptor on
-	success.
-
-	The returned file descriptor can be polled and becomes readable
-	when a signal arrives. Reading from it returns a signalfd_siginfo
-	structure.
-
-	The returned file descriptor has the close on exec flag set.
-
-	The kernel is also told to send us SIGINT signals if a user presses
-	the local equivalent of CTRL+ALT+DEL.
-*/
-int sigsetup(void);
-
-/*
-	Undo everything that sigsetup() changed about signal handling and
-	restore the default.
-*/
-void sigreset(void);
-
 /********** initsock.c **********/
 
 int init_socket_create(void);

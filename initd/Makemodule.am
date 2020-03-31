@@ -1,4 +1,4 @@
-init_SOURCES = initd/main.c initd/init.h initd/signal_linux.c initd/runsvc.c
+init_SOURCES = initd/main.c initd/init.h initd/runsvc.c
 init_SOURCES += initd/status.c initd/supervisor.c initd/initsock.c
 init_CPPFLAGS = $(AM_CPPFLAGS)
 init_CFLAGS = $(AM_CFLAGS)
