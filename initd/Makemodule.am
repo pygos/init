@@ -3,6 +3,6 @@ init_SOURCES += initd/status.c initd/supervisor.c initd/initsock.c
 init_CPPFLAGS = $(AM_CPPFLAGS)
 init_CFLAGS = $(AM_CFLAGS)
 init_LDFLAGS = $(AM_LDFLAGS)
-init_LDADD = libinit.a libcfg.a libutil.a
+init_LDADD = libinit.a libcfg.a
 
 sbin_PROGRAMS += init

@@ -2,13 +2,14 @@
 #ifndef SERVICECMD_H
 #define SERVICECMD_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 
 #include "service.h"
-#include "util.h"
+#include "config.h"
 
 /*
 	Describes a command that can be launched by passing its name as
@@ -45,7 +46,7 @@ service_t *loadsvc(const char *directory, const char *filename, int flags);
 	Implemented in servicecmd.c. Prints program usage message and
 	terminates with the given exit status.
 */
-void usage(int status) NORETURN;
+void usage(int status) __attribute__((noreturn));
 
 /*
 	Write a message to stderr that advises the user how to consult the

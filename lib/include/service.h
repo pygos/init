@@ -4,7 +4,11 @@
 
 #include <sys/types.h>
 
-#include "util.h"
+typedef struct exec_t {
+	struct exec_t *next;
+	int argc;		/* number of elements in argument vector */
+	char args[];		/* argument vectot string blob */
+} exec_t;
 
 enum {
 	/*

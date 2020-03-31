@@ -9,9 +9,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "util.h"
-
-static NORETURN void usage_and_exit(void)
+static __attribute__((noreturn)) void usage_and_exit(void)
 {
 	fputs("Usage: killall5 SIGNAL\n", stderr);
 	exit(EXIT_FAILURE);

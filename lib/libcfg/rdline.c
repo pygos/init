@@ -8,7 +8,6 @@
 #include <fcntl.h>
 
 #include "libcfg.h"
-#include "util.h"
 
 int rdline_init(rdline_t *t, int dirfd, const char *filename,
 		int argc, const char *const *argv)

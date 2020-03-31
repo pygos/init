@@ -5,7 +5,6 @@
 #include "servicecmd.h"
 #include "service.h"
 #include "config.h"
-#include "util.h"
 
 
 command_t *commands;

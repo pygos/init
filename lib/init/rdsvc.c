@@ -11,7 +11,6 @@
 
 #include "service.h"
 #include "libcfg.h"
-#include "util.h"
 
 static int try_unescape(char *arg, rdline_t *rd)
 {
@@ -265,8 +264,10 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 	memcpy(svc->name, filename, nlen);
 	svc->id = -1;
 
-	if (rdcfg(svc, &rd, svc_params, ARRAY_SIZE(svc_params), flags))
+	if (rdcfg(svc, &rd, svc_params,
+		  sizeof(svc_params) / sizeof(svc_params[0]), flags)) {
 		goto fail;
+	}
 
 out:
 	rdline_cleanup(&rd);

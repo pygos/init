@@ -17,11 +17,12 @@
 #include <linux/reboot.h>
 #include <sys/signalfd.h>
 #include <sys/reboot.h>
+#include <stdbool.h>
 #include <signal.h>
 
 #include "initsock.h"
 #include "service.h"
-#include "util.h"
+#include "config.h"
 
 #define RUNSVCBIN SCRIPTDIR "/runsvc"
 

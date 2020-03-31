@@ -10,8 +10,6 @@
 #include <sys/reboot.h>
 #include <linux/reboot.h>
 
-#include "util.h"
-
 #define FL_FORCE 0x01
 #define FL_NOSYNC 0x02
 
@@ -29,7 +27,7 @@ static const char *shortopt = "hprfn";
 static const char *defact_str = "power-off";
 static int defact = RB_POWER_OFF;
 
-static NORETURN void usage(const char *progname, int status)
+static __attribute__((noreturn)) void usage(const char *progname, int status)
 {
 	fprintf(status == EXIT_SUCCESS ? stdout : stderr,
 "%s [OPTIONS...]\n\n"

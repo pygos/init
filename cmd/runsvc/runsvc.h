@@ -4,6 +4,8 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +14,7 @@
 
 #include "service.h"
 #include "libcfg.h"
-#include "util.h"
+#include "config.h"
 
 #define ENVFILE ETCPATH "/initd.env"
 

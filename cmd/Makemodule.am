@@ -7,7 +7,7 @@ runsvc_SOURCES = cmd/runsvc/runsvc.c cmd/runsvc/env.c cmd/runsvc/runsvc.h
 runsvc_CPPFLAGS = $(AM_CPPFLAGS)
 runsvc_CFLAGS = $(AM_CFLAGS)
 runsvc_LDFLAGS = $(AM_LDFLAGS)
-runsvc_LDADD = libinit.a libcfg.a libutil.a
+runsvc_LDADD = libinit.a libcfg.a
 
 killall5_SOURCES = cmd/killall5.c
 killall5_CPPFLAGS = $(AM_CPPFLAGS)
@@ -30,7 +30,7 @@ service_SOURCES += $(SRVHEADERS)
 service_CPPFLAGS = $(AM_CPPFLAGS)
 service_CFLAGS = $(AM_CFLAGS)
 service_LDFLAGS = $(AM_LDFLAGS)
-service_LDADD = libinit.a libcfg.a libutil.a
+service_LDADD = libinit.a libcfg.a
 
 dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 

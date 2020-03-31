@@ -23,7 +23,7 @@ int svc_type_from_string(const char *type)
 {
 	size_t i;
 
-	for (i = 0; i < ARRAY_SIZE(type_map); ++i) {
+	for (i = 0; i < sizeof(type_map) / sizeof(type_map[0]); ++i) {
 		if (strcmp(type_map[i], type) == 0)
 			return i;
 	}
@@ -40,7 +40,7 @@ int svc_target_from_string(const char *target)
 {
 	size_t i;
 
-	for (i = 0; i < ARRAY_SIZE(target_map); ++i) {
+	for (i = 0; i < sizeof(target_map) / sizeof(target_map[0]); ++i) {
 		if (strcmp(target_map[i], target) == 0)
 			return i;
 	}
