@@ -6,15 +6,18 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "service.h"
 #include "libcfg.h"
 #include "config.h"
 
 #define ENVFILE ETCPATH "/initd.env"
+#define PROCFDDIR "/proc/self/fd"
 
 static int setup_env(void)
 {
@@ -55,6 +58,30 @@ static int setup_env(void)
 	return status;
 }
 
+static int close_all_files(void)
+{
+	struct dirent *ent;
+	DIR *dir;
+	int fd;
+
+	dir = opendir(PROCFDDIR);
+	if (dir == NULL) {
+		perror(PROCFDDIR);
+		return -1;
+	}
+
+	while ((ent = readdir(dir)) != NULL) {
+		if (!isdigit(ent->d_name[0]))
+			continue;
+
+		fd = atoi(ent->d_name);
+		close(fd);
+	}
+
+	closedir(dir);
+	return 0;
+}
+
 static int setup_tty(const char *tty, bool truncate)
 {
 	int fd;
@@ -70,10 +97,6 @@ static int setup_tty(const char *tty, bool truncate)
 
 	if (truncate)
 		ftruncate(fd, 0);
-
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 
 	setsid();
 
@@ -160,6 +183,9 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 
 	if (setup_env())
+		return EXIT_FAILURE;
+
+	if (close_all_files())
 		return EXIT_FAILURE;
 
 	if (setup_tty(svc->ctty, (svc->flags & SVC_FLAG_TRUNCATE_OUT) != 0))
