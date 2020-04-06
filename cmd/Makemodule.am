@@ -3,12 +3,6 @@ shutdown_CPPFLAGS = $(AM_CPPFLAGS)
 shutdown_CFLAGS = $(AM_CFLAGS)
 shutdown_LDFLAGS = $(AM_LDFLAGS)
 
-runsvc_SOURCES = cmd/runsvc.c
-runsvc_CPPFLAGS = $(AM_CPPFLAGS)
-runsvc_CFLAGS = $(AM_CFLAGS)
-runsvc_LDFLAGS = $(AM_LDFLAGS)
-runsvc_LDADD = libinit.a libcfg.a
-
 killall5_SOURCES = cmd/killall5.c
 killall5_CPPFLAGS = $(AM_CPPFLAGS)
 killall5_CFLAGS = $(AM_CFLAGS)
@@ -37,4 +31,4 @@ dist_man8_MANS += cmd/shutdown.8 cmd/service/service.8
 EXTRA_DIST += $(SRVHEADERS)
 
 sbin_PROGRAMS += service shutdown
-helper_PROGRAMS += killall5 runsvc waitfile
+helper_PROGRAMS += killall5 waitfile

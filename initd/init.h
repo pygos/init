@@ -24,7 +24,8 @@
 #include "service.h"
 #include "config.h"
 
-#define RUNSVCBIN SCRIPTDIR "/runsvc"
+#define ENVFILE ETCPATH "/initd.env"
+#define PROCFDDIR "/proc/self/fd"
 
 enum {
 	STATUS_OK = 0,

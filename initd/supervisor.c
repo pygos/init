@@ -175,7 +175,7 @@ void supervisor_init(void)
 {
 	int status = STATUS_OK;
 
-	if (svcscan(SVCDIR, &cfg, RDSVC_NO_EXEC | RDSVC_NO_CTTY))
+	if (svcscan(SVCDIR, &cfg, 0))
 		status = STATUS_FAIL;
 
 	target = TGT_BOOT;
@@ -191,7 +191,7 @@ void supervisor_reload_config(void)
 	service_t *svc;
 	int i;
 
-	if (svcscan(SVCDIR, &newcfg, RDSVC_NO_EXEC | RDSVC_NO_CTTY))
+	if (svcscan(SVCDIR, &newcfg, 0))
 		return;
 
 	for (i = 0; i < TGT_MAX; ++i) {
