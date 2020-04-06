@@ -1,5 +1,59 @@
 /* SPDX-License-Identifier: ISC */
-#include "runsvc.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "service.h"
+#include "libcfg.h"
+#include "config.h"
+
+#define ENVFILE ETCPATH "/initd.env"
+
+static int setup_env(void)
+{
+	int status = -1;
+	ssize_t ret;
+	FILE *fp;
+
+	clearenv();
+
+	fp = fopen(ENVFILE, "r");
+	if (fp == NULL) {
+		perror(ENVFILE);
+		return -1;
+	}
+
+	do {
+		char *line = NULL;
+		size_t n = 0;
+
+		errno = 0;
+		ret = getline(&line, &n, fp);
+
+		if (ret < 0) {
+			if (errno == 0) {
+				status = 0;
+			} else {
+				perror(ENVFILE);
+			}
+		} else if (ret > 0 && putenv(line) != 0) {
+			perror("putenv");
+			ret = -1;
+		}
+
+		free(line);
+	} while (ret >= 0);
+
+	fclose(fp);
+	return status;
+}
 
 static int setup_tty(const char *tty, bool truncate)
 {
@@ -105,7 +159,7 @@ int main(int argc, char **argv)
 	if (svc == NULL)
 		return EXIT_FAILURE;
 
-	if (initenv())
+	if (setup_env())
 		return EXIT_FAILURE;
 
 	if (setup_tty(svc->ctty, (svc->flags & SVC_FLAG_TRUNCATE_OUT) != 0))

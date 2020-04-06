@@ -3,7 +3,7 @@ shutdown_CPPFLAGS = $(AM_CPPFLAGS)
 shutdown_CFLAGS = $(AM_CFLAGS)
 shutdown_LDFLAGS = $(AM_LDFLAGS)
 
-runsvc_SOURCES = cmd/runsvc/runsvc.c cmd/runsvc/env.c cmd/runsvc/runsvc.h
+runsvc_SOURCES = cmd/runsvc.c
 runsvc_CPPFLAGS = $(AM_CPPFLAGS)
 runsvc_CFLAGS = $(AM_CFLAGS)
 runsvc_LDFLAGS = $(AM_LDFLAGS)
