@@ -36,14 +36,6 @@ enum {
 };
 
 enum {
-	RDSVC_NO_FNAME = 0x01,	/* do not store a copy of the filename */
-	RDSVC_NO_EXEC = 0x02,	/* do not store executable script */
-	RDSVC_NO_CTTY = 0x04,	/* do not store the controlling tty */
-	RDSVC_NO_DEPS = 0x08,	/* do not store dependencies */
-	RDSVC_NO_DESC = 0x10,	/* do not store description */
-};
-
-enum {
 	/* truncate stdout */
 	SVC_FLAG_TRUNCATE_OUT = 0x01,
 
@@ -87,7 +79,7 @@ typedef struct {
 /*
 	Read a service from a file.
 */
-service_t *rdsvc(int dirfd, const char *filename, int flags);
+service_t *rdsvc(int dirfd, const char *filename);
 
 void delsvc(service_t *svc);
 
@@ -98,7 +90,7 @@ void delsvc(service_t *svc);
 	Returns 0 on success, -1 on failure. The function takes care of
 	printing error messages on failure.
 */
-int svcscan(const char *directory, service_list_t *list, int flags);
+int svcscan(const char *directory, service_list_t *list);
 
 void del_svc_list(service_list_t *list);
 

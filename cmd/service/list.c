@@ -24,7 +24,7 @@ static int cmd_list(int argc, char **argv)
 	if (check_arguments(argv[0], argc, 1, 2))
 		return EXIT_FAILURE;
 
-	if (svcscan(SVCDIR, &list, 0)) {
+	if (svcscan(SVCDIR, &list)) {
 		fprintf(stderr, "Error while reading services from %s\n",
 			SVCDIR);
 		ret = EXIT_FAILURE;

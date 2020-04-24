@@ -93,7 +93,7 @@ static int cmd_dumpscript(int argc, char **argv)
 		strcat(filename, argv[i]);
 	}
 
-	svc = loadsvc(SVCDIR, filename, 0);
+	svc = loadsvc(SVCDIR, filename);
 
 	if (svc == NULL) {
 		fprintf(stderr, "Could not load service '%s'\n", filename);

@@ -46,9 +46,7 @@ static int try_pack_argv(char *str, rdline_t *rd)
 static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
-
-	if (flags & RDSVC_NO_DESC)
-		return 0;
+	(void)flags;
 
 	if (try_unescape(arg, rd))
 		return -1;
@@ -59,9 +57,7 @@ static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
 static int svc_tty(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
-
-	if (flags & RDSVC_NO_CTTY)
-		return 0;
+	(void)flags;
 
 	if (strncmp(arg, "truncate", 8) == 0 && isspace(arg[8])) {
 		svc->flags |= SVC_FLAG_TRUNCATE_OUT;
@@ -81,11 +77,9 @@ static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
 	exec_t *e, *end;
+	(void)flags;
 
 	svc->flags |= SVC_FLAG_HAS_EXEC;
-
-	if (flags & RDSVC_NO_EXEC)
-		return 0;
 
 	e = calloc(1, sizeof(*e) + strlen(arg) + 1);
 	if (e == NULL) {
@@ -113,9 +107,7 @@ static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
 static int svc_before(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
-
-	if (flags & RDSVC_NO_DEPS)
-		return 0;
+	(void)flags;
 
 	if (svc->before != NULL) {
 		fprintf(stderr, "%s: %zu: 'before' dependencies respecified\n",
@@ -134,9 +126,7 @@ static int svc_before(void *user, char *arg, rdline_t *rd, int flags)
 static int svc_after(void *user, char *arg, rdline_t *rd, int flags)
 {
 	service_t *svc = user;
-
-	if (flags & RDSVC_NO_DEPS)
-		return 0;
+	(void)flags;
 
 	if (svc->after != NULL) {
 		fprintf(stderr, "%s: %zu: 'after' dependencies respecified\n",
@@ -231,7 +221,7 @@ static const cfg_param_t svc_params[] = {
 	{ "after", 0, svc_after },
 };
 
-service_t *rdsvc(int dirfd, const char *filename, int flags)
+service_t *rdsvc(int dirfd, const char *filename)
 {
 	const char *arg, *args[1];
 	service_t *svc = NULL;
@@ -255,17 +245,15 @@ service_t *rdsvc(int dirfd, const char *filename, int flags)
 	if (svc == NULL)
 		goto fail_oom;
 
-	if (!(flags & RDSVC_NO_FNAME)) {
-		svc->fname = strdup(filename);
-		if (svc->fname == NULL)
-			goto fail_oom;
-	}
+	svc->fname = strdup(filename);
+	if (svc->fname == NULL)
+		goto fail_oom;
 
 	memcpy(svc->name, filename, nlen);
 	svc->id = -1;
 
 	if (rdcfg(svc, &rd, svc_params,
-		  sizeof(svc_params) / sizeof(svc_params[0]), flags)) {
+		  sizeof(svc_params) / sizeof(svc_params[0]), 0)) {
 		goto fail;
 	}
 

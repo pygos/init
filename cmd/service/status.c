@@ -128,9 +128,7 @@ static int cmd_status(int argc, char **argv)
 			printf("\tTemplate name: %s\n", resp.service_name);
 			printf("\tExit status: %d\n", resp.exit_status);
 
-			svc = loadsvc(SVCDIR, resp.filename,
-				      RDSVC_NO_EXEC | RDSVC_NO_DEPS |
-				      RDSVC_NO_CTTY | RDSVC_NO_FNAME);
+			svc = loadsvc(SVCDIR, resp.filename);
 
 			if (svc == NULL) {
 				fputs("\tError loading service file\n", stdout);

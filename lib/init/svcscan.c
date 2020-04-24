@@ -11,7 +11,7 @@
 
 #include "service.h"
 
-int svcscan(const char *directory, service_list_t *list, int flags)
+int svcscan(const char *directory, service_list_t *list)
 {
 	int i, dfd, type, ret = 0;
 	struct dirent *ent;
@@ -66,7 +66,7 @@ int svcscan(const char *directory, service_list_t *list, int flags)
 		if (type != S_IFREG && type != S_IFLNK)
 			continue;
 
-		svc = rdsvc(dfd, ent->d_name, flags);
+		svc = rdsvc(dfd, ent->d_name);
 		if (svc == NULL) {
 			ret = -1;
 			continue;

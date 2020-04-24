@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-service_t *loadsvc(const char *directory, const char *filename, int flags)
+service_t *loadsvc(const char *directory, const char *filename)
 {
 	service_t *svc;
 	int dirfd;
@@ -17,7 +17,7 @@ service_t *loadsvc(const char *directory, const char *filename, int flags)
 		return NULL;
 	}
 
-	svc = rdsvc(dirfd, filename, flags);
+	svc = rdsvc(dirfd, filename);
 	close(dirfd);
 	return svc;
 }

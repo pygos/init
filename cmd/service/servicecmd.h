@@ -40,7 +40,7 @@ typedef struct command_t {
 /* Global list of available commands */
 extern command_t *commands;
 
-service_t *loadsvc(const char *directory, const char *filename, int flags);
+service_t *loadsvc(const char *directory, const char *filename);
 
 /*
 	Implemented in servicecmd.c. Prints program usage message and
