@@ -43,10 +43,9 @@ static int try_pack_argv(char *str, rdline_t *rd)
 	return count;
 }
 
-static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_desc(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
-	(void)flags;
 
 	if (try_unescape(arg, rd))
 		return -1;
@@ -54,10 +53,9 @@ static int svc_desc(void *user, char *arg, rdline_t *rd, int flags)
 	return svc->desc == NULL ? -1 : 0;
 }
 
-static int svc_tty(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_tty(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
-	(void)flags;
 
 	if (strncmp(arg, "truncate", 8) == 0 && isspace(arg[8])) {
 		svc->flags |= SVC_FLAG_TRUNCATE_OUT;
@@ -73,11 +71,10 @@ static int svc_tty(void *user, char *arg, rdline_t *rd, int flags)
 	return svc->ctty == NULL ? -1 : 0;
 }
 
-static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_exec(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
 	exec_t *e, *end;
-	(void)flags;
 
 	svc->flags |= SVC_FLAG_HAS_EXEC;
 
@@ -104,10 +101,9 @@ static int svc_exec(void *user, char *arg, rdline_t *rd, int flags)
 	return 0;
 }
 
-static int svc_before(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_before(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
-	(void)flags;
 
 	if (svc->before != NULL) {
 		fprintf(stderr, "%s: %zu: 'before' dependencies respecified\n",
@@ -123,10 +119,9 @@ static int svc_before(void *user, char *arg, rdline_t *rd, int flags)
 	return (svc->num_before < 0) ? -1 : 0;
 }
 
-static int svc_after(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_after(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
-	(void)flags;
 
 	if (svc->after != NULL) {
 		fprintf(stderr, "%s: %zu: 'after' dependencies respecified\n",
@@ -142,11 +137,10 @@ static int svc_after(void *user, char *arg, rdline_t *rd, int flags)
 	return (svc->num_after < 0) ? -1 : 0;
 }
 
-static int svc_type(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_type(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
 	int count = try_pack_argv(arg, rd);
-	(void)flags;
 
 	if (count < 1)
 		return -1;
@@ -190,11 +184,10 @@ fail_limit:
 	return -1;
 }
 
-static int svc_target(void *user, char *arg, rdline_t *rd, int flags)
+static int svc_target(void *user, char *arg, rdline_t *rd)
 {
 	service_t *svc = user;
 	int target;
-	(void)flags;
 
 	if (try_unescape(arg, rd))
 		return -1;
@@ -253,7 +246,7 @@ service_t *rdsvc(int dirfd, const char *filename)
 	svc->id = -1;
 
 	if (rdcfg(svc, &rd, svc_params,
-		  sizeof(svc_params) / sizeof(svc_params[0]), 0)) {
+		  sizeof(svc_params) / sizeof(svc_params[0]))) {
 		goto fail;
 	}
 

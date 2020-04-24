@@ -27,7 +27,7 @@ typedef struct {
 	 */
 	unsigned int allow_block : 1;
 
-	int (*handle)(void *obj, char *arg, rdline_t *rd, int flags);
+	int (*handle)(void *obj, char *arg, rdline_t *rd);
 } cfg_param_t;
 
 /*
@@ -92,11 +92,10 @@ int pack_argv(char *str);
 
 /*
 	Parse a configuration file containing '<keyword> [arguments...]' lines.
-	The cfgobj and flags are passed to the callback in the params array.
+	The cfgobj is passed to the callback in the params array.
 
 	Returns zero on success.
  */
-int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
-	  int flags);
+int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count);
 
 #endif /* LIBCONFIG_H */

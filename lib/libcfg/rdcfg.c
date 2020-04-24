@@ -47,8 +47,7 @@ static int splitkv(rdline_t *rd, char **k, char **v)
 	return 0;
 }
 
-int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
-	  int flags)
+int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count)
 {
 	const cfg_param_t *p;
 	char *key, *value;
@@ -67,7 +66,7 @@ int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
 				;
 
 			if (*value != '\0') {
-				ret = p->handle(cfgobj, value, rd, flags);
+				ret = p->handle(cfgobj, value, rd);
 				if (ret)
 					return -1;
 			}
@@ -75,7 +74,7 @@ int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
 			while ((ret = rdline(rd)) == 0) {
 				if (strcmp(rd->line, "}") == 0)
 					break;
-				if (p->handle(cfgobj, rd->line, rd, flags))
+				if (p->handle(cfgobj, rd->line, rd))
 					return -1;
 			}
 
@@ -83,7 +82,7 @@ int rdcfg(void *cfgobj, rdline_t *rd, const cfg_param_t *params, size_t count,
 				return -1;
 			if (ret > 0)
 				goto fail_bra;
-		} else if (p->handle(cfgobj, value, rd, flags)) {
+		} else if (p->handle(cfgobj, value, rd)) {
 			return -1;
 		}
 	}
